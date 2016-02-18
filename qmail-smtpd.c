@@ -1,5 +1,5 @@
 #include "sig.h"
-#include "readwrite.h"
+#include "inc/readwrite.h"		/* the original definitions */
 #include "stralloc.h"
 #include "substdio.h"
 #include "alloc.h"
@@ -188,7 +188,7 @@ void setup()
   remoteinfo = env_get("TCPREMOTEINFO");
   relayclient = env_get("RELAYCLIENT");
   submission = env_get("SUBMISSIONPORT");		// smtpd-auth-0.59 manual
-  if (!submission) submission= SUBMISSION;		// smtpd-auth-0.59 manual
+  if (!submission) submission = SUBMISSION;		// smtpd-auth-0.59 manual
 
 #ifdef TLS
   if (env_get("SMTPS")) { smtps = 1; tls_init(); }
@@ -837,7 +837,8 @@ char *arg;
 	if (tlsrequired && (strcmp(tlsrequired, "1")) == 0) {
   	  if (!ssl) { 
   		out("538 AUTH PLAIN/LOGIN not available without TLS (#5.3.3)\r\n");
-    	flush(); die_read(); }
+    	flush(); /*die_read();*/ return;	/* don't die */
+      }
 	}
   }
 #endif		/* END forcetls patch */
@@ -1147,8 +1148,8 @@ char **argv;
   setup();
   if (ipme_init() != 1) die_ipme();
   if (spp_connect()) {
-  smtp_greet("220 ");
-  out(" ESMTP\r\n");
+    smtp_greet("220 ");
+    out(" ESMTP\r\n");
   }
   if (commands(&ssin,&smtpcommands) == 0) die_read();
   die_nomem();

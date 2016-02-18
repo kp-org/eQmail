@@ -1,14 +1,14 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <grp.h>
-#include "readwrite.h"
+//#include "readwrite.h"
 #include "exit.h"
 #include "scan.h"
 #include "fmt.h"
 #include "strerr.h"
 #include "open.h"
 #include "seek.h"
-#include "fork.h"
+//#include "fork.h" --> replaced by unistd.h from readwrite.h
 
 #define FATAL "idedit: fatal: "
 #define WARNING "idedit: warning: "

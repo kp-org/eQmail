@@ -1,7 +1,7 @@
 #include "fd.h"
 #include "prot.h"
 #include "exit.h"
-#include "fork.h"
+//#include "fork.h"
 #include "auto_uids.h"
 
 char *(qsargs[]) = { "qmail-send", 0 };

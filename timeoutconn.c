@@ -5,7 +5,7 @@
 #include "ndelay.h"
 #include "select.h"
 #include "error.h"
-#include "readwrite.h"
+//#include "readwrite.h"
 #include "ip.h"
 #include "byte.h"
 #include "timeoutconn.h"
@@ -49,7 +49,8 @@ int timeout;
     int dummy;
     dummy = sizeof(sin);
     if (getpeername(s,(struct sockaddr *) &sin,&dummy) == -1) {
-      read(s,&ch,1);
+	  /* get return value of read to prevent warn_unused_result */
+	  int x = read(s,&ch,1);
       return -1;
     }
     ndelay_off(s);
@@ -97,7 +98,8 @@ int timeout;
     int dummy;
     dummy = sizeof(sin);
     if (getpeername(s,(struct sockaddr *) &sin,&dummy) == -1) {
-      read(s,&ch,1);
+	  /* get return value of read to prevent warn_unused_result */
+	  int x = read(s,&ch,1);
       return -1;
     }
     ndelay_off(s);

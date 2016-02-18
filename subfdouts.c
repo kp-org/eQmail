@@ -1,4 +1,4 @@
-#include "readwrite.h"
+#include "inc/readwrite.h"		/* the original definitions */
 #include "substdio.h"
 #include "subfd.h"
 

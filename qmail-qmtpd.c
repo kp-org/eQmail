@@ -1,4 +1,5 @@
-#include <unistd.h>
+#include <unistd.h>		/* replace "exit.h" */
+//#include "exit.h"
 #include "stralloc.h"
 #include "substdio.h"
 #include "qmail.h"
@@ -9,7 +10,7 @@
 #include "sig.h"
 #include "rcpthosts.h"
 #include "auto_qmail.h"
-#include "readwrite.h"
+//#include "readwrite.h"
 #include "control.h"
 #include "received.h"
 

@@ -1,6 +1,7 @@
 #include "alloc.h"
 #include "error.h"
-extern char *malloc();
+#include <stdlib.h>
+//extern char *malloc();	/* use <stdlib.h> instead */
 extern void free();
 
 #define ALIGNMENT 16 /* XXX: assuming that this alignment is enough */

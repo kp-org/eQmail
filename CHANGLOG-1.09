@@ -19,8 +19,21 @@ Patchlevel p3: eqmail-1.09-p3
   - added "#include <sys/stat.h>" and check that config
     file of qmail-spp exists (in qmail-spp.c)
 
-4. eqmail-1.09-p4
+Patchlevel p4: eqmail-1.09-p4
   - updated qmail-auth to 0.59 (new submission port feat.)
   - added TLS required functionality
     - for AUTH LOGIN/PLAIN only
     - have explicitily set to enable (export TLSREQUIRED=1)
+
+Patchlevel p5:
+  - compiler clean up (optimization for gcc)
+	- qmail-remote: code = smtpcode();
+	- alloc.c: include stdlib.h	(_exit warning)
+	- replaced uint32.{h1,h2} logic by stdlib.h
+	- renamed puts(s) --> o_puts(s)
+	- renamed log2() --> o_log2() (not in popup and pop3d)
+	- replaced #include "readwrite.h" "exit.h" und "fork.h"
+	  by '#include <unistd.h>' where possible
+	  (removal/replacement of the 1.06-readwrite.patch)
+	- added (unused) return value to read() call in
+	  timeoutconn.c (required by unistd.h)

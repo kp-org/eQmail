@@ -12,9 +12,10 @@
 #include "open.h"
 #include "datetime.h"
 #include "date822fmt.h"
-#include "readwrite.h"
+//#include "readwrite.h"
+#include <unistd.h>		/* replace "readwrite.h" "exit.h" */
 #include "error.h"
-#include "exit.h"
+//#include "exit.h"
 
 readsubdir rs;
 

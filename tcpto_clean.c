@@ -2,7 +2,8 @@
 #include "tcpto.h"
 #include "open.h"
 #include "substdio.h"
-#include "readwrite.h"
+//#include "readwrite.h"
+#include <unistd.h>		/* replace "readwrite.h" */
 
 struct tcpto_buf tcpto_cleanbuf[TCPTO_BUFSIZ];
 

@@ -2,7 +2,7 @@
 #include "substdio.h"
 #include "lock.h"
 #include "open.h"
-#include "readwrite.h"
+#include "inc/readwrite.h"
 #include "auto_qmail.h"
 #include "exit.h"
 #include "ipalloc.h"

@@ -2,7 +2,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "substdio.h"
-#include "readwrite.h"
 #include "subfd.h"
 #include "sgetopt.h"
 #include "control.h"

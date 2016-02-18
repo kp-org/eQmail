@@ -9,7 +9,7 @@ printf "[connection]\n\n[helo]\n\n[mail]\n\n[rcpt]\n\n[data]\n\n#[auth]\n" \
 chown root:qmail QMAIL/control/smtpplugins
 chmod 644 QMAIL/control/smtpplugins	)
 
-mkdir QMAIL/bin/plugins
+mkdir -p QMAIL/bin/plugins
 chgrp qmail QMAIL/bin/plugins
 
 #rm -R QMAIL/boot

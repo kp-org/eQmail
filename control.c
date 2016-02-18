@@ -1,4 +1,5 @@
-#include "readwrite.h"
+//#include "readwrite.h"
+#include <unistd.h>		/* replace "readwrite.h" */
 #include "open.h"
 #include "getln.h"
 #include "stralloc.h"

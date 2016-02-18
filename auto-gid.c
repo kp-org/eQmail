@@ -2,7 +2,7 @@
 #include <grp.h>
 #include "subfd.h"
 #include "substdio.h"
-#include "readwrite.h"
+#include "inc/readwrite.h"		/* the original definitions */
 #include "exit.h"
 #include "scan.h"
 #include "fmt.h"

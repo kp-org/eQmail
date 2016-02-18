@@ -24,7 +24,7 @@
 #include "exit.h"
 #include "constmap.h"
 #include "tcpto.h"
-#include "readwrite.h"
+#include "inc/readwrite.h"		/* the original definitions */
 #include "timeoutconn.h"
 #include "timeoutread.h"
 #include "timeoutwrite.h"
@@ -540,7 +540,6 @@ void smtp()
   int i;
   stralloc slop = {0};
 
-
 #ifndef PORT_SMTP
   /* the qmtpc patch uses smtp_port and undefines PORT_SMTP */
 # define port smtp_port
@@ -554,11 +553,11 @@ void smtp()
     if (port == 465) smtps = 1;
   if (!smtps)
 #endif
-
-  if (smtpcode >= 500 && smtpcode < 600) quit("DConnected to "," but greeting failed");
-  /* RFC2821: On error code 4xx through 499 try the next MX (@Kai Peter) */
-  if (smtpcode >= 400 && smtpcode < 500) return;
-  if (smtpcode() != 220) quit("ZConnected to "," but greeting failed");
+  code = smtpcode();
+  if (code >= 500 && code < 600) quit("DConnected to "," but greeting failed");
+  /* RFC2821: On error code 4xx through 499 try the next MX */
+  if (code >= 400 && code < 500) return;
+  if (code != 220) quit("ZConnected to "," but greeting failed");
  
 #ifdef EHLO
 # ifdef TLS

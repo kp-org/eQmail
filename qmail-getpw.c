@@ -1,11 +1,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <pwd.h>
-#include "readwrite.h"
+//#include "readwrite.h"
 #include "substdio.h"
 #include "subfd.h"
 #include "error.h"
-#include "exit.h"
+//#include "exit.h"
+#include <unistd.h>		/* replace "exit.h" */
 #include "byte.h"
 #include "str.h"
 #include "case.h"
