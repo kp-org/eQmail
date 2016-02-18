@@ -5,10 +5,12 @@
 #include "readwrite.h"
 #include "auto_qmail.h"
 #include "exit.h"
+#include "ipalloc.h"
+#include "tcpto.h"
 
 #define FATAL "qmail-tcpok: fatal: "
 
-char buf[1024]; /* XXX: must match size in tcpto_clean.c, tcpto.c */
+struct tcpto_buf buf[TCPTO_BUFSIZ];
 substdio ss;
 
 void main()

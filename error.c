@@ -93,3 +93,10 @@ EACCES;
 #else
 -13;
 #endif
+
+int error_refused =
+#ifdef ECONNREFUSED
+ECONNREFUSED;
+#else
+-15;
+#endif

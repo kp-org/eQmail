@@ -581,6 +581,10 @@ fmt_ulong.o: \
 compile fmt_ulong.c fmt.h
 	./compile fmt_ulong.c
 
+fmt_xlong.o: \
+compile fmt_xlong.c fmt.h
+	./compile fmt_xlong.c
+
 fmtqfn.o: \
 compile fmtqfn.c fmtqfn.h fmt.h auto_split.h
 	./compile fmtqfn.c
@@ -612,10 +616,10 @@ strerr.h substdio.h fmt.h
 	./compile forward.c
 
 fs.a: \
-makelib fmt_str.o fmt_strn.o fmt_uint.o fmt_uint0.o fmt_ulong.o \
-scan_ulong.o scan_8long.o
+makelib fmt_str.o fmt_strn.o fmt_uint.o fmt_uint0.o fmt_ulong.o fmt_xlong.o \
+scan_ulong.o scan_8long.o scan_0x.o
 	./makelib fs.a fmt_str.o fmt_strn.o fmt_uint.o fmt_uint0.o \
-	fmt_ulong.o scan_ulong.o scan_8long.o
+	fmt_ulong.o fmt_xlong.o scan_ulong.o scan_8long.o scan_0x.o
 
 getln.a: \
 makelib getln.o getln2.o
@@ -1715,6 +1719,10 @@ scan_ulong.o: \
 compile scan_ulong.c scan.h
 	./compile scan_ulong.c
 
+scan_0x.o: \
+compile scan_0x.c scan.h
+	./compile scan_0x.c
+
 seek.a: \
 makelib seek_cur.o seek_end.o seek_set.o seek_trunc.o
 	./makelib seek.a seek_cur.o seek_end.o seek_set.o \
@@ -1830,7 +1838,7 @@ str_start.c lock.h lock_ex.c lock_exnb.c lock_un.c tryflock.c getln.3 \
 getln.h getln.c getln2.3 getln2.c sgetopt.3 sgetopt.h sgetopt.c \
 subgetopt.3 subgetopt.h subgetopt.c error.3 error_str.3 error_temp.3 \
 error.h error.c error_str.c error_temp.c fmt.h fmt_str.c fmt_strn.c \
-fmt_uint.c fmt_uint0.c fmt_ulong.c scan.h scan_ulong.c scan_8long.c \
+fmt_uint.c fmt_uint0.c fmt_ulong.c fmt_xlong.c scan.h scan_ulong.c scan_8long.c scan_0x.c \
 slurpclose.h slurpclose.c quote.h quote.c hfield.h hfield.c \
 headerbody.h headerbody.c token822.h token822.c control.h control.c \
 datetime.3 datetime.h datetime.c datetime_un.c prioq.h prioq.c \

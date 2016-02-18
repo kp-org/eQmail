@@ -4,6 +4,7 @@
 #include "exit.h"
 #include "fork.h"
 #include "error.h"
+#include "ipalloc.h"
 #include "tcpto.h"
 
 void initialize(argc,argv)

@@ -722,13 +722,15 @@ int auth_login(arg) char *arg;
     if (r = b64decode(arg,str_len(arg),&user) == 1) return err_input();
   }
   else {
-    out("334 VXNlcm5hbWU6\r\n"); flush();       /* Username: */
+//  out("334 VXNlcm5hbWU6\r\n"); flush();       /* Username: */
+    out("334 Username:\r\n"); flush();       	/* Username: */
     if (authgetl() < 0) return -1;
     if (r = b64decode(authin.s,authin.len,&user) == 1) return err_input();
   }
   if (r == -1) die_nomem();
 
-  out("334 UGFzc3dvcmQ6\r\n"); flush();         /* Password: */
+//out("334 UGFzc3dvcmQ6\r\n"); flush();         /* Password: */
+  out("334 Password:\r\n"); flush();         	/* Password: */
 
   if (authgetl() < 0) return -1;
   if (r = b64decode(authin.s,authin.len,&pass) == 1) return err_input();

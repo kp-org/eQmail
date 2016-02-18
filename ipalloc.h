@@ -8,9 +8,32 @@
 #endif
 
 #ifdef IX_FQDN
-struct ip_mx { struct ip_address ip; int pref; char *fqdn; } ;
+//struct ip_mx { struct ip_address ip; int pref; char *fqdn; } ;
+#include "stralloc.h"		// --> von jms-7.08 patch?
+struct ip_mx {
+  unsigned short af;
+  union {
+    struct ip_address ip;
+#ifdef INET6
+    struct ip6_address ip6;
+#endif
+  } addr;
+  int pref;
+  char *fqdn;
+};
 #else
-struct ip_mx { struct ip_address ip; int pref; } ;
+//struct ip_mx { struct ip_address ip; int pref; } ;
+struct ip_mx {
+  unsigned short af;
+  union {
+	struct ip_address ip;
+#ifdef INET6
+    struct ip6_address ip6;
+#endif
+  } addr;
+  int pref;
+};
+
 #endif
 
 #include "gen_alloc.h"
