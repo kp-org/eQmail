@@ -1,0 +1,33 @@
+.TH qmail-rspawn 8
+.SH NAME
+qmail-rexec \- run programs before
+.B qmail-remote
+.SH SYNOPSIS
+.B qmail-rexec
+.SH DESCRIPTION
+.B qmail-rexec
+plugs into the pipe 
+.B qmail-rspawn
+\-->
+.B qmail-remote.
+It reads a series of remote delivery commands from 
+.B qmail-rspawn 
+and invokes optional one or more program(s), before
+.B qmail-remote
+will be executed with the given delivery information.
+.B qmail-remote
+have to be the last program in the pipe and can be called one time only.
+.SH EXAMPLE
+Edit
+.B qmail-rexec
+by add additional commands:
+
+   #!/bin/sh
+
+   np="qmail-qstat" > /tmp/stats.txt
+   np="qmail-remote" ; qmail-remote "$@"
+
+.SH "SEE ALSO"
+qmail-send(8),
+qmail-remote(8)
+qmail-rspawn(8)

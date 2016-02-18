@@ -187,7 +187,6 @@ qmail-remote
 qmail-rspawn.o
 tcpto_clean.o
 qmail-rspawn
-direntry.h
 qmail-clean.o
 fmtqfn.o
 auto_split.c

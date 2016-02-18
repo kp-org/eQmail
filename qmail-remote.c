@@ -412,8 +412,9 @@ int tls_init()
   }
 
   /* POODLE vulnerability */
-//  SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
-
+#ifdef POODLE
+  SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
+#endif
   if (servercert) {
     if (!SSL_CTX_load_verify_locations(ctx, servercert, NULL)) {
       SSL_CTX_free(ctx);

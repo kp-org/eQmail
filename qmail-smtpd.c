@@ -1043,8 +1043,9 @@ void tls_init()
   if (!ctx) { tls_err("unable to initialize ctx"); return; }
 
   /* POODLE vulnerability */
-//  SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
-
+#ifdef POODLE
+  SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
+#endif
   if (!SSL_CTX_use_certificate_chain_file(ctx, SERVERCERT))
     { SSL_CTX_free(ctx); tls_err("missing certificate"); return; }
   SSL_CTX_load_verify_locations(ctx, CLIENTCA, NULL);
@@ -1057,7 +1058,7 @@ void tls_init()
     X509_STORE_set_flags(store, X509_V_FLAG_CRL_CHECK |
                                 X509_V_FLAG_CRL_CHECK_ALL);
 #endif
-  
+
 #if OPENSSL_VERSION_NUMBER >= 0x10002000L
   /* support ECDH */
   SSL_CTX_set_ecdh_auto(ctx,1);

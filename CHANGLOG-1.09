@@ -43,3 +43,9 @@ Patchlevel p6: eqmail-1.09-p6
 	- created forks:
 	  --> eqmail-bfrmt.patch
 	  --> netqmail-1.06-before-remote.patch
+
+Patchlevel p7: eqmail-1.09-p7
+	- removed tryvfork, fork.{h1,h2}
+	- removed uint32.h from Makefile
+	- removed trydrent, direntry.{h1,h2}, static "inc/direntry.h"
+	- eliminated 'shar:' from Makefile
