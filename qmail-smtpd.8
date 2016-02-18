@@ -127,15 +127,11 @@ is set, it overrides
 .IR databytes .
 
 .TP 5
-.I dh1024.pem
-If these 1024 bit DH parameters are provided,
+.I dh2048.pem
+If these 2048 bit DH parameters are provided,
 .B qmail-smtpd
 will use them for TLS sessions instead of generating one on-the-fly 
 (which is very timeconsuming).
-.TP 5
-.I dh512.pem
-512 bit counterpart for 
-.B dh1024.pem. 
 
 .TP 5
 .I localiphost
@@ -214,8 +210,8 @@ Envelope recipient addresses without @ signs are
 always allowed through.
 
 .TP 5
-.I rsa512.pem
-If this 512 bit RSA key is provided,
+.I rsa2048.pem
+If this 2048 bit RSA key is provided,
 .B qmail-smtpd
 will use it for TLS sessions instead of generating one on-the-fly.
 

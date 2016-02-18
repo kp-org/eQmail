@@ -1854,7 +1854,8 @@ ipalloc.h ipalloc.c select.h1 select.h2 trysysel.c ndelay.h ndelay.c \
 ndelay_off.c direntry.3 direntry.h1 direntry.h2 trydrent.c prot.h \
 prot.c chkshsgr.c warn-shsgr tryshsgr.c ipme.h ipme.c trysalen.c \
 maildir.5 maildir.h maildir.c tcp-environ.5 constmap.h constmap.c \
-update_tmprsadh
+update_tmprsadh \
+qmail-spp.0 qmail-spp.8 smtpplugins.0 smtpplugins.5
 	shar -m `cat FILES` > shar
 	chmod 400 shar
 

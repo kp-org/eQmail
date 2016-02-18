@@ -43,6 +43,8 @@
 #include "fmt.h"
 #include "getln.h"
 
+#include <sys/stat.h>	/* check for conffile */
+
 /* stuff needed from qmail-smtpd */
 extern void flush();
 extern void out();
@@ -72,12 +74,15 @@ int spp_init()
   int i, len = 0;
   stralloc *plugins_to;
   char *x, *conffile = "control/smtpplugins";
+  struct stat st;	// Kai
 
   if (!env_get("NOSPP")) {
     spprun = 1;
     plugins_to = &plugins_dummy;
     x = env_get("SPPCONFFILE");
     if (x && *x) conffile = x;
+/* check if config file exists and if not don't execute qmail-spp stuff */
+if (stat(conffile,&st) != 0) return 0;
     sppfok = control_readfile(&sppf, conffile, 0);
     if (sppfok != 1) return -1;
     for (i = 0; i < sppf.len; i += len) {
