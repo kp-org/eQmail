@@ -37,3 +37,9 @@ Patchlevel p5:
 	  (removal/replacement of the 1.06-readwrite.patch)
 	- added (unused) return value to read() call in
 	  timeoutconn.c (required by unistd.h)
+
+Patchlevel p6: eqmail-1.09-p6
+	- qmail-bfrmt plugin to prepare DKIM signing
+	- created forks:
+	  --> eqmail-bfrmt.patch
+	  --> netqmail-1.06-before-remote.patch

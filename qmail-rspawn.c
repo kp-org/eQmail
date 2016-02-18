@@ -1,11 +1,14 @@
 #include "fd.h"
 #include "wait.h"
 #include "substdio.h"
-#include "exit.h"
-#include "fork.h"
 #include "error.h"
 #include "ipalloc.h"
 #include "tcpto.h"
+
+#include <unistd.h>
+#include <sys/stat.h>
+#include <string.h>
+char *np;	/* next program to call */
 
 void initialize(argc,argv)
 int argc;
@@ -13,7 +16,6 @@ char **argv;
 {
  tcpto_clean();
 }
-
 int truncreport = 0;
 
 void report(ss,wstat,s,len)
@@ -28,15 +30,24 @@ int len;
  int orr;
 
  if (wait_crashed(wstat))
-  { substdio_puts(ss,"Zqmail-remote crashed.\n"); return; }
+  { substdio_puts(ss,"Z");
+    substdio_puts(ss,np);
+    substdio_puts(ss," crashed.\n"); return; }
+
  switch(wait_exitcode(wstat))
   {
    case 0: break;
-   case 111: substdio_puts(ss,"ZUnable to run qmail-remote.\n"); return;
-   default: substdio_puts(ss,"DUnable to run qmail-remote.\n"); return;
+   case 111: substdio_puts(ss,"ZUnable to run ");
+             substdio_puts(ss,np);
+             substdio_puts(ss,".\n"); return;
+   default: substdio_puts(ss,"DUnable to run ");
+            substdio_puts(ss,np);
+            substdio_puts(ss,".\n"); return;
   }
  if (!len)
-  { substdio_puts(ss,"Zqmail-remote produced no output.\n"); return; }
+  { substdio_puts(ss,"Z");
+    substdio_puts(ss,np);
+    substdio_puts(ss," produced no output.\n"); return; }
 
  result = -1;
  j = 0;
@@ -82,10 +93,16 @@ int spawn(fdmess,fdout,s,r,at)
 int fdmess; int fdout;
 char *s; char *r; int at;
 {
+ struct stat st;
+ np = "qmail-rexec";
+ /* act. dir is (/var/qmail/)queue/mess */
+ char x[22] = "../../bin/";	/* relative path */
+ strcat(x,np);	            /* combine path and np */
+ if (stat(x,&st) != 0) { np = "qmail-remote"; }
+
  int f;
  char *(args[5]);
-
- args[0] = "qmail-remote";
+ args[0] = np;
  args[1] = r + at + 1;
  args[2] = s;
  args[3] = r;

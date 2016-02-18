@@ -396,3 +396,4 @@ config-spp
 qmail-spp.0
 smtpplugins.0
 smtpplugins.5
+qmail-rexec

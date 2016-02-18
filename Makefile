@@ -832,7 +832,7 @@ dnsptr dnsip dnsmxip dnsfq hostname ipmeprint qreceipt qsmhook qbiff \
 forward preline condredirect bouncesaying except maildirmake \
 maildir2mbox maildirwatch qail elq pinq idedit install-big install \
 instcheck home home+df proc proc+df binm1 binm1+df binm2 binm2+df \
-binm3 binm3+df update_tmprsadh config-spp
+binm3 binm3+df update_tmprsadh config-spp qmail-rexec
 
 load: \
 make-load warn-auto.sh systype
@@ -1806,6 +1806,7 @@ substdio.h alloc.h auto_qmail.h exit.h env.h str.h
 setup: \
 it man
 	./install
+	cp -n qmail-rexec `head -1 conf-qmail`/bin/qmail-rexec
 
 sgetopt.o: \
 compile sgetopt.c substdio.h subfd.h substdio.h sgetopt.h subgetopt.h \
@@ -1890,7 +1891,7 @@ ndelay_off.c direntry.3 direntry.h1 direntry.h2 trydrent.c prot.h \
 prot.c chkshsgr.c warn-shsgr tryshsgr.c ipme.h ipme.c trysalen.c \
 maildir.5 maildir.h maildir.c tcp-environ.5 constmap.h constmap.c \
 update_tmprsadh \
-qmail-spp.0 qmail-spp.8 smtpplugins.0 smtpplugins.5
+qmail-spp.0 qmail-spp.8 smtpplugins.0 smtpplugins.5 qmail-rexec
 	shar -m `cat FILES` > shar
 	chmod 400 shar
 
@@ -2251,3 +2252,8 @@ smtpplugins.9 conf-qmail
 
 smtpplugins.0: smtpplugins.5
 	nroff -man smtpplugins.5 > smtpplugins.0
+
+qmail-rexec: qmail-rexec.sh conf-qmail
+	cat qmail-rexec.sh > qmail-rexec && \
+	chmod 755 qmail-rexec && \
+	chgrp qmail qmail-rexec
