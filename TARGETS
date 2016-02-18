@@ -393,3 +393,7 @@ setup
 check
 update_tmprsadh
 qmail-spp.o
+config-spp
+qmail-spp.0
+smtpplugins.0
+smtpplugins.5

@@ -856,7 +856,7 @@ char **argv;
 #ifdef TLS
       partner_fqdn = ip.ix[i].fqdn;
 #endif
-      smtp(); /* does not return, but for trying next MX (@Kai Peter) */
+      smtp(); /* does not return, but try next MX */
     }
 //    tcpto_err(&ip.ix[i].ip,errno == error_timeout);
     tcpto_err(&ip.ix[i],errno == error_timeout);

@@ -339,7 +339,7 @@ wait.h seek.h qmail.h substdio.h strerr.h substdio.h fmt.h
 	./compile condredirect.c
 
 config: \
-warn-auto.sh config.sh conf-qmail conf-break conf-split
+warn-auto.sh config.sh config-spp.sh conf-qmail conf-break conf-split
 	cat warn-auto.sh config.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
@@ -355,6 +355,13 @@ warn-auto.sh config-fast.sh conf-qmail conf-break conf-split
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> config-fast
 	chmod 755 config-fast
+
+config-spp: \
+warn-auto.sh config-spp.sh conf-qmail
+	cat warn-auto.sh config-spp.sh \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	> config-spp
+	chmod 755 config-spp
 
 constmap.o: \
 compile constmap.c constmap.h alloc.h case.h
@@ -816,7 +823,7 @@ dnsptr dnsip dnsmxip dnsfq hostname ipmeprint qreceipt qsmhook qbiff \
 forward preline condredirect bouncesaying except maildirmake \
 maildir2mbox maildirwatch qail elq pinq idedit install-big install \
 instcheck home home+df proc proc+df binm1 binm1+df binm2 binm2+df \
-binm3 binm3+df update_tmprsadh
+binm3 binm3+df update_tmprsadh config-spp
 
 load: \
 make-load warn-auto.sh systype
@@ -943,7 +950,7 @@ preline.0 condredirect.0 bouncesaying.0 except.0 maildirmake.0 \
 maildir2mbox.0 maildirwatch.0 qmail.0 qmail-limits.0 qmail-log.0 \
 qmail-control.0 qmail-header.0 qmail-users.0 dot-qmail.0 \
 qmail-command.0 tcp-environ.0 maildir.0 mbox.0 addresses.0 \
-envelopes.0 forgeries.0
+envelopes.0 forgeries.0 qmail-spp.0 smtpplugins.0
 
 mbox.0: \
 mbox.5
@@ -1476,7 +1483,7 @@ auto_qmail.o auto_uids.o auto_spawn.o
 	./load qmail-rspawn spawn.o tcpto_clean.o now.o coe.o \
 	sig.a open.a seek.a lock.a wait.a fd.a stralloc.a alloc.a \
 	substdio.a error.a str.a auto_qmail.o auto_uids.o \
-	auto_spawn.o 
+	auto_spawn.o
 
 qmail-rspawn.0: \
 qmail-rspawn.8
@@ -2195,3 +2202,19 @@ tmprsadh: \
 update_tmprsadh
 	echo "Creating new temporary RSA and DH parameters"
 	./update_tmprsadh
+
+qmail-spp.0: \
+qmail-spp.8 conf-qmail
+	nroff -man qmail-spp.8 > qmail-spp.0
+
+smtpplugins.5: \
+smtpplugins.9 conf-qmail
+	cat smtpplugins.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}BREAK}"`head -1 conf-break`"}g \
+	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
+	> smtpplugins.5
+
+smtpplugins.0: \
+smtpplugins.5
+	nroff -man smtpplugins.5 > smtpplugins.0
