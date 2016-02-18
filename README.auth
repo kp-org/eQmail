@@ -1,0 +1,67 @@
+README qmail-smtpd SMTP Authentication
+======================================
+
+
+History:
+--------
+
+This patch is based on Krzysztof Dabrowski's qmail-smtpd-auth-0.31 patch 
+which itself uses "Mrs. Brisby's" initial code. 
+Version 0.41 of this patch fixes the "CAPS-LOCK" typo announcing
+'CRAM_MD5' instead of 'CRAM-MD5' (german keyboard) - tx to Mike Garrison.
+Version 0.42 fixes the '421 unable to read controls (#4.3.0)' problem
+(can't read control/morercpthosts.cdb) because FD 3 was already closed - tx Richard Lyons.
+Version 0.43 fixes the ba64decode() failure in case CRAM_MD5 is not enabled - tx Vladimir Zidar.
+Version 0.51 includes the evaluation of the 'Auth' and the 'Size' parameter in the 'Mail From:' command.
+Version 0.52 uses DJB functions to copy FDs.
+Version 0.56 corrects some minor mistakes displaying the 'Auth' userid.
+Version 0.57 uses keyword "ESMTPA" in Received header in case of authentication to comply with RFC 3848.
+Version 0.58 fixes a potential problem with cc -O2 optimization within base64.c - tx John Simpson.
+
+
+Scope:
+------
+
+This patch supports RFC 2554 "SMTP Service Extension for Authentication" for qmail-smtpd.
+Additionally, RFC 1870 is honoured ("SMTP Service Extension for Message Size Declaration").
+For more technical details see: http://www.fehcom.de/qmail/docu/smtpauth.html.
+
+
+Installation:
+-------------
+
+* Untar the source in the qmail-1.03 home direcotry.
+* Run ./install_auth.
+* Modify the compile time option "#define CRAM_MD5" to your needs.
+* Re-make qmail.
+
+
+Setup:
+------
+
+In order to use SMTP Authentication you have to use a 'Pluggable Authentication Module'
+PAM to be called by qmail-smtpd; typically
+
+	/var/qmail/bin/qmail-smtpd /bin/checkpassword true 2>&1
+
+Since qmail-smtpd does not run as root, checkpassword has to be made sticky.
+There is no need to include additionally the hostname in the call.
+In order to compute the CRAM-MD5 challenge, qmail-smtpd uses the 'tcplocalhost' information.
+
+
+Changes wrt. Krysztof Dabrowski's patch:
+----------------------------------------
+
+* Avoid the 'hostname' in the call of the PAM.
+* Confirm to Dan Bernstein's checkpassword interface even for CRAM-MD5.
+* Doesn't close FD 2; thus not inhibiting logging to STDERR.
+* Fixed bugs in base64.c.
+* Modified unconditional close of FD 3 in order to sustain reading of 'control/morecpthosts.cdb'.
+* Evaluation of the (informational) Mail From: < > Auth=username.
+* Additional support for the advertised "Size" via 'Mail From: <return-path> SIZE=123456780' (RFC 1870).
+* RFC 3848 conformance for Received header in case of SMTP Auth.
+
+
+Erwin Hoffmann - Cologne 2006-12-28 (www.fehcom.de)
+
+
