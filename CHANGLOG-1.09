@@ -1,0 +1,26 @@
+Initial: eqmail-1.08-p2 (=eqmail-1.09-p0)
+  --> ohne domainbindings
+
+Patchlevel p1: eqmail-1.09-p1
+  - added IPv6 support for remote connections
+  - default delim for address extentions is '+' (plus, in conf-break)
+
+Patchlevel p2: eqmail-1.09-p2
+  - created file config-qmail-spp (smtpplugins) and added
+	include to config.sh and config-fast.sh
+  - added "smtpplugins" to qmail-control.9
+  - removed install-auth.sh
+  - new man pages qmail-spp.8 and smtpplugins.5
+
+Patchlevel p3: eqmail-1.09-p3
+  - update TLS to netqmail-1.06-tls-20151215.patch
+  - corrected man page qmail-smtpd.8
+  - deactivated the POODLE code (commented out)
+  - added "#include <sys/stat.h>" and check that config
+    file of qmail-spp exists (in qmail-spp.c)
+
+4. eqmail-1.09-p4
+  - updated qmail-auth to 0.59 (new submission port feat.)
+  - added TLS required functionality
+    - for AUTH LOGIN/PLAIN only
+    - have explicitily set to enable (export TLSREQUIRED=1)

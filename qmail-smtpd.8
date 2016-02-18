@@ -56,6 +56,14 @@ value from
 or
 .IR subprogram .
 
+Binding
+.B qmail-smtpd
+to the SUBMISSION port (\'587\') instead of the standard SMTP port 25 will advice
+.B qmail-smtpd 
+to require SMTP authention prior of accepting the \'MAIL FROM:\' command.
+A different port can be chosen, populating the environment variable 
+.IR SUBMISSIONPORT .
+
 .SH TRANSPARENCY
 .B qmail-smtpd
 converts the SMTP newline convention into the UNIX newline convention

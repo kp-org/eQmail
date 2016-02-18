@@ -30,6 +30,7 @@ int spp_val;
 
 #define CRAM_MD5
 #define AUTHSLEEP 5
+#define SUBMISSION "587"
 
 #define MAXHOPS 100
 unsigned int databytes = 0;
@@ -107,6 +108,7 @@ int err_noauth() { out("504 auth type unimplemented (#5.5.1)\r\n"); return -1; }
 int err_authabrt() { out("501 auth exchange canceled (#5.0.0)\r\n"); return -1; }
 int err_input() { out("501 malformed auth input (#5.5.4)\r\n"); return -1; }
 void err_authfail() { out("535 authentication failed (#5.7.1)\r\n"); }
+void err_submission() { out("530 Authorization required (#5.7.1) \r\n"); }
 
 stralloc greeting = {0};
 
@@ -129,6 +131,8 @@ char *remoteip;
 char *remotehost;
 char *remoteinfo;
 char *local;
+char *localport;
+char *submission;
 char *relayclient;
 
 stralloc helohost = {0};
@@ -174,6 +178,8 @@ void setup()
   protocol = "SMTP";
   remoteip = env_get("TCPREMOTEIP");
   if (!remoteip) remoteip = "unknown";
+  localport = env_get("TCPLOCALPORT");			// smtpd-auth-0.59 manual
+  if (!localport) localport = "0";				// smtpd-auth-0.59 manual
   local = env_get("TCPLOCALHOST");
   if (!local) local = env_get("TCPLOCALIP");
   if (!local) local = "unknown";
@@ -181,6 +187,8 @@ void setup()
   if (!remotehost) remotehost = "unknown";
   remoteinfo = env_get("TCPREMOTEINFO");
   relayclient = env_get("RELAYCLIENT");
+  submission = env_get("SUBMISSIONPORT");		// smtpd-auth-0.59 manual
+  if (!submission) submission= SUBMISSION;		// smtpd-auth-0.59 manual
 
 #ifdef TLS
   if (env_get("SMTPS")) { smtps = 1; tls_init(); }
@@ -279,7 +287,7 @@ int addrallowed()
   return r;
 }
 
-
+int flagauth = 0;
 int seenmail = 0;
 int flagbarf; /* defined if seenmail */
 int allowed;
@@ -360,8 +368,6 @@ void mailfrom_auth(arg,len)
 char *arg; 
 int len;
 {
-  int j;
-
   if (!stralloc_copys(&fuser,"")) die_nomem();
   if (case_starts(arg,"<>")) { if (!stralloc_cats(&fuser,"unknown")) die_nomem(); }
   else 
@@ -441,6 +447,8 @@ void smtp_rset(arg) char *arg;
 }
 void smtp_mail(arg) char *arg;
 {
+  if (str_equal(localport,submission)) 
+    if (!flagauth) { err_submission(); return; }
   if (!addrparse(arg)) { err_syntax(); return; }
   flagsize = 0;
   mailfrom_parms(arg);
@@ -645,7 +653,6 @@ static stralloc chal = {0};     /* plain challenge */
 static stralloc slop = {0};     /* b64 challenge */
 #endif
 
-int flagauth = 0;
 char **childargs;
 char ssauthbuf[512];
 substdio ssauth = SUBSTDIO_FDBUF(safewrite,3,ssauthbuf,sizeof(ssauthbuf));
@@ -821,6 +828,19 @@ char *arg;
 {
   int i;
   char *cmd = arg;
+
+/* forcetls patch - enhanced by Kai */
+#ifdef TLS
+  if (strcmp(arg,"cram-md5") != 0) {
+	char *tlsrequired = env_get("TLSREQUIRED");
+//	if (!forcetls || (forcetls && strcmp(forcetls, "0")!=0))
+	if (tlsrequired && (strcmp(tlsrequired, "1")) == 0) {
+  	  if (!ssl) { 
+  		out("538 AUTH PLAIN/LOGIN not available without TLS (#5.3.3)\r\n");
+    	flush(); die_read(); }
+	}
+  }
+#endif		/* END forcetls patch */
 
   if (!*childargs) { out("503 auth not available (#5.3.3)\r\n"); return; }
   if (flagauth) { err_authd(); return; }
