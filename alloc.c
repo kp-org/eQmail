@@ -1,11 +1,11 @@
 #include "alloc.h"
 #include "error.h"
 #include <stdlib.h>
-//extern char *malloc();	/* use <stdlib.h> instead */
+/*extern char *malloc();*/	/* use <stdlib.h> instead */
 extern void free();
 
 #define ALIGNMENT 16 /* XXX: assuming that this alignment is enough */
-#define SPACE 4096 /* must be multiple of ALIGNMENT */
+#define SPACE 4096   /* must be multiple of ALIGNMENT */
 
 typedef union { char irrelevant[ALIGNMENT]; double d; } aligned;
 static aligned realspace[SPACE / ALIGNMENT];

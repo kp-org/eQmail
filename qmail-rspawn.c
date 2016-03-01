@@ -94,7 +94,7 @@ int fdmess; int fdout;
 char *s; char *r; int at;
 {
  struct stat st;
- np = "qmail-rexec";
+ np = "qmail-bfrmt";
  /* act. dir is (/var/qmail/)queue/mess */
  char x[22] = "../../bin/";	/* relative path */
  strcat(x,np);	            /* combine path and np */

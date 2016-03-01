@@ -1,0 +1,41 @@
+2016-03-01, by Kai Peter (kp@dyndn.es)
+
+All documentation of netqmail is still valid. As well all license(s) and 
+copyrights including of the used patches. This file gives some additional 
+informationen.
+
+The patches directory of netqmail-1.06 moved to netqmail-1.06 inside 
+the folder patches. The folder patches contains all patches which were
+applied with a ordered link. Originals of modified patches are stored
+in the folder orig.
+
+NO WARRANTY!
+This software comes WITHOUT ANY warranty! Use at your own risk!
+
+Installation
+
+The install process didn't change. It is still like with netqmail-1.6. 
+Refer to the related documentation.
+
+Alternatively replace the executables of an existing (net)qmail instal-
+lation only. First of all backup your /var/qmail/bin folder.
+Compile the package with make and copy the executables into the (usually)
+/var/qmail/bin folder. Overwrite all existing files. This can be done with
+particular files only too (e.g. qmail-smtpd and/or qmail-remote). Set right
+permissions (especially of qmail-queue).
+Copy the modified man pages qmail-smtpd.8, qmail-remote.8 and qmail-control.9 
+to their proper location too.
+
+
+New configuration options
+
+Read the patched manual pages mentioned above about the new options. For
+usage of the qmail-spp plugins refer to http://qmail-spp.sourceforge.net/
+as a starting point.
+IMPORTANT: create the file control/smtpplugins manually. It have to 
+           exists in any case!
+
+The creation of this package was done careful as I was able to do it. Feel
+free to analyze it for potential or real bugs. Fix them and send me the 
+fix. If somebody is interessted to join this project please feel free to
+contact me.

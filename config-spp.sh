@@ -1,3 +1,4 @@
+
 # create control/smtpplugins
 [ -f QMAIL/control/smtpplugins ] || \
 ( echo "Creating empty smtpplugins config file..."
@@ -11,7 +12,3 @@ chmod 644 QMAIL/control/smtpplugins	)
 
 mkdir -p QMAIL/bin/plugins
 chgrp qmail QMAIL/bin/plugins
-
-#rm -R QMAIL/boot
-#rm -R QMAIL/doc
-#rm -R QMAIL/cat

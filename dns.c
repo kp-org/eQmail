@@ -33,7 +33,7 @@ static struct ip_address ip;
 #ifdef INET6
 static struct ip6_address ip6;
 #endif
-static stralloc txt = {0};	// von jms-708-patch?
+static stralloc txt = {0};
 unsigned short pref;
 
 static stralloc glue = {0};
@@ -381,13 +381,12 @@ int pref;
   struct ip_mx ix = {0};
   int err4 = 0, err6 = 0;
 #ifdef TLS
-  stralloc fqdn = {0};		// jms-7.08 patch ?
+  stralloc fqdn = {0};
 #endif
 
  if (!stralloc_copy(&glue,sa)) return DNS_MEM;
  if (!stralloc_0(&glue)) return DNS_MEM;
  if (glue.s[0]) {
-//   if (!glue.s[ip_scan(glue.s,&ix.ip)] || !glue.s[ip_scanbracket(glue.s,&ix.ip)])
 	ix.af = AF_INET;
 	if (!glue.s[ip_scan(glue.s,&ix.addr.ip)] || !glue.s[ip_scanbracket(glue.s,&ix.addr.ip)])
     {
@@ -425,18 +424,15 @@ int pref;
 	default:
   while ((r = findip(T_A)) != 2)
   {
-//   ix.ip = ip;
 	ix.af = AF_INET;
 	ix.addr.ip = ip;
 	ix.pref = pref;
-//	if (r == DNS_SOFT) return DNS_SOFT;
 	if (r == DNS_SOFT) { err4 = DNS_SOFT; break; }
 	if (r == 1) {
 
 #ifdef IX_FQDN
      ix.fqdn = glue.s;
 #endif
-//	if (!ipalloc_append(ia,&ix)) return DNS_MEM;
 	if (!ipalloc_append(ia,&ix)) { err4 = DNS_MEM; break; }
 	}
 	break;
@@ -482,12 +478,11 @@ unsigned long random;
  if (!stralloc_copy(&glue,sa)) return DNS_MEM;
  if (!stralloc_0(&glue)) return DNS_MEM;
  if (glue.s[0]) {
-ix.pref = 0;	// von jms-7.08 patch ?
-//   if (!glue.s[ip_scan(glue.s,&ix.ip)] || !glue.s[ip_scanbracket(glue.s,&ix.ip)])
+    ix.pref = 0;
 	if (!glue.s[ip_scan(glue.s,&ix.addr.ip)] || !glue.s[ip_scanbracket(glue.s,&ix.addr.ip)])
     {
 #ifdef TLS
-  	  ix.fqdn = NULL;	// von jms-7.08 patch (TLS)?
+  	  ix.fqdn = NULL;
 #endif
 	  ix.af = AF_INET;
      if (!ipalloc_append(ia,&ix)) return DNS_MEM;

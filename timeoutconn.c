@@ -5,7 +5,6 @@
 #include "ndelay.h"
 #include "select.h"
 #include "error.h"
-//#include "readwrite.h"
 #include "ip.h"
 #include "byte.h"
 #include "timeoutconn.h"

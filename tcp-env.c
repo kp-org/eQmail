@@ -98,20 +98,15 @@ char *argv[];
    dummy = sizeof(salocal);
    if (getsockname(0,(struct sockaddr *) &salocal,&dummy) == -1) die();
 	mappedtov4(&salocal);
-//   localport = ntohs(salocal.sin_port);
 	switch(salocal.sa.sa_family) {
 	case AF_INET:
 	localport = ntohs(salocal.sa4.sin_port);
    temp[fmt_ulong(temp,localport)] = 0;
    if (!env_put2("TCPLOCALPORT",temp)) die();
 
-//   byte_copy(&iplocal,4,&salocal.sin_addr);
-//   temp[ip_fmt(temp,&iplocal)] = 0;
 	temp[ip_fmt(temp, &salocal.sa4.sin_addr)] = 0;
    if (!env_put2("TCPLOCALIP",temp)) die();
 
-//   switch(dns_ptr(&localname,&iplocal))
-//    {
 	switch(dns_ptr(&localname,&salocal.sa4.sin_addr)) {
      case DNS_MEM: die();
      case DNS_SOFT:
@@ -154,21 +149,15 @@ char *argv[];
    if (getpeername(0,(struct sockaddr *) &saremote,&dummy) == -1) die();
 	mappedtov4(&saremote);
 
-//   remoteport = ntohs(saremote.sin_port);
 	switch(saremote.sa.sa_family) {
 	case AF_INET:
 	remoteport = ntohs(saremote.sa4.sin_port);
    temp[fmt_ulong(temp,remoteport)] = 0;
    if (!env_put2("TCPREMOTEPORT",temp)) die();
 
-//   byte_copy(&ipremote,4,&saremote.sin_addr);
-//   temp[ip_fmt(temp,&ipremote)] = 0;
 	temp[ip_fmt(temp, &saremote.sa4.sin_addr)] = 0;
    if (!env_put2("TCPREMOTEIP",temp)) die();
 
-// ---
-//   switch(dns_ptr(&remotename,&ipremote))
-//    {
    switch(dns_ptr(&remotename,&saremote.sa4.sin_addr)) {
    case DNS_MEM: die();
    case DNS_SOFT:
@@ -190,7 +179,6 @@ char *argv[];
 	temp[ip6_fmt(temp, &saremote.sa6.sin6_addr)] = 0;
 	if (!env_put2("TCPREMOTEIP",temp)) die();
 	switch(dns_ptr6(&remotename,&saremote.sa6.sin6_addr)) {
-// --
      case DNS_MEM: die();
      case DNS_SOFT:
        if (!stralloc_copys(&remotename,"softdnserror")) die();

@@ -36,7 +36,7 @@ void hier()
   d(auto_qmail,"control",auto_uido,auto_gidq,0755);
   d(auto_qmail,"users",auto_uido,auto_gidq,0755);
   d(auto_qmail,"bin",auto_uido,auto_gidq,0755);
-  d(auto_qmail,"boot",auto_uido,auto_gidq,0755);
+//  d(auto_qmail,"boot",auto_uido,auto_gidq,0755);
   d(auto_qmail,"doc",auto_uido,auto_gidq,0755);
   d(auto_qmail,"man",auto_uido,auto_gidq,0755);
   d(auto_qmail,"man/cat1",auto_uido,auto_gidq,0755);
@@ -67,7 +67,7 @@ void hier()
   z(auto_qmail,"queue/lock/tcpto",sizeof(struct tcpto_buf)*TCPTO_BUFSIZ,auto_uidr,auto_gidq,0644);
   z(auto_qmail,"queue/lock/sendmutex",0,auto_uids,auto_gidq,0600);
   p(auto_qmail,"queue/lock/trigger",auto_uids,auto_gidq,0622);
-
+/*
   c(auto_qmail,"boot","home",auto_uido,auto_gidq,0755);
   c(auto_qmail,"boot","home+df",auto_uido,auto_gidq,0755);
   c(auto_qmail,"boot","proc",auto_uido,auto_gidq,0755);
@@ -78,7 +78,7 @@ void hier()
   c(auto_qmail,"boot","binm2+df",auto_uido,auto_gidq,0755);
   c(auto_qmail,"boot","binm3",auto_uido,auto_gidq,0755);
   c(auto_qmail,"boot","binm3+df",auto_uido,auto_gidq,0755);
-
+*/
   c(auto_qmail,"doc","FAQ",auto_uido,auto_gidq,0644);
   c(auto_qmail,"doc","UPGRADE",auto_uido,auto_gidq,0644);
   c(auto_qmail,"doc","SENDMAIL",auto_uido,auto_gidq,0644);
@@ -147,6 +147,7 @@ void hier()
   c(auto_qmail,"bin","qail",auto_uido,auto_gidq,0755);
   c(auto_qmail,"bin","elq",auto_uido,auto_gidq,0755);
   c(auto_qmail,"bin","pinq",auto_uido,auto_gidq,0755);
+  c(auto_qmail,"bin","qmail-bfrmt",auto_uido,auto_gidq,0755);
 #ifdef TLS
   c(auto_qmail,"bin","update_tmprsadh",auto_uido,auto_gidq,0755);
 #endif
@@ -172,7 +173,7 @@ void hier()
   c(auto_qmail,"man/man5","tcp-environ.5",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/cat5","tcp-environ.0",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/man5","smtpplugins.5",auto_uido,auto_gidq,0644);
-  c(auto_qmail,"man/cat5","smtpplugins.0",auto_uido,auto_gidq,0644);
+//  c(auto_qmail,"man/cat5","smtpplugins.0",auto_uido,auto_gidq,0644);
 
   c(auto_qmail,"man/man7","forgeries.7",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/cat7","forgeries.0",auto_uido,auto_gidq,0644);
@@ -259,5 +260,5 @@ void hier()
   c(auto_qmail,"man/man8","qmail-command.8",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/cat8","qmail-command.0",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/man8","qmail-spp.8",auto_uido,auto_gidq,0644);
-  c(auto_qmail,"man/cat8","qmail-spp.0",auto_uido,auto_gidq,0644);
+  c(auto_qmail,"man/man8","qmail-bfrmt.8",auto_uido,auto_gidq,0644);
 }

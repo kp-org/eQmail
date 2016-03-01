@@ -412,9 +412,7 @@ int tls_init()
   }
 
   /* POODLE vulnerability */
-#ifdef POODLE
   SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
-#endif
   if (servercert) {
     if (!SSL_CTX_load_verify_locations(ctx, servercert, NULL)) {
       SSL_CTX_free(ctx);
@@ -845,25 +843,19 @@ char **argv;
     perm_ambigmx();
  
   for (i = 0;i < ip.len;++i) if (ip.ix[i].pref < prefme) {
-//    if (tcpto(&ip.ix[i].ip)) continue;
     if (tcpto(&ip.ix[i])) continue;
  
-//    smtpfd = socket(AF_INET,SOCK_STREAM,0);
     smtpfd = socket(ip.ix[i].af,SOCK_STREAM,0);
     if (smtpfd == -1) temp_oserr();
  
-//    if (timeoutconn(smtpfd,&ip.ix[i].ip,(unsigned int) port,timeoutconnect) == 0) 
-//      tcpto_err(&ip.ix[i].ip,0);
-//      partner = ip.ix[i].ip;
 	if (timeoutconn46(smtpfd,&ip.ix[i],(unsigned int) port,timeoutconnect) == 0) {
 	  tcpto_err(&ip.ix[i],0);
 	  partner = ip.ix[i];
 #ifdef TLS
       partner_fqdn = ip.ix[i].fqdn;
 #endif
-      smtp(); /* does not return, but for trying next MX (@Kai Peter) */
+      smtp(); /* does not return, but for trying next MX */
     }
-//    tcpto_err(&ip.ix[i].ip,errno == error_timeout);
     tcpto_err(&ip.ix[i],errno == error_timeout);
     close(smtpfd);
   }

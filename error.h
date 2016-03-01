@@ -17,7 +17,7 @@ extern int error_pipe;
 extern int error_perm;
 extern int error_acces;
 
-extern int error_dquot;		// von jms-7.08 patch ?
+extern int error_dquot;
 extern int error_refused;
 
 extern char *error_str();

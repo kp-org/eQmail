@@ -8,8 +8,7 @@
 #endif
 
 #ifdef IX_FQDN
-//struct ip_mx { struct ip_address ip; int pref; char *fqdn; } ;
-#include "stralloc.h"		// --> von jms-7.08 patch?
+#include "stralloc.h"
 struct ip_mx {
   unsigned short af;
   union {
@@ -22,7 +21,6 @@ struct ip_mx {
   char *fqdn;
 };
 #else
-//struct ip_mx { struct ip_address ip; int pref; } ;
 struct ip_mx {
   unsigned short af;
   union {

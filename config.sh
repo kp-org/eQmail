@@ -64,3 +64,4 @@
 )
 
 . ./config-spp
+. ./config-bfrmt

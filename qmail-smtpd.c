@@ -178,8 +178,8 @@ void setup()
   protocol = "SMTP";
   remoteip = env_get("TCPREMOTEIP");
   if (!remoteip) remoteip = "unknown";
-  localport = env_get("TCPLOCALPORT");			// smtpd-auth-0.59 manual
-  if (!localport) localport = "0";				// smtpd-auth-0.59 manual
+  localport = env_get("TCPLOCALPORT");
+  if (!localport) localport = "0";
   local = env_get("TCPLOCALHOST");
   if (!local) local = env_get("TCPLOCALIP");
   if (!local) local = "unknown";
@@ -187,8 +187,8 @@ void setup()
   if (!remotehost) remotehost = "unknown";
   remoteinfo = env_get("TCPREMOTEINFO");
   relayclient = env_get("RELAYCLIENT");
-  submission = env_get("SUBMISSIONPORT");		// smtpd-auth-0.59 manual
-  if (!submission) submission = SUBMISSION;		// smtpd-auth-0.59 manual
+  submission = env_get("SUBMISSIONPORT");
+  if (!submission) submission = SUBMISSION;
 
 #ifdef TLS
   if (env_get("SMTPS")) { smtps = 1; tls_init(); }
@@ -735,9 +735,8 @@ int auth_login(arg) char *arg;
     if (r = b64decode(authin.s,authin.len,&user) == 1) return err_input();
   }
   if (r == -1) die_nomem();
-
-//out("334 UGFzc3dvcmQ6\r\n"); flush();         /* Password: */
-  out("334 Password:\r\n"); flush();         	/* Password: */
+//  out("334 UGFzc3dvcmQ6\r\n"); flush();         /* Password: */
+    out("334 Password:\r\n"); flush();         	/* Password: */
 
   if (authgetl() < 0) return -1;
   if (r = b64decode(authin.s,authin.len,&pass) == 1) return err_input();
@@ -829,11 +828,10 @@ char *arg;
   int i;
   char *cmd = arg;
 
-/* forcetls patch - enhanced by Kai */
+/* tls required patch */
 #ifdef TLS
   if (strcmp(arg,"cram-md5") != 0) {
 	char *tlsrequired = env_get("TLSREQUIRED");
-//	if (!forcetls || (forcetls && strcmp(forcetls, "0")!=0))
 	if (tlsrequired && (strcmp(tlsrequired, "1")) == 0) {
   	  if (!ssl) { 
   		out("538 AUTH PLAIN/LOGIN not available without TLS (#5.3.3)\r\n");
@@ -841,7 +839,7 @@ char *arg;
       }
 	}
   }
-#endif		/* END forcetls patch */
+#endif		/* END tls required patch */
 
   if (!*childargs) { out("503 auth not available (#5.3.3)\r\n"); return; }
   if (flagauth) { err_authd(); return; }
@@ -1043,9 +1041,7 @@ void tls_init()
   if (!ctx) { tls_err("unable to initialize ctx"); return; }
 
   /* POODLE vulnerability */
-#ifdef POODLE
   SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
-#endif
   if (!SSL_CTX_use_certificate_chain_file(ctx, SERVERCERT))
     { SSL_CTX_free(ctx); tls_err("missing certificate"); return; }
   SSL_CTX_load_verify_locations(ctx, CLIENTCA, NULL);

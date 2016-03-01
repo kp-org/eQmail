@@ -49,3 +49,15 @@ Patchlevel p7: eqmail-1.09-p7
 	- removed uint32.h from Makefile
 	- removed trydrent, direntry.{h1,h2}, static "inc/direntry.h"
 	- eliminated 'shar:' from Makefile
+
+Patchlevel p8 - RC1:
+    - remove out commented #include's
+    - remove temp. comments by me and backup code
+    - replaced qmail-rexec by qmail-bfrmt:
+  	  --> create config file beforemote and man page
+  	- removed old "boot" stuff from hier.c and Makefile (commented out)
+	- added folders "doc", "tps", README.tps
+	- reactivated POODLE from tls patch
+	- more Makefile cleanup
+	- removed .o, .a and .0 files from TARGETS
+    - removed trycpp.c

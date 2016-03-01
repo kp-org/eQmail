@@ -27,9 +27,7 @@ char **argv;
   {
    substdio_putsflush(subfderr,"no IP addresses\n"); _exit(100);
   }
-// dnsdoe(dns_ptr(&sa,&ia.ix[0].ip));
   if (ia.ix[0].af == AF_INET)
-//  dnsdoe(dns_ptr(&ssa,&ia.ix[0].addr.ip));	// ssa --> sa ???
   dnsdoe(dns_ptr(&sa,&ia.ix[0].addr.ip));
 #ifdef INET6
   else

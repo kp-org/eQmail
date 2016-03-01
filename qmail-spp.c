@@ -29,7 +29,6 @@
  *
  */
 
-//#include "readwrite.h"
 #include <unistd.h>		/* replace "readwrite.h" "exit.h" */
 #include "stralloc.h"
 #include "substdio.h"
@@ -37,14 +36,12 @@
 #include "str.h"
 #include "byte.h"
 #include "env.h"
-//#include "exit.h"
 #include "wait.h"
-//#include "fork.h"
 #include "fd.h"
 #include "fmt.h"
 #include "getln.h"
 
-#include <sys/stat.h>	/* check for conffile */
+#include <sys/stat.h>	/* check for config file */
 
 /* stuff needed from qmail-smtpd */
 extern void flush();
