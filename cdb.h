@@ -1,7 +1,7 @@
 #ifndef CDB_H
 #define CDB_H
 
-#include "uint32.h"
+#include "inc/uint32.h"
 
 extern uint32 cdb_hash();
 extern uint32 cdb_unpack();

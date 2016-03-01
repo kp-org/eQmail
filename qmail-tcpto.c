@@ -1,5 +1,7 @@
 /* XXX: this program knows quite a bit about tcpto's internals */
 
+#include <sys/types.h>
+#include <sys/socket.h>
 #include "substdio.h"
 #include "subfd.h"
 #include "auto_qmail.h"
@@ -10,6 +12,8 @@
 #include "exit.h"
 #include "datetime.h"
 #include "now.h"
+#include "ipalloc.h"
+#include "tcpto.h"
 
 void die(n) int n; { substdio_flush(subfdout); _exit(n); }
 
@@ -28,7 +32,7 @@ void die_open() { warn("fatal: unable to open tcpto"); die(111); }
 void die_lock() { warn("fatal: unable to lock tcpto"); die(111); }
 void die_read() { warn("fatal: unable to read tcpto"); die(111); }
 
-char tcpto_buf[1024];
+struct tcpto_buf tcpto_buf[TCPTO_BUFSIZ];
 
 char tmp[FMT_ULONG + IPFMT];
 
@@ -38,8 +42,7 @@ void main()
  int fd;
  int r;
  int i;
- char *record;
- struct ip_address ip;
+ int af;
  datetime_sec when;
  datetime_sec start;
 
@@ -56,29 +59,31 @@ void main()
  close(fdlock);
 
  if (r == -1) die_read();
- r >>= 4;
+ r /= sizeof(tcpto_buf[0]);
 
  start = now();
 
- record = tcpto_buf;
  for (i = 0;i < r;++i)
   {
-   if (record[4] >= 1)
+   if (tcpto_buf[i].flag >= 1)
     {
-     byte_copy(&ip,4,record);
-     when = (unsigned long) (unsigned char) record[11];
-     when = (when << 8) + (unsigned long) (unsigned char) record[10];
-     when = (when << 8) + (unsigned long) (unsigned char) record[9];
-     when = (when << 8) + (unsigned long) (unsigned char) record[8];
+     af = tcpto_buf[i].af;
+     when = tcpto_buf[i].when;
 
-     substdio_put(subfdout,tmp,ip_fmt(tmp,&ip));
+#ifdef INET6
+     if (af == AF_INET)
+       substdio_put(subfdout,tmp,ip_fmt(tmp,&tcpto_buf[i].addr.ip));
+     else
+       substdio_put(subfdout,tmp,ip6_fmt(tmp,&tcpto_buf[i].addr.ip6));
+#else
+     substdio_put(subfdout,tmp,ip_fmt(tmp,&tcpto_buf[i].addr.ip));
+#endif
      substdio_puts(subfdout," timed out ");
      substdio_put(subfdout,tmp,fmt_ulong(tmp,(unsigned long) (start - when)));
      substdio_puts(subfdout," seconds ago; # recent timeouts: ");
-     substdio_put(subfdout,tmp,fmt_ulong(tmp,(unsigned long) (unsigned char) record[4]));
+     substdio_put(subfdout,tmp,fmt_ulong(tmp,tcpto_buf[i].flag));
      substdio_puts(subfdout,"\n");
     }
-   record += 16;
   }
 
  die(0);

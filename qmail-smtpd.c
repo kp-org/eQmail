@@ -1,5 +1,5 @@
 #include "sig.h"
-#include "readwrite.h"
+#include "inc/readwrite.h"		/* the original definitions */
 #include "stralloc.h"
 #include "substdio.h"
 #include "alloc.h"
@@ -30,6 +30,7 @@ int spp_val;
 
 #define CRAM_MD5
 #define AUTHSLEEP 5
+#define SUBMISSION "587"
 
 #define MAXHOPS 100
 unsigned int databytes = 0;
@@ -107,6 +108,7 @@ int err_noauth() { out("504 auth type unimplemented (#5.5.1)\r\n"); return -1; }
 int err_authabrt() { out("501 auth exchange canceled (#5.0.0)\r\n"); return -1; }
 int err_input() { out("501 malformed auth input (#5.5.4)\r\n"); return -1; }
 void err_authfail() { out("535 authentication failed (#5.7.1)\r\n"); }
+void err_submission() { out("530 Authorization required (#5.7.1) \r\n"); }
 
 stralloc greeting = {0};
 
@@ -129,6 +131,8 @@ char *remoteip;
 char *remotehost;
 char *remoteinfo;
 char *local;
+char *localport;
+char *submission;
 char *relayclient;
 
 stralloc helohost = {0};
@@ -174,6 +178,8 @@ void setup()
   protocol = "SMTP";
   remoteip = env_get("TCPREMOTEIP");
   if (!remoteip) remoteip = "unknown";
+  localport = env_get("TCPLOCALPORT");
+  if (!localport) localport = "0";
   local = env_get("TCPLOCALHOST");
   if (!local) local = env_get("TCPLOCALIP");
   if (!local) local = "unknown";
@@ -181,6 +187,8 @@ void setup()
   if (!remotehost) remotehost = "unknown";
   remoteinfo = env_get("TCPREMOTEINFO");
   relayclient = env_get("RELAYCLIENT");
+  submission = env_get("SUBMISSIONPORT");
+  if (!submission) submission = SUBMISSION;
 
 #ifdef TLS
   if (env_get("SMTPS")) { smtps = 1; tls_init(); }
@@ -279,7 +287,7 @@ int addrallowed()
   return r;
 }
 
-
+int flagauth = 0;
 int seenmail = 0;
 int flagbarf; /* defined if seenmail */
 int allowed;
@@ -360,8 +368,6 @@ void mailfrom_auth(arg,len)
 char *arg; 
 int len;
 {
-  int j;
-
   if (!stralloc_copys(&fuser,"")) die_nomem();
   if (case_starts(arg,"<>")) { if (!stralloc_cats(&fuser,"unknown")) die_nomem(); }
   else 
@@ -441,6 +447,8 @@ void smtp_rset(arg) char *arg;
 }
 void smtp_mail(arg) char *arg;
 {
+  if (str_equal(localport,submission)) 
+    if (!flagauth) { err_submission(); return; }
   if (!addrparse(arg)) { err_syntax(); return; }
   flagsize = 0;
   mailfrom_parms(arg);
@@ -645,7 +653,6 @@ static stralloc chal = {0};     /* plain challenge */
 static stralloc slop = {0};     /* b64 challenge */
 #endif
 
-int flagauth = 0;
 char **childargs;
 char ssauthbuf[512];
 substdio ssauth = SUBSTDIO_FDBUF(safewrite,3,ssauthbuf,sizeof(ssauthbuf));
@@ -722,13 +729,14 @@ int auth_login(arg) char *arg;
     if (r = b64decode(arg,str_len(arg),&user) == 1) return err_input();
   }
   else {
-    out("334 VXNlcm5hbWU6\r\n"); flush();       /* Username: */
+//  out("334 VXNlcm5hbWU6\r\n"); flush();       /* Username: */
+    out("334 Username:\r\n"); flush();       	/* Username: */
     if (authgetl() < 0) return -1;
     if (r = b64decode(authin.s,authin.len,&user) == 1) return err_input();
   }
   if (r == -1) die_nomem();
-
-  out("334 UGFzc3dvcmQ6\r\n"); flush();         /* Password: */
+//  out("334 UGFzc3dvcmQ6\r\n"); flush();         /* Password: */
+    out("334 Password:\r\n"); flush();         	/* Password: */
 
   if (authgetl() < 0) return -1;
   if (r = b64decode(authin.s,authin.len,&pass) == 1) return err_input();
@@ -820,6 +828,19 @@ char *arg;
   int i;
   char *cmd = arg;
 
+/* tls required patch */
+#ifdef TLS
+  if (strcmp(arg,"cram-md5") != 0) {
+	char *tlsrequired = env_get("TLSREQUIRED");
+	if (tlsrequired && (strcmp(tlsrequired, "1")) == 0) {
+  	  if (!ssl) { 
+  		out("538 AUTH PLAIN/LOGIN not available without TLS (#5.3.3)\r\n");
+    	flush(); /*die_read();*/ return;	/* don't die */
+      }
+	}
+  }
+#endif		/* END tls required patch */
+
   if (!*childargs) { out("503 auth not available (#5.3.3)\r\n"); return; }
   if (flagauth) { err_authd(); return; }
   if (seenmail) { err_authmail(); return; }
@@ -875,9 +896,9 @@ void smtp_tls(char *arg)
 
 RSA *tmp_rsa_cb(SSL *ssl, int export, int keylen)
 {
-  if (!export) keylen = 512;
-  if (keylen == 512) {
-    FILE *in = fopen("control/rsa512.pem", "r");
+  if (!export) keylen = 2048;
+  if (keylen == 2048) {
+    FILE *in = fopen("control/rsa2048.pem", "r");
     if (in) {
       RSA *rsa = PEM_read_RSAPrivateKey(in, NULL, NULL, NULL);
       fclose(in);
@@ -889,17 +910,9 @@ RSA *tmp_rsa_cb(SSL *ssl, int export, int keylen)
 
 DH *tmp_dh_cb(SSL *ssl, int export, int keylen)
 {
-  if (!export) keylen = 1024;
-  if (keylen == 512) {
-    FILE *in = fopen("control/dh512.pem", "r");
-    if (in) {
-      DH *dh = PEM_read_DHparams(in, NULL, NULL, NULL);
-      fclose(in);
-      if (dh) return dh;
-    }
-  }
-  if (keylen == 1024) {
-    FILE *in = fopen("control/dh1024.pem", "r");
+  if (!export) keylen = 2048;
+  if (keylen == 2048) {
+    FILE *in = fopen("control/dh2048.pem", "r");
     if (in) {
       DH *dh = PEM_read_DHparams(in, NULL, NULL, NULL);
       fclose(in);
@@ -995,8 +1008,10 @@ int tls_verify()
         || !stralloc_catb(&proto, email.s, email.len)
         || !stralloc_cats(&proto, ")")
         || !stralloc_0(&proto)) die_nomem();
-      relayclient = "";
       protocol = proto.s;
+      relayclient = "";
+      /* also inform qmail-queue */
+      if (!env_put("RELAYCLIENT=")) die_nomem();
     }
 
     X509_free(peercert);
@@ -1025,6 +1040,8 @@ void tls_init()
   ctx = SSL_CTX_new(SSLv23_server_method());
   if (!ctx) { tls_err("unable to initialize ctx"); return; }
 
+  /* POODLE vulnerability */
+  SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
   if (!SSL_CTX_use_certificate_chain_file(ctx, SERVERCERT))
     { SSL_CTX_free(ctx); tls_err("missing certificate"); return; }
   SSL_CTX_load_verify_locations(ctx, CLIENTCA, NULL);
@@ -1038,6 +1055,11 @@ void tls_init()
                                 X509_V_FLAG_CRL_CHECK_ALL);
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x10002000L
+  /* support ECDH */
+  SSL_CTX_set_ecdh_auto(ctx,1);
+#endif
+ 
   /* set the callback here; SSL_set_verify didn't work before 0.9.6c */
   SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, verify_cb);
 
@@ -1123,8 +1145,8 @@ char **argv;
   setup();
   if (ipme_init() != 1) die_ipme();
   if (spp_connect()) {
-  smtp_greet("220 ");
-  out(" ESMTP\r\n");
+    smtp_greet("220 ");
+    out(" ESMTP\r\n");
   }
   if (commands(&ssin,&smtpcommands) == 0) die_read();
   die_nomem();

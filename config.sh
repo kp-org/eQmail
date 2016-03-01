@@ -62,3 +62,6 @@
     echo You will have to set up control/me yourself.
   fi
 )
+
+. ./config-spp
+. ./config-bfrmt

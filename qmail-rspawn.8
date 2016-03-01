@@ -7,15 +7,16 @@ qmail-rspawn \- schedule remote deliveries
 .B qmail-rspawn
 reads a series of remote delivery commands from descriptor 0,
 invokes
-.B qmail-remote
+.B qmail-bfrmt
 to perform the deliveries,
 and prints the results to descriptor 1.
 
 .B qmail-rspawn
 invokes
-.B qmail-remote
+.B qmail-bfrmt
 asynchronously,
 so the results may not be in the same order as the commands.
 .SH "SEE ALSO"
 qmail-send(8),
-qmail-remote(8)
+qmail-remote(8),
+qmail-bfrmt(8)

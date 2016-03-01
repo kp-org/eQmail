@@ -2,7 +2,7 @@
 #include "strerr.h"
 #include "error.h"
 #include "open.h"
-#include "readwrite.h"
+#include <unistd.h>		/* replace "readwrite.h" */
 #include "exit.h"
 
 extern void hier();

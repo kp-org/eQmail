@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <utmpx.h>
-#include "readwrite.h"
+#include <unistd.h>		/* replace readwrite.h */
 #include "stralloc.h"
 #include "substdio.h"
 #include "subfd.h"

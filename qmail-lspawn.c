@@ -5,7 +5,6 @@
 #include "stralloc.h"
 #include "scan.h"
 #include "exit.h"
-#include "fork.h"
 #include "error.h"
 #include "cdb.h"
 #include "case.h"

@@ -13,7 +13,7 @@
 #include "str.h"
 #include "exit.h"
 #include "maildir.h"
-#include "readwrite.h"
+#include <unistd.h>		/* replace "readwrite.h" */
 #include "timeoutread.h"
 #include "timeoutwrite.h"
 

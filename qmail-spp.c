@@ -29,19 +29,19 @@
  *
  */
 
-#include "readwrite.h"
+#include <unistd.h>		/* replace "readwrite.h" "exit.h" */
 #include "stralloc.h"
 #include "substdio.h"
 #include "control.h"
 #include "str.h"
 #include "byte.h"
 #include "env.h"
-#include "exit.h"
 #include "wait.h"
-#include "fork.h"
 #include "fd.h"
 #include "fmt.h"
 #include "getln.h"
+
+#include <sys/stat.h>	/* check for config file */
 
 /* stuff needed from qmail-smtpd */
 extern void flush();
@@ -72,14 +72,17 @@ int spp_init()
   int i, len = 0;
   stralloc *plugins_to;
   char *x, *conffile = "control/smtpplugins";
+  struct stat st;	/* needed by stat of config file */
 
   if (!env_get("NOSPP")) {
     spprun = 1;
     plugins_to = &plugins_dummy;
     x = env_get("SPPCONFFILE");
     if (x && *x) conffile = x;
+	/* if config file couldn't be found ignore qmail-spp stuff */
+	if (stat(conffile,&st) != 0) return 0;
     sppfok = control_readfile(&sppf, conffile, 0);
-    if (sppfok != 1) return -1;
+    if (sppfok != 1) return -1;		// better?: log and continue (return 0;)
     for (i = 0; i < sppf.len; i += len) {
       len = str_len(sppf.s + i) + 1;
       if (sppf.s[i] == '[')

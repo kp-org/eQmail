@@ -1,4 +1,4 @@
-#include "readwrite.h"
+#include <unistd.h>		/* replace "readwrite.h" "exit.h" */
 #include "prioq.h"
 #include "env.h"
 #include "stralloc.h"
@@ -10,7 +10,6 @@
 #include "lock.h"
 #include "gfrom.h"
 #include "str.h"
-#include "exit.h"
 #include "myctime.h"
 #include "maildir.h"
 

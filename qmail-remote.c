@@ -24,7 +24,7 @@
 #include "exit.h"
 #include "constmap.h"
 #include "tcpto.h"
-#include "readwrite.h"
+#include "inc/readwrite.h"		/* the original definitions */
 #include "timeoutconn.h"
 #include "timeoutread.h"
 #include "timeoutwrite.h"
@@ -48,7 +48,7 @@ stralloc auth_smtp_pass = {0};
 
 saa reciplist = {0};
 
-struct ip_address partner;
+struct ip_mx partner;
 
 #ifdef TLS
 # include <sys/stat.h>
@@ -102,7 +102,15 @@ zerodie(); }
 void outhost()
 {
   char x[IPFMT];
-  if (substdio_put(subfdoutsmall,x,ip_fmt(x,&partner)) == -1) _exit(0);
+#ifdef INET6
+  if (partner.af == AF_INET) {
+#endif
+  if (substdio_put(subfdoutsmall,x,ip_fmt(x,&partner.addr.ip)) == -1) _exit(0);
+#ifdef INET6
+  } else {
+  if (substdio_put(subfdoutsmall,x,ip6_fmt(x,&partner.addr.ip6)) == -1) _exit(0);
+  }
+#endif
 }
 
 int flagcritical = 0;
@@ -403,6 +411,8 @@ int tls_init()
     tls_quit_error("ZTLS error initializing ctx");
   }
 
+  /* POODLE vulnerability */
+  SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
   if (servercert) {
     if (!SSL_CTX_load_verify_locations(ctx, servercert, NULL)) {
       SSL_CTX_free(ctx);
@@ -429,7 +439,7 @@ int tls_init()
 
   if (!smtps) substdio_putsflush(&smtpto, "STARTTLS\r\n");
 
-  /* while the server is preparing a responce, do something else */
+  /* while the server is preparing a response, do something else */
   if (control_readfile(&saciphers, "control/tlsclientciphers", 0) == -1)
     { SSL_free(myssl); temp_control(); }
   if (saciphers.len) {
@@ -441,10 +451,9 @@ int tls_init()
   SSL_set_cipher_list(myssl, ciphers);
   alloc_free(saciphers.s);
 
-  /* SSL_set_options(myssl, SSL_OP_NO_TLSv1); */
   SSL_set_fd(myssl, smtpfd);
 
-  /* read the responce to STARTTLS */
+  /* read the response to STARTTLS */
   if (!smtps) {
     if (smtpcode() != 220) {
       SSL_free(myssl);
@@ -462,6 +471,7 @@ int tls_init()
   if (servercert) {
     X509 *peercert;
     STACK_OF(GENERAL_NAME) *gens;
+    int found_gen_dns = 0;
 
     int r = SSL_get_verify_result(ssl);
     if (r != X509_V_OK) {
@@ -483,14 +493,16 @@ int tls_init()
       for (i = 0, r = sk_GENERAL_NAME_num(gens); i < r; ++i)
       {
         const GENERAL_NAME *gn = sk_GENERAL_NAME_value(gens, i);
-        if (gn->type == GEN_DNS)
+        if (gn->type == GEN_DNS){
+          found_gen_dns = 1;
           if (match_partner(gn->d.ia5->data, gn->d.ia5->length)) break;
+        }
       }
       sk_GENERAL_NAME_pop_free(gens, GENERAL_NAME_free);
     }
 
-    /* no alternative name matched, look up commonName */
-    if (!gens || i >= r) {
+    /* no SubjectAltName of type DNS found, look up commonName */
+    if (!found_gen_dns) {
       stralloc peer = {0};
       X509_NAME *subj = X509_get_subject_name(peercert);
       i = X509_NAME_get_index_by_NID(subj, NID_commonName, -1);
@@ -527,7 +539,6 @@ void smtp()
   int i;
   stralloc slop = {0};
 
-
 #ifndef PORT_SMTP
   /* the qmtpc patch uses smtp_port and undefines PORT_SMTP */
 # define port smtp_port
@@ -541,11 +552,11 @@ void smtp()
     if (port == 465) smtps = 1;
   if (!smtps)
 #endif
-
-  if (smtpcode >= 500 && smtpcode < 600) quit("DConnected to "," but greeting failed");
-  /* RFC2821: On error code 4xx through 499 try the next MX (@Kai Peter) */
-  if (smtpcode >= 400 && smtpcode < 500) return;
-  if (smtpcode() != 220) quit("ZConnected to "," but greeting failed");
+  code = smtpcode();
+  if (code >= 500 && code < 600) quit("DConnected to "," but greeting failed");
+  /* RFC2821: On error code 4xx through 499 try the next MX */
+  if (code >= 400 && code < 500) return;
+  if (code != 220) quit("ZConnected to "," but greeting failed");
  
 #ifdef EHLO
 # ifdef TLS
@@ -705,6 +716,33 @@ void getcontrols()
   }
 }
 
+#ifdef INET6
+int ipme_is46(mxip)
+struct ip_mx *mxip;
+{
+  switch(mxip->af) {
+  case AF_INET:
+    return ipme_is(&mxip->addr.ip);
+  case AF_INET6:
+    return ipme_is6(&mxip->addr.ip6);
+  }
+  return 0;
+}
+#endif
+
+int timeoutconn46(fd, ix, port, timeout)
+int fd;
+struct ip_mx *ix;
+int port;
+int timeout;
+{
+#ifdef INET6
+	if (ix->af == AF_INET6)
+		return timeoutconn6(fd, &ix->addr.ip6, port, timeout);
+#endif
+	return timeoutconn(fd, &ix->addr.ip, port, timeout);
+}
+
 void main(argc,argv)
 int argc;
 char **argv;
@@ -786,7 +824,11 @@ char **argv;
  
   prefme = 100000;
   for (i = 0;i < ip.len;++i)
-    if (ipme_is(&ip.ix[i].ip))
+#ifdef INET6
+   if (ipme_is46(&ip.ix[i]))
+#else
+   if (ipme_is(&ip.ix[i].addr.ip))
+#endif
       if (ip.ix[i].pref < prefme)
         prefme = ip.ix[i].pref;
  
@@ -801,20 +843,20 @@ char **argv;
     perm_ambigmx();
  
   for (i = 0;i < ip.len;++i) if (ip.ix[i].pref < prefme) {
-    if (tcpto(&ip.ix[i].ip)) continue;
+    if (tcpto(&ip.ix[i])) continue;
  
-    smtpfd = socket(AF_INET,SOCK_STREAM,0);
+    smtpfd = socket(ip.ix[i].af,SOCK_STREAM,0);
     if (smtpfd == -1) temp_oserr();
  
-    if (timeoutconn(smtpfd,&ip.ix[i].ip,(unsigned int) port,timeoutconnect) == 0) {
-      tcpto_err(&ip.ix[i].ip,0);
-      partner = ip.ix[i].ip;
+	if (timeoutconn46(smtpfd,&ip.ix[i],(unsigned int) port,timeoutconnect) == 0) {
+	  tcpto_err(&ip.ix[i],0);
+	  partner = ip.ix[i];
 #ifdef TLS
       partner_fqdn = ip.ix[i].fqdn;
 #endif
-      smtp(); /* does not return, but for trying next MX (@Kai Peter) */
+      smtp(); /* does not return, but for trying next MX */
     }
-    tcpto_err(&ip.ix[i].ip,errno == error_timeout);
+    tcpto_err(&ip.ix[i],errno == error_timeout);
     close(smtpfd);
   }
   

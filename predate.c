@@ -1,14 +1,13 @@
 #include <sys/types.h>
 #include <time.h>
 #include "datetime.h"
-#include "fork.h"
 #include "wait.h"
 #include "fd.h"
 #include "fmt.h"
 #include "strerr.h"
 #include "substdio.h"
 #include "subfd.h"
-#include "readwrite.h"
+#include <unistd.h>		/* replace "readwrite.h" "fork.h" */
 #include "exit.h"
 
 #define FATAL "predate: fatal: "

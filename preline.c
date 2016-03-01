@@ -1,10 +1,9 @@
 #include "fd.h"
 #include "sgetopt.h"
-#include "readwrite.h"
+#include "inc/readwrite.h"		/* the original definitions */
 #include "strerr.h"
 #include "substdio.h"
 #include "exit.h"
-#include "fork.h"
 #include "wait.h"
 #include "env.h"
 #include "sig.h"

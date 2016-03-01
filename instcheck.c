@@ -2,7 +2,6 @@
 #include <sys/stat.h>
 #include "strerr.h"
 #include "error.h"
-#include "readwrite.h"
 #include "exit.h"
 
 extern void hier();

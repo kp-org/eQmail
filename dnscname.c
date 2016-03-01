@@ -3,8 +3,7 @@
 #include "stralloc.h"
 #include "dns.h"
 #include "dnsdoe.h"
-#include "readwrite.h"
-#include "exit.h"
+#include <unistd.h>		/* replace "readwrite.h" "exit.h" */
 
 stralloc sa = {0};
 

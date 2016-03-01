@@ -6,7 +6,7 @@
 #include "str.h"
 #include "exit.h"
 #include "hfield.h"
-#include "readwrite.h"
+#include <unistd.h>		/* replace "readwrite.h */
 #include "open.h"
 #include "headerbody.h"
 #include "maildir.h"

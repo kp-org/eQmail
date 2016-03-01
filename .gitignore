@@ -1,0 +1,12 @@
+doc2
+obsolete
+*.bck
+*.orig
+*.patch
+*.rej
+*.o
+*.a
+*.0
+compile
+load
+makelib

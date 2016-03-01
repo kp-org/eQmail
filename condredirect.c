@@ -1,9 +1,8 @@
 #include "sig.h"
-#include "readwrite.h"
+#include "inc/readwrite.h"	/* the original definitions */
 #include "exit.h"
 #include "env.h"
 #include "error.h"
-#include "fork.h"
 #include "wait.h"
 #include "seek.h"
 #include "qmail.h"

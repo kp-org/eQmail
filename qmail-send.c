@@ -1,13 +1,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "readwrite.h"
+#include <unistd.h>		/* replace "readwrite.h" "exit.h" */
 #include "sig.h"
-#include "direntry.h"
+#include "inc/direntry.h"
 #include "control.h"
 #include "select.h"
 #include "open.h"
 #include "seek.h"
-#include "exit.h"
 #include "lock.h"
 #include "ndelay.h"
 #include "now.h"
@@ -754,7 +753,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
     { log1("warning: trouble injecting bounce message, will try later\n"); return 0; }
 
    strnum2[fmt_ulong(strnum2,id)] = 0;
-   log2("bounce msg ",strnum2);
+   o_log2("bounce msg ",strnum2);
    strnum2[fmt_ulong(strnum2,qp)] = 0;
    log3(" qp ",strnum2,"\n");
   }
@@ -794,8 +793,8 @@ void del_status()
   for (c = 0;c < CHANNELS;++c) {
     strnum2[fmt_ulong(strnum2,(unsigned long) concurrencyused[c])] = 0;
     strnum3[fmt_ulong(strnum3,(unsigned long) concurrency[c])] = 0;
-    log2(chanstatusmsg[c],strnum2);
-    log2("/",strnum3);
+    o_log2(chanstatusmsg[c],strnum2);
+    o_log2("/",strnum3);
   }
   if (flagexitasap) log1(" exitasap");
   log1("\n");
@@ -859,7 +858,7 @@ char *recip;
 
  strnum2[fmt_ulong(strnum2,d[c][i].delid)] = 0;
  strnum3[fmt_ulong(strnum3,jo[j].id)] = 0;
- log2("starting delivery ",strnum2);
+ o_log2("starting delivery ",strnum2);
  log3(": msg ",strnum3,tochan[c]);
  logsafe(recip);
  log1("\n");
@@ -1346,14 +1345,14 @@ fd_set *rfds;
 	 fnmake_info(id);
          log3("warning: trouble writing to ",fn.s,"\n"); goto fail;
 	}
-       log2("info msg ",strnum3);
+       o_log2("info msg ",strnum3);
        strnum2[fmt_ulong(strnum2,(unsigned long) st.st_size)] = 0;
-       log2(": bytes ",strnum2);
+       o_log2(": bytes ",strnum2);
        log1(" from <"); logsafe(todoline.s + 1);
        strnum2[fmt_ulong(strnum2,pid)] = 0;
-       log2("> qp ",strnum2);
+       o_log2("> qp ",strnum2);
        strnum2[fmt_ulong(strnum2,uid)] = 0;
-       log2(" uid ",strnum2);
+       o_log2(" uid ",strnum2);
        log1("\n");
        break;
      case 'T':

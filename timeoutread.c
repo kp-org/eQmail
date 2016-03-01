@@ -1,7 +1,6 @@
 #include "timeoutread.h"
 #include "select.h"
 #include "error.h"
-#include "readwrite.h"
 
 int timeoutread(t,fd,buf,len) int t; int fd; char *buf; int len;
 {

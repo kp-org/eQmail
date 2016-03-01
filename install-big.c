@@ -164,6 +164,8 @@ void hier()
   c(auto_qmail,"man/cat5","qmail-users.0",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/man5","tcp-environ.5",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/cat5","tcp-environ.0",auto_uido,auto_gidq,0644);
+  c(auto_qmail,"man/man5","smtpplugins.5",auto_uido,auto_gidq,0644);
+  c(auto_qmail,"man/cat5","smtpplugins.0",auto_uido,auto_gidq,0644);
 
   c(auto_qmail,"man/man7","forgeries.7",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/cat7","forgeries.0",auto_uido,auto_gidq,0644);
@@ -249,6 +251,8 @@ void hier()
   c(auto_qmail,"man/cat8","qmail-smtpd.0",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/man8","qmail-command.8",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/cat8","qmail-command.0",auto_uido,auto_gidq,0644);
+  c(auto_qmail,"man/man8","qmail-spp.8",auto_uido,auto_gidq,0644);
+  c(auto_qmail,"man/cat8","qmail-spp.0",auto_uido,auto_gidq,0644);
 
   c(auto_qmail,"bin","dot-forward",auto_uido,auto_gidq,0755);
 

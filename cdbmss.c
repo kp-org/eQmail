@@ -1,4 +1,4 @@
-#include "readwrite.h"
+#include <unistd.h>		/* replace "readwrite.h" */
 #include "seek.h"
 #include "alloc.h"
 #include "cdbmss.h"
