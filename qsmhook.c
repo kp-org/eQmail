@@ -6,7 +6,7 @@
 #include "env.h"
 #include "byte.h"
 #include "str.h"
-#include "alloc.h"
+#include "inc/alloc.h"
 #include "case.h"
 #include "subfd.h"
 #include "error.h"

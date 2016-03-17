@@ -1,0 +1,1 @@
+#define HASSIGPROCMASK 1

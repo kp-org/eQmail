@@ -1,0 +1,6 @@
+#!/bin/sh
+# WARNING: This file was auto-generated. Do not edit!
+CC='cc -O2 -DINET6 -DTLS=20151215 -I/usr/local/openssl/include'
+LD='cc -s'
+echo 'main="$1"; shift'
+echo exec "$LD" '-o "$main" "$main".o ${1+"$@"}'

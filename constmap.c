@@ -1,5 +1,5 @@
 #include "constmap.h"
-#include "alloc.h"
+#include "inc/alloc.h"
 #include "case.h"
 
 static constmap_hash hash(s,len)

@@ -1,0 +1,9 @@
+#!/bin/sh
+# WARNING: This file was auto-generated. Do not edit!
+subject="$1"
+shift
+( echo Subject: "$subject"
+  echo To: ${1+"$@"}
+  echo ''
+  cat
+) | /var/qmail/bin/qmail-inject

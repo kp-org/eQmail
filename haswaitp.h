@@ -1,0 +1,1 @@
+#define HASWAITPID 1

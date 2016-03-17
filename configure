@@ -1,0 +1,64 @@
+#!/bin/sh
+#********************************************************************************
+# Configure script of eQmail-1.10
+
+echo -n "Checking system ... "
+OS=`uname -s | tr '/:[A-Z]' '..[a-z]'` ; echo -n $OS > systype
+echo "building on "${OS}"!"
+echo -n "Checking architecture ... "
+ARCH=`uname -m` ; echo -n ":$ARCH" >> systype
+echo "build on "${ARCH}"!"
+# !!!!!!!!!!
+echo "" >> systype
+
+#********************************************************************************
+# Checking conf-* files
+for cf in $(ls conf-*)
+do
+  echo "Checking config file $cf ... done!"
+  t=`echo $cf | cut -d- -f2`
+  if [ ! $t == "cc" ] && [ ! $t == "ld" ] && \
+     [ ! $t == "groups" ] && [ ! $t == "patrn" ] ; then
+     echo -n "Found $cf ... "
+     # user alias
+     if [ $t == "users" ] ; then t="usera" ; fi
+     echo "char auto_$t[] = \""`head -1 $cf`"\";" > auto_"$t".c
+     if [ $? -eq 0 ] ; then
+        echo "auto_$t.c created!"
+      else 
+        echo "failed!" ; exit 1
+     fi
+  fi
+done
+#
+echo "int auto_spawn = `head -1 conf-spawn`;" > auto_spawn.c
+echo "int auto_split = `head -1 conf-split`;" > auto_split.c
+#
+echo -n "Checking users and groups"
+echo "int auto_uida = "$(id -u $(head -1 conf-users))";"            > auto_uids.c
+echo "int auto_uidd = "$(id -u `head -2 conf-users | tail -1`)";"  >> auto_uids.c
+echo "int auto_uidl = "$(id -u `head -3 conf-users | tail -1`)";"  >> auto_uids.c
+echo "int auto_uido = "$(id -u `head -4 conf-users | tail -1`)";"  >> auto_uids.c
+echo "int auto_uidp = "$(id -u `head -5 conf-users | tail -1`)";"  >> auto_uids.c
+echo "int auto_uidq = "$(id -u `head -6 conf-users | tail -1`)";"  >> auto_uids.c
+echo "int auto_uidr = "$(id -u `head -7 conf-users | tail -1`)";"  >> auto_uids.c
+echo "int auto_uids = "$(id -u `head -8 conf-users | tail -1`)";"  >> auto_uids.c
+echo "int auto_gidq = "$(getent group $(head -1 conf-groups) | cut -d: -f3)";"          >> auto_uids.c
+echo "int auto_gidn = "$(getent group `head -2 conf-groups | tail -1` | cut -d: -f3)";" >> auto_uids.c
+echo " ... auto_uids.c created!"
+
+#********************************************************************************
+# check for header files
+echo -n "Checkiing for select.h ..."
+if [ -f /usr/include/sys/select.h ] ; then 
+  CCOPTS=$CCOPTS" -DHAS_SELECT"
+  echo "found!"
+ else
+  echo "not found, using internal solution!"
+fi
+
+
+
+echo
+echo "Done! Now run make."
+

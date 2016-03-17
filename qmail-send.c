@@ -12,7 +12,7 @@
 #include "now.h"
 #include "getln.h"
 #include "substdio.h"
-#include "alloc.h"
+#include "inc/alloc.h"
 #include "error.h"
 #include "stralloc.h"
 #include "str.h"

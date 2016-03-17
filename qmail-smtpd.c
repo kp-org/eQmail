@@ -2,7 +2,7 @@
 #include "inc/readwrite.h"		/* the original definitions */
 #include "stralloc.h"
 #include "substdio.h"
-#include "alloc.h"
+#include "inc/alloc.h"
 #include "auto_qmail.h"
 #include "control.h"
 #include "received.h"

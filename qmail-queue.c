@@ -5,7 +5,7 @@
 #include "open.h"
 #include "seek.h"
 #include "fmt.h"
-#include "alloc.h"
+#include "inc/alloc.h"
 #include "substdio.h"
 #include "datetime.h"
 #include "now.h"

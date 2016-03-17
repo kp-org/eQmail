@@ -1,6 +1,6 @@
 #include <unistd.h>		/* replace "readwrite.h" */
 #include "seek.h"
-#include "alloc.h"
+#include "inc/alloc.h"
 #include "cdbmss.h"
 
 int cdbmss_start(c,fd)

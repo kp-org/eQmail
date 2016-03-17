@@ -1,0 +1,89 @@
+.TH smtpplugins 5 "" openqmail
+.SH NAME
+smtpplugins \- configuration file of qmail-spp
+.SH DESCRIPTION
+By default
+.B smtpplugins
+is the configuration file of qmail-spp, located in
+.IR /var/qmail/control 
+directory. It consist of few sections, one for each command:
+.P
+    connection - for plugins run just after client connection
+    helo       - for HELO/EHLO
+    mail       - for MAIL
+    rcpt       - for RCPT
+    data       - for DATA
+    auth       - for AUTH
+.P
+Section names are marked using square brackets ('[' and ']'). 
+After a section name there have to be inserted one ore more
+.IR plugins 
+to execute for this command - one per line. Pathes are relative
+to /var/qmail. Lines startting with '#' will be ignored.
+.P
+If line starts with a colon (':'), then the
+.IR plugin
+will be invoked by a system shell (/bin/sh -c). This is useful 
+for debugging a plugin but slighty slower than normal mode.
+
+.SH EXAMPLE
+Assuming that all
+.IR plugins
+are located in
+.IR /var/qmail/bin/plugins ","
+the config file could look like this:
+.P
+.RS
+# plugins to execute on client's connection
+.sp 0
+[connection]
+.sp 1
+# plugins to execute on HELO/EHLO commands
+.sp 0
+[helo]
+.sp 0
+:bin/plugins/badhelo example.com spammers.com
+.sp 1
+# plugins to execute on MAIL command
+.sp 0
+[mail]
+.sp 0
+# bin/plugins/spf
+.sp 1
+# plugins to execute on RCPT command
+.sp 0
+[rcpt]
+.sp 0
+bin/plugins/morelog
+.sp 1
+# plugins to execute on DATA command
+.sp 0
+[data]
+.sp 1
+# plugins to execute on AUTH command
+.sp 0
+[auth]
+.RE
+.P
+In this example on each incomming mail
+.IR /var/qmail/bin/plugins/badhelo 
+will be invoked and in case the mail was not rejected
+.IR /var/qmail/bin/plugins/betterlog
+in a new system shell.
+." Assumption:
+.SH RESTRICTIONS
+The config file itself has to exist (even if it's empty), otherwise eqmail 
+will crash with an "segfault ... error 4" (from glibc).
+.SH AUTHOR
+Written by Kai Peter. Adapted from the qmail-spp documentation website.
+Original publisher information (as of December 2015):
+.P
+.ce
+Copyright © 2004-2008 Pawel Foremski
+.ce 0
+Permission is granted to copy, distribute and/or modify this document under
+the terms of the GNU Free Documentation License, Version 1.2 or any later
+version published by the Free Software Foundation; with no Invariant Sections,
+no Front-Cover Texts, and no Back-Cover Texts.
+.SH "SEE ALSO"
+qmail-spp(8)

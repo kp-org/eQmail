@@ -121,8 +121,8 @@ void hier()
   c(auto_qmail,"bin","qmail-qstat",auto_uido,auto_gidq,0755);
   c(auto_qmail,"bin","qmail-tcpto",auto_uido,auto_gidq,0755);
   c(auto_qmail,"bin","qmail-tcpok",auto_uido,auto_gidq,0755);
-  c(auto_qmail,"bin","qmail-pop3d",auto_uido,auto_gidq,0755);
-  c(auto_qmail,"bin","qmail-popup",auto_uido,auto_gidq,0711);
+//  c(auto_qmail,"bin","qmail-pop3d",auto_uido,auto_gidq,0755);
+//  c(auto_qmail,"bin","qmail-popup",auto_uido,auto_gidq,0711);
   c(auto_qmail,"bin","qmail-qmqpc",auto_uido,auto_gidq,0755);
   c(auto_qmail,"bin","qmail-qmqpd",auto_uido,auto_gidq,0755);
   c(auto_qmail,"bin","qmail-qmtpd",auto_uido,auto_gidq,0755);
@@ -237,10 +237,10 @@ void hier()
   c(auto_qmail,"man/cat8","qmail-tcpok.0",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/man8","qmail-tcpto.8",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/cat8","qmail-tcpto.0",auto_uido,auto_gidq,0644);
-  c(auto_qmail,"man/man8","qmail-pop3d.8",auto_uido,auto_gidq,0644);
-  c(auto_qmail,"man/cat8","qmail-pop3d.0",auto_uido,auto_gidq,0644);
-  c(auto_qmail,"man/man8","qmail-popup.8",auto_uido,auto_gidq,0644);
-  c(auto_qmail,"man/cat8","qmail-popup.0",auto_uido,auto_gidq,0644);
+//  c(auto_qmail,"man/man8","qmail-pop3d.8",auto_uido,auto_gidq,0644);
+//  c(auto_qmail,"man/cat8","qmail-pop3d.0",auto_uido,auto_gidq,0644);
+//  c(auto_qmail,"man/man8","qmail-popup.8",auto_uido,auto_gidq,0644);
+//  c(auto_qmail,"man/cat8","qmail-popup.0",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/man8","qmail-qmqpc.8",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/cat8","qmail-qmqpc.0",auto_uido,auto_gidq,0644);
   c(auto_qmail,"man/man8","qmail-qmqpd.8",auto_uido,auto_gidq,0644);

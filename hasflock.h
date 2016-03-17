@@ -1,0 +1,1 @@
+#define HASFLOCK 1

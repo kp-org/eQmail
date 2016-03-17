@@ -14,7 +14,7 @@
 #include "strerr.h"
 #include "subfd.h"
 #include "sgetopt.h"
-#include "alloc.h"
+#include "inc/alloc.h"
 #include "error.h"
 #include "stralloc.h"
 #include "fmt.h"

@@ -5,7 +5,7 @@
 #include "substdio.h"
 #include "error.h"
 #include "control.h"
-#include "alloc.h"
+#include "inc/alloc.h"
 #include "scan.h"
 
 static char inbuf[64];

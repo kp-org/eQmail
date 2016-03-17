@@ -1,4 +1,4 @@
-#include "alloc.h"
+#include "inc/alloc.h"
 #include "cdbmake.h"
 
 void cdbmake_init(cdbm)
