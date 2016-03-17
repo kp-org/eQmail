@@ -1,3 +1,0 @@
-#!/bin/sh
-# WARNING: This file was auto-generated. Do not edit!
-/var/qmail/bin/maildir2mbox && exec Mail ${1+"$@"}

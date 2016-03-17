@@ -1,1 +1,0 @@
-#define HASSIGACTION 1

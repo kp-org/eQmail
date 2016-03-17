@@ -1,1 +1,0 @@
-#define HASMKFIFO 1
