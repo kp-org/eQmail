@@ -1,5 +1,5 @@
 #include "timeoutwrite.h"
-#include "select.h"
+#include "inc/select.h"
 #include "error.h"
 
 int timeoutwrite(t,fd,buf,len) int t; int fd; char *buf; int len;

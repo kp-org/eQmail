@@ -1,7 +1,7 @@
 #include "sgetopt.h"
 #include "substdio.h"
 #include "subfd.h"
-#include "inc/alloc.h"
+#include "alloc.h"
 #include "auto_qmail.h"
 #include "exit.h"
 #include "env.h"

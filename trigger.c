@@ -1,4 +1,4 @@
-#include "select.h"
+#include "inc/select.h"
 #include "open.h"
 #include "trigger.h"
 #include "hasnpbg1.h"

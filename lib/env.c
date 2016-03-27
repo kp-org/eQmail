@@ -7,7 +7,7 @@ No known patent problems.
 */
 
 #include "str.h"
-#include "inc/alloc.h"
+#include "alloc.h"
 #include "env.h"
 
 int env_isinit = 0; /* if env_isinit: */

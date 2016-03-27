@@ -1,5 +1,5 @@
 #include "stralloc.h"
-#include "inc/alloc.h"
+#include "alloc.h"
 #include "str.h"
 #include "token822.h"
 #include "gen_allocdefs.h"

@@ -94,9 +94,10 @@ EACCES;
 -13;
 #endif
 
-int error_refused =
+int error_connrefused =
 #ifdef ECONNREFUSED
 ECONNREFUSED;
 #else
--15;
+//-15;   /* this was a former value */
+-17;
 #endif

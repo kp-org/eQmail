@@ -1,3 +1,4 @@
-cc -O2 -DINET6 -DTLS=20151215 -I/usr/local/openssl/include
+cc -O2 -I./inc -DINET6 -DTLS=20151215 -I/usr/local/openssl/include
 
-This will be used to compile .c files.
+This will be used to compile .c files. Some additional options will
+be added by the configure script.

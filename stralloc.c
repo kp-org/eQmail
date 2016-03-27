@@ -1,7 +1,7 @@
 #include "byte.h"
 #include "str.h"
 #include "stralloc.h"
-#include "inc/alloc.h"
+#include "alloc.h"
 #include "gen_alloc.h"		/* not reaaly needed here */
 #include "gen_allocdefs.h"
 /* Consolidate the "stralloc_*.c" functions into one source
@@ -9,8 +9,8 @@
    These functions will be linked to "stralloc.a" only!
    Included files:     Size (bytes)    Date
      - stralloc_arts.c         196     19980615
-     - stralloc_catb.c         320     19980615
      - stralloc_cat.c          161     19980615
+     - stralloc_catb.c         320     19980615
      - stralloc_cats.c         150     19980615
      - stralloc_copy.c         163     19980615
      - stralloc_eady.c         203     19980615
@@ -27,6 +27,13 @@ char *s;
   len = str_len(s);
   return (sa->len >= len) && byte_equal(s,len,sa->s);
 }
+/* file: stralloc_cat.c */
+int stralloc_cat(sato,safrom)
+stralloc *sato;
+stralloc *safrom;
+{
+  return stralloc_catb(sato,safrom->s,safrom->len);
+}
 /* file: stralloc_catb.c */
 int stralloc_catb(sa,s,n)
 stralloc *sa;
@@ -39,13 +46,6 @@ unsigned int n;
   sa->len += n;
   sa->s[sa->len] = 'Z'; /* ``offensive programming'' */
   return 1;
-}
-/* file: stralloc_cat.c */
-int stralloc_cat(sato,safrom)
-stralloc *sato;
-stralloc *safrom;
-{
-  return stralloc_catb(sato,safrom->s,safrom->len);
 }
 /* file: stralloc_cats.c */
 int stralloc_cats(sa,s)

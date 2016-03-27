@@ -9,17 +9,18 @@ echo -n "Checking architecture ... "
 ARCH=`uname -m` ; echo -n ":$ARCH" >> systype
 echo "build on "${ARCH}"!"
 # !!!!!!!!!!
-echo "" >> systype
+#echo "" >> systype
 
 #********************************************************************************
 # Checking conf-* files
 for cf in $(ls conf-*)
 do
-  echo "Checking config file $cf ... done!"
+#  echo "Checking config file $cf ... done!"
   t=`echo $cf | cut -d- -f2`
   if [ ! $t == "cc" ] && [ ! $t == "ld" ] && \
-     [ ! $t == "groups" ] && [ ! $t == "patrn" ] ; then
-     echo -n "Found $cf ... "
+     [ ! $t == "groups" ] && [ ! $t == "patrn" ] && [ ! $t == "opt" ] ; then
+  echo -n "Checking config file $cf ... "
+#     echo -n "Found $cf ... "
      # user alias
      if [ $t == "users" ] ; then t="usera" ; fi
      echo "char auto_$t[] = \""`head -1 $cf`"\";" > auto_"$t".c
@@ -33,6 +34,18 @@ done
 #
 echo "int auto_spawn = `head -1 conf-spawn`;" > auto_spawn.c
 echo "int auto_split = `head -1 conf-split`;" > auto_split.c
+
+#********************************************************************************
+# checking that users from conf-users are exists
+  id -u $(head -1 conf-users) 2>&1 >/dev/null  #|| (echo "run mkusers" ; exit 1)
+  if [ $? -ne 0 ] ; then echo "Create users first!" ; exit 1 ; fi
+for i in 2 3 4 5 6 7 8
+do
+  id -u `head -$i conf-users | tail -1` 2>&1 >/dev/null
+  if [ $? -ne 0 ] ; then echo "Create users first!" ; exit 1 ; fi
+done
+
+#********************************************************************************
 #
 echo -n "Checking users and groups"
 echo "int auto_uida = "$(id -u $(head -1 conf-users))";"            > auto_uids.c
@@ -51,14 +64,48 @@ echo " ... auto_uids.c created!"
 # check for header files
 echo -n "Checkiing for select.h ..."
 if [ -f /usr/include/sys/select.h ] ; then 
-  CCOPTS=$CCOPTS" -DHAS_SELECT"
+  CCOPTS=$CCOPTS" -DHAS_SELECT_H"
   echo "found!"
  else
   echo "not found, using internal solution!"
 fi
 
 
+#********************************************************************************
+# Create compile, load, makelib
+# compile: auto-cc
+echo -n "Checking for compile ... "
+CC=`head -1 conf-cc`"$CCOPTS"
+#echo CC: $CC
+(cat warn-auto.sh ; echo exec "$CC" -c '${1+"$@"}')  > compile
+#echo exec "$CC" -c '${1+"$@"}'
+chmod 755 compile
+echo "created!"
+
+# from Makefile
+#compile: make-compile warn-auto.sh systype
+#       ( cat warn-auto.sh; ./make-compile "`cat systype`" ) > compile
+
+
+
+# load: auto-ld
+echo -n "Checking for loader ... "
+LD=`head -1 conf-ld`"$LDOPTS"
+(cat warn-auto.sh ; echo 'main="$1"; shift' ; \
+    echo exec "$LD" '-o "$main" "$main".o ${1+"$@"}') > load
+chmod 755 load
+echo "created!"
+
+# makelib
+echo -n "Checking for makelib ... "
+(cat warn-auto.sh ; \
+  echo 'main="$1"; shift' ; \
+  echo 'rm -f "$main"' ; \
+  echo 'ar cr "$main" ${1+"$@"}' ; \
+  echo 'ranlib "$main"') > makelib
+chmod 755 makelib
+echo "created!"
+
 
 echo
 echo "Done! Now run make."
-

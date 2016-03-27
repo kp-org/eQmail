@@ -11,7 +11,7 @@ extern int res_search();
 #include "ip.h"
 #include "ipalloc.h"
 #include "fmt.h"
-#include "inc/alloc.h"
+#include "alloc.h"
 #include "str.h"
 #include "stralloc.h"
 #include "dns.h"

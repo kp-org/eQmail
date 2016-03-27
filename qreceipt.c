@@ -4,7 +4,7 @@
 #include "stralloc.h"
 #include "subfd.h"
 #include "getln.h"
-#include "inc/alloc.h"
+#include "alloc.h"
 #include "str.h"
 #include "hfield.h"
 #include "token822.h"

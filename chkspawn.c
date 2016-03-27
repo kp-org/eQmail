@@ -1,7 +1,7 @@
 #include "substdio.h"
 #include "subfd.h"
 #include "fmt.h"
-#include "select.h"
+#include "inc/select.h"
 #include "exit.h"
 #include "auto_spawn.h"
 

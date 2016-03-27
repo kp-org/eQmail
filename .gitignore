@@ -12,4 +12,8 @@ compile
 load
 makelib
 _*
-
+trysyslog.o
+trysyslog
+conf-opt
+mkusers
+tmp
