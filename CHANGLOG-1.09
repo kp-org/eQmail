@@ -65,3 +65,4 @@ RC2:
     - changed URL in file INSTALL
     - added mkuser script (beta)
     - removed unused error code dquot from error.h
+    - added error_refused to qmail-remote (IPv6)
