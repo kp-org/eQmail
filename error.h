@@ -16,9 +16,7 @@ extern int error_again;
 extern int error_pipe;
 extern int error_perm;
 extern int error_acces;
-
-extern int error_dquot;
-extern int error_refused;
+extern int error_refused;   // add -DTCPTO_REFUSED to conf-cc (IPv6 remote)
 
 extern char *error_str();
 extern int error_temp();
