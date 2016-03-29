@@ -30,6 +30,7 @@
 #include "timeoutwrite.h"
 
 #define HUGESMTPTEXT 5000
+#define TCPTO_REFUSED
 
 #define PORT_SMTP 25 /* silly rabbit, /etc/services is for users */
 unsigned long port = PORT_SMTP;
@@ -856,9 +857,13 @@ char **argv;
 #endif
       smtp(); /* does not return, but for trying next MX */
     }
-    tcpto_err(&ip.ix[i],errno == error_timeout);
+    tcpto_err(&ip.ix[i],errno == error_timeout
+#ifdef TCPTO_REFUSED
+          || errno == error_refused
+#endif
+	);
     close(smtpfd);
   }
-  
+
   temp_noconn();
 }
