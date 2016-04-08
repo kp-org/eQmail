@@ -1,5 +1,5 @@
 #include "sig.h"
-#include "inc/readwrite.h"		/* the original definitions */
+#include "readwrite.h"		/* the original definitions */
 #include "stralloc.h"
 #include "substdio.h"
 #include "alloc.h"

@@ -7,7 +7,7 @@
 #include "str.h"
 #include "alloc.h"
 #include "stralloc.h"
-#include "inc/select.h"
+#include "select.h"
 #include "exit.h"
 #include "coe.h"
 #include "open.h"

@@ -1,7 +1,7 @@
 #ifndef READSUBDIR_H
 #define READSUBDIR_H
 
-#include "inc/direntry.h"
+#include "direntry.h"
 
 typedef struct readsubdir
  {

@@ -1,5 +1,5 @@
 #include "sig.h"
-#include "inc/readwrite.h"	/* the original definitions */
+#include "readwrite.h"	/* the original definitions */
 #include "exit.h"
 #include "env.h"
 #include "error.h"

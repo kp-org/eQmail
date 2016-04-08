@@ -1,4 +1,4 @@
-#include "inc/select.h"
+#include "select.h"
 #include "error.h"
 #include "ndelay.h"
 #include "now.h"

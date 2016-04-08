@@ -14,7 +14,12 @@ clean:
 	@echo  done!
 
 dot-qmail.5: dot-qmail.man
-	cat dot-qmail.man | sed s}BREAK}"`head -1 ../conf-break`"}g > 5/dot-qmail.5
+	cat dot-qmail.man | sed s}QMAILHOME}"`head -1 ../conf-break`"}g \
+	|sed s}QMAIL}"`head -1 ../conf-break`"}g \
+	|sed s}BREAK}"`head -1 ../conf-break`"}g \
+	|sed s}SPAWN}"`head -1 ../conf-break`"}g \
+	|sed s}SPLIT}"`head -1 ../conf-break`"}g \
+	> 5/dot-qmail.5
 
 man: dot-qmail.5 qmail-bfrmt.8 qmail-control.5 qmail-getpw.8 qmail-limits.7 \
 qmail-newmrh.8 qmail-newu.8 qmail-pw2u.8 qmail-send.8 qmail-start.8 qmail-users.5 \
@@ -44,7 +49,7 @@ qmail-pw2u.8: qmail-pw2u.man
 
 qmail-send.8: qmail-send.man
 	cat qmail-send.man | sed s}BREAK}"`head -1 ../conf-break`"}g \
-	| sed s}SPAWN}"`head -1 conf-spawn`"}g > 8/qmail-send.8
+	| sed s}SPAWN}"`head -1 ../conf-spawn`"}g > 8/qmail-send.8
 
 qmail-start.8: qmail-start.man
 	cat qmail-start.man | sed s}QMAILHOME}"`head -1 ../conf-qmail`"}g > 8/qmail-start.8

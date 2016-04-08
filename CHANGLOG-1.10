@@ -1,0 +1,88 @@
+Commit 1.10p3: !!! NOT PUSHED !!!
+20160507: - Makefile cleanup
+          - removed dns{cname,ptr,ip,mxip,fq
+          - rewrite of "config.sh"
+          - added man pages: preline.1, datemail.1
+          - added an example to maildir2mbox.1 (like pinq)
+          - moved slurpclose.{c,h} to {lib/,inc/}
+          - moved subdf*.c, substd*.c --> lib/
+          - moved base64.h --> inc/, base64.c --> lib/
+          - removed elq, pinq, qail
+20160406: - moved fmtqfn.c to lib/, fmtqfn.h to inc/
+          - consolidated datetime_un.c --> datetime.c
+          - removed "hostname.c", changed the call in "config.sh"
+          - consolidated cdbmake_*.c --> cdbmake.c 
+          - consolidated cdb_*.c --> cdb.c
+          - moved substdio.h, subfd.h, cdb.h to inc/
+          - moved sgetopt.c, subgetopt.c to lib/
+          - moved sgetopt.h, subgetopt.h to inc/
+          - moved getln.c to lib/, getln.h to inc/
+          - consolidated substdio_copy.c into substdio.c
+          - moved strerr.c to lib/, strerr.h to inc/
+          - removed config-fast
+          - added "file exists" check to config.sh
+20160405: - consolidated strerr_* into strerr.c
+          - removed 'socket.lib'
+		  - moved libresolv check (dns.lib) to configure script, added trylib.c
+          - removed HASSIG* code (trysgprm.c, trysgact.c, sig.c)
+          - moved seek.c, sig.c, stralloc.c, wait.c --> lib/
+          - moved seek.h, sig.h, stralloc.h, wait.h --> inc/
+          - removed trysyslog.c
+          - removed obsoleted fifo.c, trymkffo.c
+          - removed trywaitp.c and HASWAITPID code (wait.c)
+          - removed idedit.c, BIN.Makefile
+          - removed check {get,set}groups code
+          - consolidated getln2.c into getln.c
+          - moved flock check to configure script
+20160404: - removed HASNAMEDPIPEBUG code (trigger.c, trynpbg1.c)
+
+Commit 1.10p2:
+20160326: - created new install script
+          - removed hier.c, install.c, install-big.c, instcheck.c
+20160324: - moved byte.h, case.h, coe.h, env.h, error.h, str.h, gen_alloc.h,
+            gen_allocdefs.h, fd.h, exit.h, fifo.h, fmt.h, lock.h, open.h,
+            scan.c, ndelay.h
+			to inc/
+          - moved alloc.c, byte.c, case.c, coe.c, env.c, envread.c, error.c,
+            error_{str,temp}.c, str.c, fd.c, fmt.c, open.c, scan.c, ndelay.c
+            to lib/
+          - created "Makefile" for libs
+          - make fs.a in lib/
+          - moved all man pages to subfolder man, created "Makefile" for man
+            pages
+20160323: - changed HELP response in qmail-smtpd.c to openqmail
+          - replaced "error_refused" by "error_connrefused"
+          - added -I./inc to conf-cc
+20160318: - consolidated wait_*.c --> wait.c
+          - appended "ndelay_off.c" to "ndelay.c"
+          - added mkusers script
+          - added user check to configure
+20160317: - moved compile, load, makelib to configure script
+          - obsoleted {compile,load,makelib}.sh, auto-ccld.sh
+          - removed trysysel, checking select.h in configure,
+            removed select.{h1,h2}
+
+Commit 1.10p1:
+20160316: - seperated man.3 pages
+20160315: - consolidated open_*.c --> open.c
+          - consolidated fd_*.c --> fd.c
+          - consolidated lock_*.c --> lock.c
+          - put conf-* to configure script
+20160304: - removed "cat" man pages
+          - renamed *.9 --> *.man
+          - put findtypes into configure script
+          - appended "alloc_re.c" to "alloc.c"
+20160303: - consolidated byte_*.c --> byte.c
+          - consolidated str_*.c --> str.c
+          - consolidated stralloc_*.c --> stralloc.c
+          - consolidated fmt_*.c --> fmt.c
+          - consolidated scan_*.c --> scan.c
+          - consolidated case_*.c --> case.c
+          - consolidated sig_*.c --> sig.c
+          - consolidated seek_*.c --> seek.c
+20160301: - started 'configure'
+          - obsoleted and removed 'auto-str.c', 'auto-int.c', 'auto-uid.c',
+            'auto-gid.c'
+            through 'configure' script (early stage)
+          - commented out "doc" in 'hier.c'
+20160301: - removed qmail-{popup,pop3d}

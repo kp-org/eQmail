@@ -1,5 +1,5 @@
 #include "timeoutread.h"
-#include "inc/select.h"
+#include "select.h"
 #include "error.h"
 
 int timeoutread(t,fd,buf,len) int t; int fd; char *buf; int len;

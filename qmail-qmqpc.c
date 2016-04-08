@@ -4,7 +4,7 @@
 #include <arpa/inet.h>
 #include "substdio.h"
 #include "getln.h"
-#include "inc/readwrite.h"		/* the original definitions */
+#include "readwrite.h"		/* the original definitions */
 #include "exit.h"
 #include "stralloc.h"
 #include "slurpclose.h"

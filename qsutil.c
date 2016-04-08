@@ -1,5 +1,5 @@
 #include "stralloc.h"
-#include "inc/readwrite.h"		/* the original definitions */
+#include "readwrite.h"		/* the original definitions */
 #include "substdio.h"
 #include "qsutil.h"
 

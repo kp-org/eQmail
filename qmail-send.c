@@ -2,9 +2,9 @@
 #include <sys/stat.h>
 #include <unistd.h>		/* replace "readwrite.h" "exit.h" */
 #include "sig.h"
-#include "inc/direntry.h"
+#include "direntry.h"
 #include "control.h"
-#include "inc/select.h"
+#include "select.h"
 #include "open.h"
 #include "seek.h"
 #include "lock.h"

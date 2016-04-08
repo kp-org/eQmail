@@ -3,7 +3,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "ndelay.h"
-#include "inc/select.h"
+#include "select.h"
 #include "error.h"
 #include "ip.h"
 #include "byte.h"

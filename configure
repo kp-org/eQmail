@@ -1,6 +1,7 @@
 #!/bin/sh
 #********************************************************************************
 # Configure script of eQmail-1.10
+#CRITICAL="0"
 
 echo -n "Checking system ... "
 OS=`uname -s | tr '/:[A-Z]' '..[a-z]'` ; echo -n $OS > systype
@@ -8,8 +9,21 @@ echo "building on "${OS}"!"
 echo -n "Checking architecture ... "
 ARCH=`uname -m` ; echo -n ":$ARCH" >> systype
 echo "build on "${ARCH}"!"
-# !!!!!!!!!!
-#echo "" >> systype
+
+# check for system tools (required)
+for f in hostname [ test make perl
+do
+   echo -n "Checking for $f ... "
+   which $f 2>/dev/null
+   if [ $? -ne 0 ] ; then echo "not found!" ; exit 1 ; fi
+done
+# check for optional tools
+for f in php
+do
+   echo -n "Checking for $f ... "
+   which $f 2>/dev/null
+   if [ $? -ne 0 ] ; then echo "not found!" ; else echo $f > _$f.tmp ; fi
+done
 
 #********************************************************************************
 # Checking conf-* files
@@ -47,52 +61,49 @@ done
 
 #********************************************************************************
 #
+. inc/getids.inc
 echo -n "Checking users and groups"
-echo "int auto_uida = "$(id -u $(head -1 conf-users))";"            > auto_uids.c
-echo "int auto_uidd = "$(id -u `head -2 conf-users | tail -1`)";"  >> auto_uids.c
-echo "int auto_uidl = "$(id -u `head -3 conf-users | tail -1`)";"  >> auto_uids.c
-echo "int auto_uido = "$(id -u `head -4 conf-users | tail -1`)";"  >> auto_uids.c
-echo "int auto_uidp = "$(id -u `head -5 conf-users | tail -1`)";"  >> auto_uids.c
-echo "int auto_uidq = "$(id -u `head -6 conf-users | tail -1`)";"  >> auto_uids.c
-echo "int auto_uidr = "$(id -u `head -7 conf-users | tail -1`)";"  >> auto_uids.c
-echo "int auto_uids = "$(id -u `head -8 conf-users | tail -1`)";"  >> auto_uids.c
-echo "int auto_gidq = "$(getent group $(head -1 conf-groups) | cut -d: -f3)";"          >> auto_uids.c
-echo "int auto_gidn = "$(getent group `head -2 conf-groups | tail -1` | cut -d: -f3)";" >> auto_uids.c
+echo "int auto_uida = $UIDA;"  > auto_uids.c
+echo "int auto_uidd = $UIDD;" >> auto_uids.c
+echo "int auto_uidl = $UIDL;" >> auto_uids.c
+echo "int auto_uido = $UIDO;" >> auto_uids.c
+echo "int auto_uidp = $UIDP;" >> auto_uids.c
+echo "int auto_uidq = $UIDQ;" >> auto_uids.c
+echo "int auto_uidr = $UIDR;" >> auto_uids.c
+echo "int auto_uids = $UIDS;" >> auto_uids.c
+echo "int auto_gidq = $GIDQ;" >> auto_uids.c
+echo "int auto_gidn = $GIDN;" >> auto_uids.c
 echo " ... auto_uids.c created!"
 
 #********************************************************************************
 # check for header files
-echo -n "Checkiing for select.h ..."
-if [ -f /usr/include/sys/select.h ] ; then 
-  CCOPTS=$CCOPTS" -DHAS_SELECT_H"
-  echo "found!"
- else
-  echo "not found, using internal solution!"
-fi
+CCOPTS=""
+echo -n "Checking for select.h ..."
+if [ -f /usr/include/sys/select.h ] ; then CCOPTS="$CCOPTS -DHAS_SELECT_H"
+   else echo -n " not" ; fi
+echo " found!"
+
+# On linux we have flock, other systems have lockf instead
+echo -n "Checking for flock/lockf ..."
+which flock 2>/dev/null >/dev/null
+if [ $? -eq 0 ] ; then CCOPTS="$CCOPTS -DHASFLOCK=1" ; echo -n " flock"
+   else echo -n " lockf" ; fi
+echo " found!"
 
 
 #********************************************************************************
 # Create compile, load, makelib
-# compile: auto-cc
 echo -n "Checking for compile ... "
 CC=`head -1 conf-cc`"$CCOPTS"
-#echo CC: $CC
 (cat warn-auto.sh ; echo exec "$CC" -c '${1+"$@"}')  > compile
-#echo exec "$CC" -c '${1+"$@"}'
 chmod 755 compile
 echo "created!"
-
-# from Makefile
-#compile: make-compile warn-auto.sh systype
-#       ( cat warn-auto.sh; ./make-compile "`cat systype`" ) > compile
-
-
 
 # load: auto-ld
 echo -n "Checking for loader ... "
 LD=`head -1 conf-ld`"$LDOPTS"
 (cat warn-auto.sh ; echo 'main="$1"; shift' ; \
-    echo exec "$LD" '-o "$main" "$main".o ${1+"$@"}') > load
+  echo exec "$LD" '-o "$main" "$main".o ${1+"$@"}') > load
 chmod 755 load
 echo "created!"
 
@@ -106,6 +117,16 @@ echo -n "Checking for makelib ... "
 chmod 755 makelib
 echo "created!"
 
+#********************************************************************************
+# Checking for shared libraries
+./compile trylib.c
+# Linux has a libresolv, likely BSD systems does not
+echo -n "Checking for libresolv ..."
+((./load trylib -lresolv) >/dev/null 2>&1 && echo "-lresolv" || exit 0)> dns.lib
+[ -s dns.lib ] || echo -n " not"
+echo " found!"
+rm -f trylib
 
+#********************************************************************************
 echo
 echo "Done! Now run make."

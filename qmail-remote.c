@@ -24,7 +24,7 @@
 #include "exit.h"
 #include "constmap.h"
 #include "tcpto.h"
-#include "inc/readwrite.h"		/* the original definitions */
+#include "readwrite.h"		/* the original definitions */
 #include "timeoutconn.h"
 #include "timeoutread.h"
 #include "timeoutwrite.h"

@@ -1,5 +1,5 @@
 #include "sig.h"
-#include "inc/readwrite.h"		/* the original definitions */
+#include "readwrite.h"		/* the original definitions */
 #include "exit.h"
 #include "env.h"
 #include "qmail.h"
@@ -33,16 +33,16 @@ char **argv;
   char *sender;
   char *dtline;
   char *qqx;
- 
+
   sig_pipeignore();
- 
+
   sender = env_get("NEWSENDER");
   if (!sender)
     strerr_die2x(100,FATAL,"NEWSENDER not set");
   dtline = env_get("DTLINE");
   if (!dtline)
     strerr_die2x(100,FATAL,"DTLINE not set");
- 
+
   if (qmail_open(&qqt) == -1)
     strerr_die2sys(111,FATAL,"unable to fork: ");
   qmail_puts(&qqt,dtline);
@@ -51,7 +51,7 @@ char **argv;
   substdio_flush(&ssout);
 
   num[fmt_ulong(num,qmail_qp(&qqt))] = 0;
- 
+
   qmail_from(&qqt,sender);
   while (*++argv) qmail_to(&qqt,*argv);
   qqx = qmail_close(&qqt);

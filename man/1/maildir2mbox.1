@@ -49,5 +49,18 @@ by another
 you should run only one
 .B maildir2mbox
 at a time.
+.SH EXAMPLE
+.B maildir2mbox
+can be used to access a 
+.I maildir
+with MUA's, which doesn't support 
+.I maildir
+by default, e.g. with an unpatched
+.BR pine :
+
+.EX
+    maildir2mbox && exec pine ${1+"$@"}
+.EE
+
 .SH "SEE ALSO"
 maildir(5)
