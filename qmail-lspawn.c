@@ -179,7 +179,7 @@ char *s; char *r; int at;
    int gid;
    char *x;
    unsigned int xlen;
-   
+
    r[at] = 0;
    if (!r[0]) _exit(0); /* <> */
 

@@ -1,0 +1,48 @@
+.TH datemail 1 openqmail eqmail
+.SH NAME 
+.B datemail
+.SH Usage
+Same as 
+.BR sendmail
+.SH Description
+.B datemail 
+is a simple shell script wrapper around the qmail sendmail command. It uses predate to insert
+a Date header field in the local time zone. This is useful when injecting messages via sendmail 
+with an MUA that doesn't include a Date field. 
+.B qmail-inject 
+will add a Date field to messages lacking one, but it uses Greenwich Mean Time (GMT) instead of 
+the local time zone, which can be confusing.
+
+Caveats: 
+.B datemail 
+doesn't check to see if a message contains a Date field before adding one, so it should only be
+used to inject messages that don't already contain one.
+
+.SH Example 
+Sending a simple test message using the command:
+
+    echo to: root | /var/qmail/bin/sendmail -t
+
+results in a message like this:
+
+    Date: 23 Apr 2001 01:11:15 -0000
+    From: root@mash.example.com
+    to: root@mash.example.com
+
+Using datemail, however:
+
+    echo to: root | /var/qmail/bin/datemail -t
+
+results in a message like this:
+
+    From: root@mash.example.com
+    Date: 22 Apr 2001 21:11:30 -0400
+    to: root@mash.example.com
+
+Note that the Date field in the second test message contains -0400, which means the local time zone is four hours
+behind GMT, in this case it is Eastern Daylight Savings Time.
+.SH AUTHOR
+Created by Kai Peter, info taken from Dave Sill's "The qmail handbook".
+
+.SH SEE ALSO
+predate(1)

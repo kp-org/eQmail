@@ -12,4 +12,6 @@ nothing as root.
 
 The first eight lines of this file are the alias user, the daemon user,
 the log user, the owner of miscellaneous files such as binaries, the
-passwd user, the queue user, the remote user, and the send user.
+passwd user, the queue user, the remote user, and the send user. The
+names can be changed, but the order of what a user is for have to been
+kept!

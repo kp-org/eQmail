@@ -12,7 +12,7 @@
 #include "auto_qmail.h"
 #include "control.h"
 #include "dns.h"
-#include "alloc.h"
+#include <alloc.h>
 #include "quote.h"
 #include "ip.h"
 #include "ipalloc.h"
@@ -24,7 +24,7 @@
 #include "exit.h"
 #include "constmap.h"
 #include "tcpto.h"
-#include "inc/readwrite.h"		/* the original definitions */
+#include "readwrite.h"		/* the original definitions */
 #include "timeoutconn.h"
 #include "timeoutread.h"
 #include "timeoutwrite.h"
@@ -857,11 +857,7 @@ char **argv;
 #endif
       smtp(); /* does not return, but for trying next MX */
     }
-    tcpto_err(&ip.ix[i],errno == error_timeout
-#ifdef TCPTO_REFUSED
-          || errno == error_refused
-#endif
-	);
+    tcpto_err(&ip.ix[i],errno == error_timeout || errno == error_connrefused);
     close(smtpfd);
   }
 

@@ -4,8 +4,8 @@
 #                                                                               *
 #   Author: Kai Peter, ©2013 (kp@dyndn.es)                                      *
 #                                                                               *
-#  Version: 0.3-beta2                                                           *
-#  Lisence: ISC Lisence                                                         *
+#  Version: 0.32-beta                                                           *
+#  Lisence: public domain                                                       *
 #                                                                               *
 # Description: I don't remember how often I did create a script to create the   *
 #              necessary users ...                                              *
@@ -17,11 +17,21 @@ if [ `id -u` -ne 0 ] ; then echo "$0 have to be run as root!" ; exit 1 ; fi
 
 #********************************************************************************
 # define the first GID/UID
+<<<<<<< HEAD
 STARTGID=200
 STARTUID=200
 HOME=`head -1 conf-qmail`
 
 [ $STARTGID ] && [ $STARTUID ] || echo "Invalid ID! Aborting!"
+=======
+STARTGID=
+STARTUID=200
+HOME=`head -1 conf-qmail`
+
+([ -z $STARTGID ] || [ -z $STARTUID ]) && echo "Invalid ID! Aborting!"
+#([ -z $STARTGID ] || [ -z $STARTUID ]) && MSG="Invalid ID! Aborting!"
+#( [ -n $MSG ] && echo $MSG ; exit )
+>>>>>>> dev
 [ $STARTGID ] && [ $STARTUID ] || exit;
 
 #********************************************************************************
@@ -51,24 +61,30 @@ PRG=$(which adduser 2>/dev/null)
 # on FreeBSD we need pw and the '-n <user>' switch (the cmd is a bit different:
 # '$> pw useradd -g qmail -s /bin/nologin -c "" -d /var/qmail -u 200 -n <user>' )
 if [ `uname | tr '/:[A-Z]' '..[a-z]'` = "freebsd" ] ; then
-   PRG="/usr/sbin/pw useradd" ; N="-n" ; fi
+#   PRG="/usr/sbin/pw useradd" ; N="-n" ; fi
+   PRG=$(which pw 2>/dev/null)" useradd" ; N="-n" ; fi
 
 # Error:
-[ $PRG ] || echo "Didn't know how to create userss! Aborting!"
+[ $PRG ] ||  echo "Didn't know how to create users! Aborting!"
 [ $PRG ] || exit;
 
 # users
 if [ $STARTUID ] ; then NUID="$STARTUID" ; fi
 for U in `head -8 conf-users`
 do
-  if [ $U != "root" ] ; then
+  i=$(($i+1))  # increment the loop counter
+#  if [ $U != "root" ] ; then
+  if [ `id -u $U` 2>/dev/null -ne 0 ] ; then
 	H=$HOME ; GID="qmail"
     if [ $U = "alias" ] ; then H=$HOME/alias ; fi
 	# switch the group (the first 4 users have 'qmail', than 'nofiles')
-    if [ $NUID -ge $(($STARTUID+4)) ] ; then GID="nofiles" ; fi
+#    if [ $NUID -ge $(($STARTUID+4)) ] ; then GID="nofiles" ; fi
+    if [ $i -ge 5 ] ; then GID="nofiles" ; fi
     #
-    $PRG -g $GID -s /sbin/nologin -u $NUID -c "" -d $H $N $U && \
-	echo "Added user $U with UID $NUID and group $GID!"
-    [ $NUID ] && NUID=$(($NUID+1))		# increment the next NUID
+    [ $NUID ] && SETNUID="-u $NUID"
+    echo -n "$i: "
+    $PRG -g $GID -s /sbin/nologin $SETNUID -c "" -d $H $N $U && \
+	echo "Added user $U with group $GID!"
+    [ $NUID ] && NUID=$(($NUID+1))  # increment the next NUID
   fi
 done

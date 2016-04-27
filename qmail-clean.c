@@ -3,7 +3,7 @@
 #include "sig.h"
 #include "now.h"
 #include "str.h"
-#include "inc/direntry.h"
+#include "direntry.h"
 #include "getln.h"
 #include "stralloc.h"
 #include "substdio.h"

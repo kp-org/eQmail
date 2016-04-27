@@ -1,3 +1,15 @@
-cc -O2 -DINET6 -DTLS=20151215 -I/usr/local/openssl/include
+cc -O2 -I./inc -DINET6 -DTLS=20151215 -I/usr/local/openssl/include
 
-This will be used to compile .c files.
+This will be used to compile .c files. Some additional options will
+be added by the configure script.
+
+
+Parameters:
+===========
+ -I./inc         : default header files directory - don't change
+
+ -DINET6         : enable IPv6 for remote connections, recommended
+
+ -DTLS[=<date>]  : enable SSL/TLS, recommended (datestring is optional)
+
+ -I/usr/local/openssl/include: sometimes needed for openssl header files

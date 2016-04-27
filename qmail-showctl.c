@@ -8,7 +8,7 @@
 #include "control.h"
 #include "constmap.h"
 #include "stralloc.h"
-#include "inc/direntry.h"
+#include "direntry.h"
 #include "auto_uids.h"
 #include "auto_qmail.h"
 #include "auto_break.h"

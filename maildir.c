@@ -3,7 +3,7 @@
 #include "prioq.h"
 #include "env.h"
 #include "stralloc.h"
-#include "inc/direntry.h"
+#include "direntry.h"
 #include "datetime.h"
 #include "now.h"
 #include "str.h"

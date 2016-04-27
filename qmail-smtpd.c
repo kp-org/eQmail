@@ -1,5 +1,5 @@
 #include "sig.h"
-#include "inc/readwrite.h"		/* the original definitions */
+#include "readwrite.h"		/* the original definitions */
 #include "stralloc.h"
 #include "substdio.h"
 #include "alloc.h"
@@ -119,7 +119,7 @@ void smtp_greet(code) char *code;
 }
 void smtp_help(arg) char *arg;
 {
-  out("214 netqmail home page: http://qmail.org/netqmail\r\n");
+  out("214 eQmail home page: http://openqmail.org\r\n");
 }
 void smtp_quit(arg) char *arg;
 {

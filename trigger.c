@@ -1,25 +1,14 @@
 #include "select.h"
 #include "open.h"
 #include "trigger.h"
-#include "hasnpbg1.h"
 
 static int fd = -1;
-#ifdef HASNAMEDPIPEBUG1
-static int fdw = -1;
-#endif
 
 void trigger_set()
 {
  if (fd != -1)
    close(fd);
-#ifdef HASNAMEDPIPEBUG1
- if (fdw != -1)
-   close(fdw);
-#endif
  fd = open_read("lock/trigger");
-#ifdef HASNAMEDPIPEBUG1
- fdw = open_write("lock/trigger");
-#endif
 }
 
 void trigger_selprep(nfds,rfds)

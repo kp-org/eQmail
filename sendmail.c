@@ -52,7 +52,7 @@ const char *s;
   int n;
   int a;
   int i;
-  
+
   env_unset("QMAILNAME");
   env_unset("MAILNAME");
   env_unset("NAME");
@@ -88,7 +88,7 @@ char **argv;
   char **qiargv;
   char **arg;
   int i;
- 
+
   if (chdir(auto_qmail) == -1) {
     substdio_putsflush(subfderr,"sendmail: fatal: unable to switch to qmail home directory\n");
     _exit(111);
@@ -132,7 +132,7 @@ char **argv;
     }
   argc -= optind;
   argv += optind;
- 
+
   if (str_equal(optprogname,"mailq"))
     mailq();
 
@@ -143,7 +143,7 @@ char **argv;
 
   qiargv = (char **) alloc((argc + 10) * sizeof(char *));
   if (!qiargv) nomem();
- 
+
   arg = qiargv;
   *arg++ = "bin/qmail-inject";
   *arg++ = (flagh ? "-H" : "-a");
@@ -155,7 +155,7 @@ char **argv;
   *arg++ = "--";
   for (i = 0;i < argc;++i) *arg++ = argv[i];
   *arg = 0;
- 
+
   execv(*qiargv,qiargv);
   substdio_putsflush(subfderr,"sendmail: fatal: unable to run qmail-inject\n");
   _exit(111);

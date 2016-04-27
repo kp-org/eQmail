@@ -1,8 +1,9 @@
 doc2
+doc3
 obsolete
+extras
 *.bck
 *.orig
-*.patch
 *.rej
 *.o
 *.a
@@ -10,3 +11,9 @@ obsolete
 compile
 load
 makelib
+_*
+trysyslog
+conf-opt
+tmp
+trylib
+qmail-shctl

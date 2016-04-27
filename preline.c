@@ -1,6 +1,6 @@
 #include "fd.h"
 #include "sgetopt.h"
-#include "inc/readwrite.h"		/* the original definitions */
+#include "readwrite.h"		/* the original definitions */
 #include "strerr.h"
 #include "substdio.h"
 #include "exit.h"
