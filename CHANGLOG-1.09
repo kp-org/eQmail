@@ -66,11 +66,8 @@ RC2:
     - added mkuser script (beta)
     - removed unused error code dquot from error.h
     - added error_refused to qmail-remote (IPv6)
-<<<<<<< HEAD
 
 final version: eQmail-1.09
     - do not overwrite files in 'control'
     - added folder 'tps'
     - updated some docs
-=======
->>>>>>> f64341737d56aa05fca8695e71f658c6589a6d82
