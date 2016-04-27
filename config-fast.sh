@@ -1,4 +1,5 @@
 fqdn="$1"
+[ $fqdn ] || fqdn=`hostname -f`
 echo Your fully qualified host name is "$fqdn".
 
 echo Putting "$fqdn" into control/me...
@@ -12,6 +13,7 @@ chmod 644 QMAIL/control/me
   chmod 644 QMAIL/control/defaultdomain
 ) )
 
+[ -f QMAIL/control/plusdomain ] ||
 ( echo "$fqdn" | sed 's/^.*\.\([^\.]*\)\.\([^\.]*\)$/\1.\2/' | (
   read pdom
   echo Putting "$pdom" into control/plusdomain...
@@ -19,13 +21,17 @@ chmod 644 QMAIL/control/me
   chmod 644 QMAIL/control/plusdomain
 ) )
 
-echo Putting "$fqdn" into control/locals...
-echo "$fqdn" >> QMAIL/control/locals
-chmod 644 QMAIL/control/locals
+[ -f QMAIL/control/locals ] || \
+( echo Putting "$fqdn" into control/locals...
+  echo "$fqdn" > QMAIL/control/locals
+  chmod 644 QMAIL/control/locals
+)
 
-echo Putting "$fqdn" into control/rcpthosts...
-echo "$fqdn" >> QMAIL/control/rcpthosts
-chmod 644 QMAIL/control/rcpthosts
+[ -f QMAIL/control/rcpthosts ] || \
+( echo Putting "$fqdn" into control/rcpthosts...
+  echo "$fqdn" > QMAIL/control/rcpthosts
+  chmod 644 QMAIL/control/rcpthosts
+)
 echo "Now qmail will refuse to accept SMTP messages except to $fqdn."
 echo 'Make sure to change rcpthosts if you add hosts to locals or virtualdomains!'
 

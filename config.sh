@@ -11,16 +11,19 @@
 	chmod 644 QMAIL/control/me
 	( echo "$fqdn" | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./' | (
 	  read ddom
+	  [ -f QMAIL/control/defaultdomain ] || (
 	  echo Putting "$ddom" into control/defaultdomain...
 	  echo "$ddom" > QMAIL/control/defaultdomain
-	  chmod 644 QMAIL/control/defaultdomain
+	  chmod 644 QMAIL/control/defaultdomain )
 	) )
 	( echo "$fqdn" | sed 's/^.*\.\([^\.]*\)\.\([^\.]*\)$/\1.\2/' | (
 	  read pdom
+	  [ -f QMAIL/control/plusdomain ] || (
 	  echo Putting "$pdom" into control/plusdomain...
 	  echo "$pdom" > QMAIL/control/plusdomain
-	  chmod 644 QMAIL/control/plusdomain
+	  chmod 644 QMAIL/control/plusdomain )
 	) )
+[ -f QMAIL/control/plusdomain ] || (
 	echo ' '
 	echo Checking local IP addresses:
 	: > QMAIL/control/locals
@@ -34,22 +37,24 @@
 	    ./dnsptr "$localip" 2>/dev/null | (
 	      if read local
 	      then
-		echo Adding "$local" to control/locals...
-		echo "$local" >> QMAIL/control/locals
+		     echo Adding "$local" to control/locals...
+		     echo "$local" >> QMAIL/control/locals
 	      else
-		echo PTR lookup failed. I assume this address has no DNS name.
+		     echo PTR lookup failed. I assume this address has no DNS name.
 	      fi
 	    )
 	  done
 	)
+)
 	echo ' '
 	echo If there are any other domain names that point to you,
 	echo you will have to add them to QMAIL/control/locals.
 	echo You don\'t have to worry about aliases, i.e., domains with CNAME records.
 	echo ' '
+	[ -f QMAIL/control/rcpthosts ] || (
 	echo Copying QMAIL/control/locals to QMAIL/control/rcpthosts...
 	cp QMAIL/control/locals QMAIL/control/rcpthosts
-	chmod 644 QMAIL/control/rcpthosts
+	chmod 644 QMAIL/control/rcpthosts )
 	echo 'Now qmail will refuse to accept SMTP messages except to those hosts.'
 	echo 'Make sure to change rcpthosts if you add hosts to locals or virtualdomains!'
       else

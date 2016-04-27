@@ -27,7 +27,7 @@ struct qmail *qq;
 
   if (pipe(pim) == -1) return -1;
   if (pipe(pie) == -1) { close(pim[0]); close(pim[1]); return -1; }
- 
+
   switch(qq->pid = vfork()) {
     case -1:
       close(pim[0]); close(pim[1]);

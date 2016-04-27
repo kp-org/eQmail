@@ -4,8 +4,8 @@
 #                                                                               *
 #   Author: Kai Peter, ©2013 (kp@dyndn.es)                                      *
 #                                                                               *
-#  Version: 0.3-beta1                                                           *
-#  Lisence: public domain                                                       *
+#  Version: 0.3-beta2                                                           *
+#  Lisence: ISC Lisence                                                         *
 #                                                                               *
 # Description: I don't remember how often I did create a script to create the   *
 #              necessary users ...                                              *
@@ -31,7 +31,7 @@ PRG=$(which groupadd 2>/dev/null) || \
 PRG=$(which addgroup 2>/dev/null) || \
 PRG=$(which pw 2>/dev/null)
 # FreeBSD's tool 'pw' is special: 'pw groupadd -g 200 -n qmail'
-if [ "$PRG" ] && [ $PRG == "/usr/sbin/pw" ] ; then PRG=$PRG" groupadd" ; N="-n" ; fi
+if [ "$PRG" ] && [ $PRG = "/usr/sbin/pw" ] ; then PRG=$PRG" groupadd" ; N="-n" ; fi
 # Error:
 [ "$PRG" ] || echo "Didn't know how to add groups! Aborting!"
 [ "$PRG" ] || exit;
@@ -50,7 +50,7 @@ PRG=$(which useradd 2>/dev/null) || \
 PRG=$(which adduser 2>/dev/null)
 # on FreeBSD we need pw and the '-n <user>' switch (the cmd is a bit different:
 # '$> pw useradd -g qmail -s /bin/nologin -c "" -d /var/qmail -u 200 -n <user>' )
-if [ `uname | tr '/:[A-Z]' '..[a-z]'` == "freebsd" ] ; then
+if [ `uname | tr '/:[A-Z]' '..[a-z]'` = "freebsd" ] ; then
    PRG="/usr/sbin/pw useradd" ; N="-n" ; fi
 
 # Error:
@@ -63,7 +63,7 @@ for U in `head -8 conf-users`
 do
   if [ $U != "root" ] ; then
 	H=$HOME ; GID="qmail"
-    if [ $U == "alias" ] ; then H=$HOME/alias ; fi
+    if [ $U = "alias" ] ; then H=$HOME/alias ; fi
 	# switch the group (the first 4 users have 'qmail', than 'nofiles')
     if [ $NUID -ge $(($STARTUID+4)) ] ; then GID="nofiles" ; fi
     #
