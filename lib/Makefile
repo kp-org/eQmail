@@ -145,67 +145,6 @@ wait.a: ../makelib wait.c
 dns.o: compile dns.c
 	./compile dns.c
 
-dnscname: \
-load dnscname.o dns.o dnsdoe.o ip.o ipalloc.o stralloc.a alloc.a \
-substdio.a error.a str.a fs.a dns.lib socket.lib
-	./load dnscname dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-	alloc.a substdio.a error.a str.a fs.a  `cat dns.lib` `cat \
-	socket.lib`
-
-dnscname.o: compile dnscname.c
-	./compile dnscname.c
-
-dnsdoe.o: \
-compile dnsdoe.c substdio.h subfd.h substdio.h exit.h dns.h dnsdoe.h
-	./compile dnsdoe.c
-
-dnsfq: \
-load dnsfq.o dns.o dnsdoe.o ip.o ipalloc.o stralloc.a alloc.a \
-substdio.a error.a str.a fs.a dns.lib socket.lib
-	./load dnsfq dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-	alloc.a substdio.a error.a str.a fs.a  `cat dns.lib` `cat \
-	socket.lib`
-
-dnsfq.o: compile dnsfq.c
-	./compile dnsfq.c
-
-dnsip: \
-load dnsip.o dns.o dnsdoe.o ip.o ipalloc.o stralloc.a alloc.a \
-substdio.a error.a str.a fs.a dns.lib socket.lib
-	./load dnsip dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-	alloc.a substdio.a error.a str.a fs.a  `cat dns.lib` `cat \
-	socket.lib`
-
-dnsip.o: \
-compile dnsip.c substdio.h subfd.h substdio.h stralloc.h gen_alloc.h \
-dns.h dnsdoe.h ip.h ipalloc.h ip.h gen_alloc.h exit.h
-	./compile dnsip.c
-
-dnsmxip: \
-load dnsmxip.o dns.o dnsdoe.o ip.o ipalloc.o now.o stralloc.a alloc.a \
-substdio.a error.a str.a fs.a dns.lib socket.lib
-	./load dnsmxip dns.o dnsdoe.o ip.o ipalloc.o now.o \
-	stralloc.a alloc.a substdio.a error.a str.a fs.a  `cat \
-	dns.lib` `cat socket.lib`
-
-dnsmxip.o: \
-compile dnsmxip.c substdio.h subfd.h substdio.h stralloc.h \
-gen_alloc.h fmt.h dns.h dnsdoe.h ip.h ipalloc.h ip.h gen_alloc.h \
-now.h datetime.h exit.h
-	./compile dnsmxip.c
-
-dnsptr: \
-load dnsptr.o dns.o dnsdoe.o ip.o ipalloc.o stralloc.a alloc.a \
-substdio.a error.a str.a fs.a dns.lib socket.lib
-	./load dnsptr dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-	alloc.a substdio.a error.a str.a fs.a  `cat dns.lib` `cat \
-	socket.lib`
-
-dnsptr.o: \
-compile dnsptr.c substdio.h subfd.h substdio.h stralloc.h gen_alloc.h \
-str.h scan.h dns.h dnsdoe.h ip.h exit.h
-	./compile dnsptr.c
-
 #ip.o: \
 #compile ip.c fmt.h scan.h ip.h
 #	./compile ip.c

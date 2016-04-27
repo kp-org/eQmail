@@ -1,5 +1,5 @@
 Initial: eqmail-1.08-p2 (=eqmail-1.09-p0)
-  --> ohne domainbindings
+  --> w/o domainbindings
 
 Patchlevel p1: eqmail-1.09-p1
   - added IPv6 support for remote connections
@@ -15,7 +15,6 @@ Patchlevel p2: eqmail-1.09-p2
 Patchlevel p3: eqmail-1.09-p3
   - update TLS to netqmail-1.06-tls-20151215.patch
   - corrected man page qmail-smtpd.8
-  - deactivated the POODLE code (commented out)
   - added "#include <sys/stat.h>" and check that config
     file of qmail-spp exists (in qmail-spp.c)
 
@@ -51,13 +50,24 @@ Patchlevel p7: eqmail-1.09-p7
 	- eliminated 'shar:' from Makefile
 
 Patchlevel p8 - RC1:
+    - renamed *rexec --> *bfrmt
     - remove out commented #include's
     - remove temp. comments by me and backup code
     - replaced qmail-rexec by qmail-bfrmt:
   	  --> create config file beforemote and man page
-  	- removed old "boot" stuff from hier.c and Makefile (commented out)
+  	- removed old "boot" stuff from hier.c (commented out)
+  	  --> effects the install routine only
 	- added folders "doc", "tps", README.tps
-	- reactivated POODLE from tls patch
 	- more Makefile cleanup
-	- removed .o, .a and .0 files from TARGETS
-    - removed trycpp.c
+	- removed .o and .a files from TARGETS
+
+RC2:
+    - changed URL in file INSTALL
+    - added mkuser script (beta)
+    - removed unused error code dquot from error.h
+    - added error_refused to qmail-remote (IPv6)
+
+final version: eQmail-1.09
+    - do not overwrite files in 'control'
+    - added folder 'tps'
+    - updated some docs

@@ -4,7 +4,7 @@
 #ifndef READWRITE_H
 #define READWRITE_H
 
-extern int _read();
-extern int write();
+extern int substread();
+extern int substwrite();
 
 #endif

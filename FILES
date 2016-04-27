@@ -423,7 +423,7 @@ inc/select.h
 #trysysel.c
 ndelay.h
 ndelay.c
-ndelay_off.c
+#ndelay_off.c
 direntry.3
 #direntry.h1
 #direntry.h2
