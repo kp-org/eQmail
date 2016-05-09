@@ -1,3 +1,7 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added parentheses to while condition
+ */
 #include "fmt.h"
 #include "qmail.h"
 #include "now.h"
@@ -26,7 +30,7 @@ struct qmail *qqt;
 char *s;
 {
   char ch;
-  while (ch = *s++) {
+  while ((ch = *s++)) {
     if (!issafe(ch)) ch = '?';
     qmail_put(qqt,&ch,1);
   }

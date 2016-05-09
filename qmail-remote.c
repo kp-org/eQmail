@@ -1,3 +1,11 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - casting pointers (char *)
+ *  - added some parenthesis to condition '(relayhost = constmap('
+ *  - added 'close.h', 'chdir.h', 'base64,h', 'getpid.h'
+ *  - initialize var 'code' in function smtp()
+ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -28,9 +36,13 @@
 #include "timeoutconn.h"
 #include "timeoutread.h"
 #include "timeoutwrite.h"
+/* use internal header files instead of 'unistd.h' */
+#include "chdir.h"
+#include "close.h"
+#include "base64.h"
+#include "getpid.h"
 
 #define HUGESMTPTEXT 5000
-#define TCPTO_REFUSED
 
 #define PORT_SMTP 25 /* silly rabbit, /etc/services is for users */
 unsigned long port = PORT_SMTP;
@@ -496,7 +508,7 @@ int tls_init()
         const GENERAL_NAME *gn = sk_GENERAL_NAME_value(gens, i);
         if (gn->type == GEN_DNS){
           found_gen_dns = 1;
-          if (match_partner(gn->d.ia5->data, gn->d.ia5->length)) break;
+          if (match_partner((char *)gn->d.ia5->data, gn->d.ia5->length)) break;
         }
       }
       sk_GENERAL_NAME_pop_free(gens, GENERAL_NAME_free);
@@ -509,7 +521,7 @@ int tls_init()
       i = X509_NAME_get_index_by_NID(subj, NID_commonName, -1);
       if (i >= 0) {
         const ASN1_STRING *s = X509_NAME_get_entry(subj, i)->value;
-        if (s) { peer.len = s->length; peer.s = s->data; }
+        if (s) { peer.len = s->length; peer.s = (char *)s->data; }
       }
       if (peer.len <= 0) {
         out("ZTLS unable to verify server ");
@@ -535,7 +547,7 @@ stralloc recip = {0};
 
 void smtp()
 {
-  unsigned long code;
+  unsigned long code = 0;
   int flagbother;
   int i;
   stralloc slop = {0};
@@ -558,7 +570,7 @@ void smtp()
   /* RFC2821: On error code 4xx through 499 try the next MX */
   if (code >= 400 && code < 500) return;
   if (code != 220) quit("ZConnected to "," but greeting failed");
- 
+
 #ifdef EHLO
 # ifdef TLS
   if (!smtps)
@@ -744,7 +756,7 @@ int timeout;
 	return timeoutconn(fd, &ix->addr.ip, port, timeout);
 }
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -771,7 +783,7 @@ char **argv;
   relayhost = 0;
   for (i = 0;i <= host.len;++i)
     if ((i == 0) || (i == host.len) || (host.s[i] == '.'))
-      if (relayhost = constmap(&maproutes,host.s + i,host.len - i))
+      if ((relayhost = constmap(&maproutes,host.s + i,host.len - i)))
         break;
   if (relayhost && !*relayhost) relayhost = 0;
  
@@ -862,4 +874,5 @@ char **argv;
   }
 
   temp_noconn();
+  return(0);  /* never reached */
 }

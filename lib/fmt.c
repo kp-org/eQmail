@@ -1,3 +1,8 @@
+/*
+ *  Revision 20160503, Kai Peter
+ *  - added parentheses to inner while condition (line 27)
+ */
+
 #include "fmt.h"
 /* Consolidate the "fmt_*.c" functions into one source
    file. Original files were of date 19980615, shipped
@@ -12,19 +17,19 @@
      - fmt_ulong.c           320    19980615
      - fmt_xlong.c           455    20090316        */
 
-/* file: fmt_str.c */
+/* file: fmt_str.c ************************************************** */
 unsigned int fmt_str(s,t)
 register char *s; register char *t;
 {
   register unsigned int len;
   char ch;
   len = 0;
-  if (s) { while (ch = t[len]) s[len++] = ch; }
+  if (s) { while ((ch = t[len])) s[len++] = ch; }
   else while (t[len]) len++;
   return len;
 }
 
-/* file: fmt_strn.c */
+/* file: fmt_strn.c ************************************************* */
 unsigned int fmt_strn(s,t,n)
 register char *s; register char *t; register unsigned int n;
 {
@@ -42,7 +47,7 @@ unsigned int fmt_uint(s,u) register char *s; register unsigned int u;
   register unsigned long l; l = u; return fmt_ulong(s,l);
 }
 
-/* file: fmt_uint0.c */
+/* file: fmt_uint0.c ************************************************ */
 unsigned int fmt_uint0(s,u,n) char *s; unsigned int u; unsigned int n;
 {
   unsigned int len;
@@ -52,7 +57,7 @@ unsigned int fmt_uint0(s,u,n) char *s; unsigned int u; unsigned int n;
   return len;
 }
 
-/* file: fmt_ulong.c */
+/* file: fmt_ulong.c ************************************************ */
 unsigned int fmt_ulong(s,u) register char *s; register unsigned long u;
 {
   register unsigned int len; register unsigned long q;
@@ -65,7 +70,7 @@ unsigned int fmt_ulong(s,u) register char *s; register unsigned long u;
   return len;
 }
 
-/* file: fmt_xlong.c */
+/* file: fmt_xlong.c ************************************************ */
 char tohex(char num) {
   if (num<10)
     return num+'0';

@@ -1,3 +1,7 @@
+/*
+ *  Revision 20160506, Kai Peter
+ *  - added declarations for 'lseek', 'ftruncate'
+ */
 #include <sys/types.h>
 #include "seek.h"
 /* Consolidate  the "seek_*.c" functions into one source
@@ -9,6 +13,9 @@
      - seek_end.c             153     19980615
      - seek_set.c             173     19980615
      - seek_trunc.c           125     19980615        */
+
+off_t lseek(int fd, off_t offset, int whence);
+int ftruncate(int fd, off_t length);
 
 /* file: seek_cur.c */
 #define CUR 1 /* sigh */

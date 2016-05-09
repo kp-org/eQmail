@@ -1,3 +1,7 @@
+/*
+ *  Revision 20160503, Kai Peter
+ *  - added parentheses to while condition (case_lowers)
+ */
 #include "case.h"
 /* Consolidate  the "case_*.c" functions into one source
    file.  Original files were of date 19980615,  shipped
@@ -12,7 +16,7 @@
      - case_startb.c         397    20140914
      - case_starts.c         340    19980615          */
 
-/* file: case_diffb.c */
+/* file: case_diffb.c *********************************************** */
 int case_diffb(s,len,t)
 register char *s;
 unsigned int len;
@@ -33,7 +37,7 @@ register char *t;
   return 0;
 }
 
-/* file: case_diffs.c */
+/* file: case_diffs.c *********************************************** */
 int case_diffs(s,t)
 register char *s;
 register char *t;
@@ -52,7 +56,7 @@ register char *t;
   return ((int)(unsigned int) x) - ((int)(unsigned int) y);
 }
 
-/* file: case_lowerb.c */
+/* file: case_lowerb.c ********************************************** */
 void case_lowerb(s,len)
 char *s;
 unsigned int len;
@@ -66,19 +70,19 @@ unsigned int len;
   }
 }
 
-/* file: case_lowers.c */
+/* file: case_lowers.c ********************************************** */
 void case_lowers(s)
 char *s;
 {
   unsigned char x;
-  while (x = *s) {
+  while ((x = *s)) {
     x -= 'A';
     if (x <= 'Z' - 'A') *s = x + 'a';
     ++s;
   }
 }
 
-/* file: case_startb.c */
+/* file: case_startb.c ********************************************** */
 int case_startb(s,len,t)
 register char *s;
 unsigned int len;
@@ -99,7 +103,7 @@ register char *t;
   }
 }
 
-/* file: case_starts.c */
+/* file: case_starts.c ********************************************** */
 int case_starts(s,t)
 register char *s;
 register char *t;

@@ -1,3 +1,7 @@
+/*
+ *  Revision 20160504, Kai Peter
+ *  - added declarations 'cdbmss_{start,add,finish}'
+ */
 #ifndef CDBMSS_H
 #define CDBMSS_H
 
@@ -12,5 +16,9 @@ struct cdbmss {
   uint32 pos;
   int fd;
 } ;
+
+extern int cdbmss_start();
+extern int cdbmss_add();
+extern int cdbmss_finish();
 
 #endif

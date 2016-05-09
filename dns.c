@@ -1,3 +1,9 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added some parentheses
+ *  - added 'byte.h'
+ *  - removed unused var 'len' in function iaafmt6()
+ */
 #include <stdio.h>
 #include <netdb.h>
 #include <sys/types.h>
@@ -16,6 +22,7 @@ extern int res_search();
 #include "stralloc.h"
 #include "dns.h"
 #include "case.h"
+#include "byte.h"
 
 static unsigned short getshort(c) unsigned char *c;
 { unsigned short u; u = c[0]; return (u << 8) + c[1]; }
@@ -51,22 +58,26 @@ int type;
  if (!stralloc_copy(&glue,domain)) return DNS_MEM;
  if (!stralloc_0(&glue)) return DNS_MEM;
  if (!responsebuflen)
-  if (response.buf = (unsigned char *)alloc(PACKETSZ+1))
+  {
+  if ((response.buf = (unsigned char *)alloc(PACKETSZ+1)))
    responsebuflen = PACKETSZ+1;
   else return DNS_MEM;
+  }
 
  responselen = lookup(glue.s,C_IN,type,response.buf,responsebuflen);
  if ((responselen >= responsebuflen) ||
      (responselen > 0 && (((HEADER *)response.buf)->tc)))
   {
    if (responsebuflen < 65536)
-    if (alloc_re(&response.buf, responsebuflen, 65536))
+   {
+    if ((alloc_re(&response.buf, responsebuflen, 65536)))
      responsebuflen = 65536;
     else return DNS_MEM;
     saveresoptions = _res.options;
     _res.options |= RES_USEVC;
     responselen = lookup(glue.s,C_IN,type,response.buf,responsebuflen);
     _res.options = saveresoptions;
+   }
   }
  if (responselen <= 0)
   {
@@ -158,7 +169,7 @@ int wanttype;
    responsepos += rrdlen;
    return 1;
   }
-   
+
  responsepos += rrdlen;
  return 0;
 }
@@ -328,9 +339,9 @@ struct ip6_address *ip;
 {
   unsigned int i;
   int j;
-  unsigned int len;
+//  unsigned int len;
   static char data[] = "0123456789abcdef";
-  len = 0;
+//  len = 0;
 
   if (s) {
 	for (j = 15; j >= 0; j--) {
@@ -394,6 +405,7 @@ int pref;
 	if (!ipalloc_append(ia,&ix)) return DNS_MEM;
 	return 0;
     }
+ 
  }
 
 #ifdef INET6

@@ -71,7 +71,7 @@ struct ip6_address *ip6;
   for (j=0; j<16; j+=2) {
     if (j==12 && byte_equal(ip6->d,12,V4mappedprefix)) {
       byte_copy(ip4.d, 4, ip6->d+12);
-      temp=ip_fmt(s,ip4);
+      temp=ip_fmt(s,&ip4);
       len+=temp;
       s+=temp;
       break;

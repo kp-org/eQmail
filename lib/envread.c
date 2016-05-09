@@ -1,3 +1,7 @@
+/*
+ *  Revision 20160503, Kai Peter
+ *  - added parentheses to for condition (line 16)
+ */
 #include "env.h"
 #include "str.h"
 
@@ -9,7 +13,7 @@ char *s;
   char *envi;
  
   slen = str_len(s);
-  for (i = 0;envi = environ[i];++i)
+  for (i = 0;(envi = environ[i]);++i)
     if ((!str_diffn(s,envi,slen)) && (envi[slen] == '='))
       return envi + slen + 1;
   return 0;

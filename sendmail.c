@@ -1,3 +1,9 @@
+/*
+ *  Revision 20160504, Kai Peter
+ *  - changed return type of main to int
+ *  - added '<unistd.h>' to prevent compiler warnings
+ */
+#include <unistd.h>
 #include "sgetopt.h"
 #include "substdio.h"
 #include "subfd.h"
@@ -80,7 +86,7 @@ const char *s;
 int flagh;
 char *sender;
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -159,4 +165,5 @@ char **argv;
   execv(*qiargv,qiargv);
   substdio_putsflush(subfderr,"sendmail: fatal: unable to run qmail-inject\n");
   _exit(111);
+  return(0);  /* never reached */
 }

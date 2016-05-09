@@ -1,5 +1,12 @@
+/*
+ *  Revision 20160506, Kai Peter
+ *  - added '<sys/types.h>' and declaration of 'read'
+ */
+#include <sys/types.h>
 #include "substdio.h"
 #include "subfd.h"
+
+ssize_t read(int fd, void *buf, size_t count);
 
 int subfd_read(fd,buf,len) int fd; char *buf; int len;
 {

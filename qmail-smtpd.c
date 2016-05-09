@@ -1,3 +1,15 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added 'close.h', base64,h, 'fd.h', 'getpid.h', 'chdir.h', 'sleep.h'
+ *  - added declaration of 'spp_rcpt_accepted()'
+ *  - changed callings 'die_nomem;' to 'die_nomem();'
+ *
+ *  Revision 20160504, Kai Peter
+ *  - changed return type of main to in
+ *  - added parentheses to multiple conditions
+ *  - casting some pointers (char *)
+ *  - added includes 'exec.h', 'pipe.h'
+ */
 #include "sig.h"
 #include "readwrite.h"		/* the original definitions */
 #include "stralloc.h"
@@ -25,8 +37,18 @@
 #include "commands.h"
 #include "wait.h"
 #include "qmail-spp.h"
+/* use internal headers insted of unistd.h */
+#include "exec.h"
+#include "pipe.h"
+#include "close.h"
+#include "base64.h"
+#include "fd.h"
+#include "getpid.h"
+#include "chdir.h"
+#include "sleep.h"
 
 int spp_val;
+extern void spp_rcpt_accepted();
 
 #define CRAM_MD5
 #define AUTHSLEEP 5
@@ -227,7 +249,7 @@ char *arg;
   if (!stralloc_copys(&addr,"")) die_nomem();
   flagesc = 0;
   flagquoted = 0;
-  for (i = 0;ch = arg[i];++i) { /* copy arg to addr, stripping quotes */
+  for (i = 0;(ch = arg[i]);++i) { /* copy arg to addr, stripping quotes */
     if (flagesc) {
       if (!stralloc_append(&addr,&ch)) die_nomem();
       flagesc = 0;
@@ -394,7 +416,7 @@ void mailfrom_parms(arg) char *arg;
   int len;
 
     len = str_len(arg);
-    if (!stralloc_copys(&mfparms,"")) die_nomem;
+    if (!stralloc_copys(&mfparms,"")) die_nomem();
     i = byte_chr(arg,len,'>');
     if (i > 4 && i < len) {
       while (len) {
@@ -402,10 +424,10 @@ void mailfrom_parms(arg) char *arg;
         if (*arg == ' ' || *arg == '\0' ) {
            if (case_starts(mfparms.s,"SIZE=")) if (mailfrom_size(mfparms.s+5)) { flagsize = 1; return; }
            if (case_starts(mfparms.s,"AUTH=")) mailfrom_auth(mfparms.s+5,mfparms.len-5);  
-           if (!stralloc_copys(&mfparms,"")) die_nomem;
+           if (!stralloc_copys(&mfparms,"")) die_nomem();
         }
         else
-          if (!stralloc_catb(&mfparms,arg,1)) die_nomem; 
+          if (!stralloc_catb(&mfparms,arg,1)) die_nomem();
       }
     }
 }
@@ -726,20 +748,20 @@ int auth_login(arg) char *arg;
   int r;
 
   if (*arg) {
-    if (r = b64decode(arg,str_len(arg),&user) == 1) return err_input();
+    if ((r = b64decode(arg,str_len(arg),&user) == 1)) return err_input();
   }
   else {
 //  out("334 VXNlcm5hbWU6\r\n"); flush();       /* Username: */
     out("334 Username:\r\n"); flush();       	/* Username: */
     if (authgetl() < 0) return -1;
-    if (r = b64decode(authin.s,authin.len,&user) == 1) return err_input();
+    if ((r = b64decode(authin.s,authin.len,&user) == 1)) return err_input();
   }
   if (r == -1) die_nomem();
 //  out("334 UGFzc3dvcmQ6\r\n"); flush();         /* Password: */
     out("334 Password:\r\n"); flush();         	/* Password: */
 
   if (authgetl() < 0) return -1;
-  if (r = b64decode(authin.s,authin.len,&pass) == 1) return err_input();
+  if ((r = b64decode(authin.s,authin.len,&pass)) == 1) return err_input();
   if (r == -1) die_nomem();
 
   if (!user.len || !pass.len) return err_input();
@@ -751,12 +773,12 @@ int auth_plain(arg) char *arg;
   int r, id = 0;
 
   if (*arg) {
-    if (r = b64decode(arg,str_len(arg),&resp) == 1) return err_input();
+    if ((r = b64decode(arg,str_len(arg),&resp) == 1)) return err_input();
   }
   else {
     out("334 \r\n"); flush();
     if (authgetl() < 0) return -1;
-    if (r = b64decode(authin.s,authin.len,&resp) == 1) return err_input();
+    if ((r = b64decode(authin.s,authin.len,&resp) == 1)) return err_input();
   }
   if (r == -1 || !stralloc_0(&resp)) die_nomem();
   while (resp.s[id]) id++;                       /* "authorize-id\0userid\0passwd\0" */
@@ -795,7 +817,7 @@ int auth_cram()
   flush();
 
   if (authgetl() < 0) return -1;                        /* got response */
-  if (r = b64decode(authin.s,authin.len,&resp) == 1) return err_input();
+  if ((r = b64decode(authin.s,authin.len,&resp) == 1)) return err_input();
   if (r == -1 || !stralloc_0(&resp)) die_nomem();
 
   i = str_chr(resp.s,' ');
@@ -930,12 +952,12 @@ void tls_nogateway()
   /* there may be cases when relayclient is set */
   if (!ssl || relayclient) return;
   out("; no valid cert for gatewaying");
-  if (ssl_verify_err) { out(": "); out(ssl_verify_err); }
+  if (ssl_verify_err) { out(": "); out((char *)ssl_verify_err); }
 }
 void tls_out(const char *s1, const char *s2)
 {
-  out("454 TLS "); out(s1);
-  if (s2) { out(": "); out(s2); }
+  out("454 TLS "); out((char *)s1);
+  if (s2) { out(": "); out((char *)s2); }
   out(" (#4.3.0)\r\n"); flush();
 }
 void tls_err(const char *s) { tls_out(s, ssl_error()); if (smtps) die_read(); }
@@ -994,7 +1016,7 @@ int tls_verify()
     n = X509_NAME_get_index_by_NID(subj, NID_pkcs9_emailAddress, -1);
     if (n >= 0) {
       const ASN1_STRING *s = X509_NAME_get_entry(subj, n)->value;
-      if (s) { email.len = s->length; email.s = s->data; }
+      if (s) { email.len = s->length; email.s = (char *)s->data; }
     }
 
     if (email.len <= 0)
@@ -1135,7 +1157,7 @@ struct commands smtpcommands[] = {
 , { 0, err_unrecog, flush }
 } ;
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -1150,4 +1172,5 @@ char **argv;
   }
   if (commands(&ssin,&smtpcommands) == 0) die_read();
   die_nomem();
+  return(0);  /* never reached */
 }

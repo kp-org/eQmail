@@ -1,3 +1,8 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added 'scan.h'
+ */
 #include <unistd.h>		/* replace "exit.h" */
 #include "stralloc.h"
 #include "substdio.h"
@@ -11,6 +16,7 @@
 #include "auto_qmail.h"
 #include "control.h"
 #include "received.h"
+#include "scan.h"
 
 void badproto() { _exit(100); }
 void resources() { _exit(111); }
@@ -74,7 +80,7 @@ stralloc failure = {0};
 char *relayclient;
 int relayclientlen;
 
-main()
+int main()
 {
   char ch;
   int i;
@@ -244,7 +250,7 @@ main()
       buf2[len] = 0;
       result = buf2;
     }
-      
+
     len = fmt_ulong(buf,len);
     buf[len++] = ':';
     len += fmt_str(buf + len,result);
@@ -265,4 +271,5 @@ main()
  
     /* ssout will be flushed when we read from the network again */
   }
+  return(0);  /* never reached */
 }

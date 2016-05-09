@@ -1,3 +1,8 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added parentheses to outer if
+ */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -37,16 +42,19 @@ int userext()
 	if (errno == error_txtbsy) _exit(QLX_SYS);
 	if (pw)
 	  if (pw->pw_uid)
+        {
 	    if (stat(pw->pw_dir,&st) == 0) {
 	      if (st.st_uid == pw->pw_uid) {
 		dash = "";
+
 		if (*extension) { ++extension; dash = "-"; }
 		return 1;
 	      }
 	    }
 	    else
 	      if (error_temp(errno)) _exit(QLX_NFS);
-      }
+	    }
+    }
     if (extension == local) return 0;
     --extension;
   }
@@ -54,7 +62,7 @@ int userext()
 
 char num[FMT_ULONG];
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -84,4 +92,5 @@ char **argv;
   substdio_flush(subfdoutsmall);
 
   _exit(0);
+  return(0);  /* never reached */
 }

@@ -1,22 +1,25 @@
+/*
+ *  Revision 20160503, Kai Peter
+ *  - renamed function puts(s) to qputs(s), because puts()
+ *    is a POSIX function ('q' is as of 'q'mail)
+ *  - changed return type of main to int
+ */
 #include "substdio.h"
-#include "readwrite.h"		/* the original definitions */
+#include "readwrite.h"     /* the original definitions */
 #include "exit.h"
 #include "scan.h"
 #include "fmt.h"
-/* The function puts(s) was renamed to o_puts(s), include
-   call of it (o_put stands for original). Reason is that
-   puts() is a function in POSIX standard libraries.   */
 
 char buf1[256];
 substdio ss1 = SUBSTDIO_FDBUF(write,1,buf1,sizeof(buf1));
 
-void o_puts(s)
+void qputs(s)
 char *s;
 {
   if (substdio_puts(&ss1,s) == -1) _exit(111);
 }
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -33,11 +36,11 @@ char **argv;
   scan_8long(value,&num);
   strnum[fmt_ulong(strnum,num)] = 0;
 
-  o_puts("int ");
-  o_puts(name);
-  o_puts(" = ");
-  o_puts(strnum);
-  o_puts(";\n");
+  qputs("int ");
+  qputs(name);
+  qputs(" = ");
+  qputs(strnum);
+  qputs(";\n");
   if (substdio_flush(&ss1) == -1) _exit(111);
   _exit(0);
 }

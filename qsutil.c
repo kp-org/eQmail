@@ -1,7 +1,13 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added declaration for function 'sleep'
+ */
 #include "stralloc.h"
 #include "readwrite.h"		/* the original definitions */
 #include "substdio.h"
 #include "qsutil.h"
+
+void sleep(int seconds);
 
 static stralloc foo = {0};
 

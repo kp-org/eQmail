@@ -1,5 +1,11 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added '#include unistd.h'
+ *  - changed return type of main to int
+ */
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include "sig.h"
 #include "wait.h"
 #include "substdio.h"
@@ -176,7 +182,7 @@ void getcmd()
 
 char inbuf[128];
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -257,4 +263,5 @@ char **argv;
 	}
     }
   }
+  return(0);
 }

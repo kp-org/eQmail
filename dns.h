@@ -1,3 +1,7 @@
+/*
+ *  Revision 20160504, Kai Peter
+ *  - added 'dns_ptr6()'
+ */
 #ifndef DNS_H
 #define DNS_H
 
@@ -10,5 +14,9 @@ int dns_cname();
 int dns_mxip();
 int dns_ip();
 int dns_ptr();
+
+#ifdef INET6
+int dns_ptr6();
+#endif
 
 #endif

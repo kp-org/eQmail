@@ -1,9 +1,17 @@
+/*
+ *  Revision 20160504, Kai Peter
+ *  - changed return type of main to int
+ *  - added 'close.h', 'exec.h', 'pipe.h' to prevent compiler warnings
+ */
 #include "fd.h"
 #include "sgetopt.h"
 #include "readwrite.h"		/* the original definitions */
 #include "strerr.h"
 #include "substdio.h"
 #include "exit.h"
+#include "close.h"
+#include "exec.h"
+#include "pipe.h"
 #include "wait.h"
 #include "env.h"
 #include "sig.h"
@@ -25,7 +33,7 @@ char inbuf[SUBSTDIO_INSIZE];
 substdio ssout = SUBSTDIO_FDBUF(write,1,outbuf,sizeof outbuf);
 substdio ssin = SUBSTDIO_FDBUF(read,0,inbuf,sizeof inbuf);
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -33,13 +41,13 @@ char **argv;
   int pi[2];
   int pid;
   int wstat;
- 
+
   sig_pipeignore();
- 
+
   if (!(ufline = env_get("UFLINE"))) die_usage();
   if (!(rpline = env_get("RPLINE"))) die_usage();
   if (!(dtline = env_get("DTLINE"))) die_usage();
- 
+
   while ((opt = getopt(argc,argv,"frdFRD")) != opteof)
     switch(opt) {
       case 'f': flagufline = 0; break;
@@ -53,7 +61,7 @@ char **argv;
   argc -= optind;
   argv += optind;
   if (!*argv) die_usage();
- 
+
   if (pipe(pi) == -1)
     strerr_die2sys(111,FATAL,"unable to create pipe: ");
 
@@ -72,7 +80,7 @@ char **argv;
   close(pi[0]);
   if (fd_move(1,pi[1]) == -1)
     strerr_die2sys(111,FATAL,"unable to set up fds: ");
- 
+
   if (flagufline) substdio_bputs(&ssout,ufline);
   if (flagrpline) substdio_bputs(&ssout,rpline);
   if (flagdtline) substdio_bputs(&ssout,dtline);
@@ -80,10 +88,11 @@ char **argv;
     strerr_die2sys(111,FATAL,"unable to copy input: ");
   substdio_flush(&ssout);
   close(1);
- 
+
   if (wait_pid(&wstat,pid) == -1)
     strerr_die2sys(111,FATAL,"wait failed: ");
   if (wait_crashed(wstat))
     strerr_die2x(111,FATAL,"child crashed");
   _exit(wait_exitcode(wstat));
+  return(0);  /* never reached */
 }

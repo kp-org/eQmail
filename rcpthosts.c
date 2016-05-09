@@ -1,3 +1,7 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added 'case.h'
+ */
 #include "cdb.h"
 #include "byte.h"
 #include "open.h"
@@ -6,6 +10,7 @@
 #include "constmap.h"
 #include "stralloc.h"
 #include "rcpthosts.h"
+#include "case.h"
 
 static int flagrh = 0;
 static stralloc rh = {0};

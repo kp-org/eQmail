@@ -1,3 +1,7 @@
+/*
+ *  Revision 20169503, Kai Peter
+ *  - changed return type of main to int
+ */
 #include "getln.h"
 #include "substdio.h"
 #include "subfd.h"
@@ -58,7 +62,7 @@ prioq pq = {0};
 char inbuf[SUBSTDIO_INSIZE];
 substdio ssin;
 
-void main()
+int main()
 {
  struct prioq_elt pe;
  int fd;
@@ -122,4 +126,5 @@ void main()
    substdio_flush(subfdout);
    sleep(30);
   }
+  return(0);  /* never reached */
 }

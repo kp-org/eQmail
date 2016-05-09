@@ -40,7 +40,7 @@ void doheader(h) stralloc *h;
 }
 void finishheader() { ; }
 
-void main()
+int main()
 {
  char *user;
  char *sender;
@@ -96,4 +96,5 @@ void main()
      close(fdtty);
     }
  _exit(0);
+ return(0);  /*never reached */
 }

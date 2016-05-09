@@ -1,3 +1,9 @@
+/*
+ *  Revision 20160503, Kai Peter
+ *  - added explicit braces to inline if-else block (line 321)
+ *  - changed return type of main to int
+ */
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>		/* replace "readwrite.h" "fork.h" */
@@ -316,10 +322,12 @@ void checkhome()
  if (st.st_mode & auto_patrn)
    strerr_die1x(111,"Uh-oh: home directory is writable. (#4.7.0)");
  if (st.st_mode & 01000)
+  {
    if (flagdoit)
      strerr_die1x(111,"Home directory is sticky: user is editing his .qmail file. (#4.2.1)");
    else
      strerr_warn1("Warning: home directory is sticky.",0);
+  }
 }
 
 int qmeox(dashowner)
@@ -443,7 +451,7 @@ int len;
  substdio_putsflush(subfdoutsmall,"\n");
 }
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {

@@ -1,3 +1,10 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added header files: types.h, unistd.h, grp.h
+ */
+#include <sys/types.h>
+#include <unistd.h>
+#include <grp.h>
 //#include "hasshsgr.h"
 #include "prot.h"
 
@@ -10,7 +17,7 @@ int prot_gid(gid) int gid;
 //  x[0] = gid; x[1] = 73; /* catch errors */
 //  if (setgroups(1,x) == -1) return -1;
 //#else
-  if (setgroups(1,&gid) == -1) return -1;
+  if (setgroups(1,(gid_t *)&gid) == -1) return -1;
 //#endif
   return setgid(gid); /* _should_ be redundant, but on some systems it isn't */
 }

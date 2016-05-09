@@ -1,3 +1,9 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added '<unistd.h>, 'open.h'
+ */
+
 /* XXX: this program knows quite a bit about tcpto's internals */
 
 #include <sys/types.h>
@@ -14,6 +20,8 @@
 #include "now.h"
 #include "ipalloc.h"
 #include "tcpto.h"
+#include <unistd.h>
+#include "open.h"
 
 void die(n) int n; { substdio_flush(subfdout); _exit(n); }
 
@@ -36,7 +44,7 @@ struct tcpto_buf tcpto_buf[TCPTO_BUFSIZ];
 
 char tmp[FMT_ULONG + IPFMT];
 
-void main()
+int main()
 {
  int fdlock;
  int fd;
@@ -87,4 +95,5 @@ void main()
   }
 
  die(0);
+ return(0);  /* never reached */
 }

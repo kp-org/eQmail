@@ -1,3 +1,8 @@
+/*
+ *  Revision 20160503, Kai Peter
+ *  - added braces to inner if-else block
+ *  - changed return type of main to int
+ */
 #include "sig.h"
 #include "env.h"
 #include "substdio.h"
@@ -93,8 +98,10 @@ following address: ");
  qqx = qmail_close(&qqt);
 
  if (*qqx)
+ {
    if (*qqx == 'D') die_qqperm();
    else die_qqtemp();
+ }
 }
 
 stralloc hfbuf = {0};
@@ -119,7 +126,7 @@ stralloc *h;
 
 void dobody(h) stralloc *h; { ; }
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -128,4 +135,5 @@ char **argv;
  if (!(returnpath = env_get("SENDER"))) die_usage();
  if (headerbody(subfdin,doheaderfield,finishheader,dobody) == -1) die_read();
  die_noreceipt();
+ return(0);  /* never reached */
 }

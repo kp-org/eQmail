@@ -1,6 +1,12 @@
+/*
+ *  Revision 20160506, Kai Peter
+ *  - added '"close.h"' to prevent compiler warnings
+ */
 #include "stralloc.h"
 #include "slurpclose.h"
 #include "error.h"
+#include "readwrite.h"
+#include "close.h"
 
 int slurpclose(fd,sa,bufsize)
 int fd;

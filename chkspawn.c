@@ -1,3 +1,7 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ */
 #include "substdio.h"
 #include "subfd.h"
 #include "fmt.h"
@@ -8,7 +12,7 @@
 char num[FMT_ULONG];
 fd_set fds;
 
-void main()
+int main()
 {
   unsigned long hiddenlimit;
   unsigned long maxnumd;
@@ -45,4 +49,5 @@ limit in conf-spawn be at most ");
     _exit(1);
   }
   _exit(0);
+  return(0);  /* never reached */
 }

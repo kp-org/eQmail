@@ -1,10 +1,16 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added <sys/types.h>, <unistd.h>, 'byte.h', 'open.h'
+ */
+#include <sys/types.h>
+#include <unistd.h>
 #include "fd.h"
 #include "wait.h"
 #include "prot.h"
 #include "substdio.h"
 #include "stralloc.h"
 #include "scan.h"
-#include "exit.h"
+//#include "exit.h"
 #include "error.h"
 #include "cdb.h"
 #include "case.h"
@@ -12,6 +18,8 @@
 #include "auto_qmail.h"
 #include "auto_uids.h"
 #include "qlx.h"
+#include "byte.h"
+#include "open.h"
 
 char *aliasempty;
 

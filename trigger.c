@@ -1,6 +1,11 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added "close.h"
+ */
 #include "select.h"
 #include "open.h"
 #include "trigger.h"
+#include "close.h"
 
 static int fd = -1;
 

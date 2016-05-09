@@ -1,5 +1,12 @@
+/*
+ *  Revision 20160503, Kai Peter
+ *  - added parentheses to while conditions
+ *  - added unistd.h to slence warning of implicit declarations
+ *  - commented out unused var 'int r;' in maildir_scan()
+ */
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include "prioq.h"
 #include "env.h"
 #include "stralloc.h"
@@ -36,7 +43,7 @@ stralloc *tmpname;
  dir = opendir("tmp");
  if (!dir) return;
 
- while (d = readdir(dir))
+ while ((d = readdir(dir)))
   {
    if (d->d_name[0] == '.') continue;
    if (!stralloc_copys(tmpname,"tmp/")) break;
@@ -65,7 +72,7 @@ datetime_sec time;
  if (!dir)
    STRERR_SYS3(-1,maildir_scan_err,"unable to scan $MAILDIR/",subdir,": ")
 
- while (d = readdir(dir))
+ while ((d = readdir(dir)))
   {
    if (d->d_name[0] == '.') continue;
    pos = filenames->len;
@@ -95,7 +102,7 @@ int flagcur;
 {
  struct prioq_elt pe;
  datetime_sec time;
- int r;
+// int r;
 
  if (!stralloc_copys(filenames,"")) return 0;
  while (prioq_min(pq,&pe)) prioq_delmin(pq);

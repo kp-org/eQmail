@@ -1,3 +1,8 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added 'chdir.h', 'close.h'
+ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -17,6 +22,9 @@
 #include "auto_qmail.h"
 #include "control.h"
 #include "fmt.h"
+/* use internal headers instead of unistd.h */
+#include "chdir.h"
+#include "close.h"
 
 #define PORT_QMQP 628
 
@@ -135,7 +143,7 @@ char *server;
 
 stralloc servers = {0};
 
-main()
+int main()
 {
   int i;
   int j;
@@ -156,4 +164,5 @@ main()
     }
 
   _exit(lasterror);
+  return(0);
 }

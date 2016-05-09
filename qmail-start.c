@@ -1,7 +1,15 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added '<unistd.h>', 'sys/stat.h>'
+ */
 #include "fd.h"
 #include "prot.h"
 #include "exit.h"
 #include "auto_uids.h"
+/* @@ */
+#include <unistd.h>
+#include <sys/stat.h>
 
 char *(qsargs[]) = { "qmail-send", 0 };
 char *(qcargs[]) = { "qmail-clean", 0 };
@@ -26,7 +34,7 @@ void closepipes() {
   close(pi5[0]); close(pi5[1]); close(pi6[0]); close(pi6[1]);
 }
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -116,4 +124,5 @@ char **argv;
   closepipes();
   execvp(*qsargs,qsargs);
   die();
+  return(0);  /* never reached */
 }

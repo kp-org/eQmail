@@ -17,21 +17,14 @@ if [ `id -u` -ne 0 ] ; then echo "$0 have to be run as root!" ; exit 1 ; fi
 
 #********************************************************************************
 # define the first GID/UID
-<<<<<<< HEAD
-STARTGID=200
-STARTUID=200
-HOME=`head -1 conf-qmail`
-
-[ $STARTGID ] && [ $STARTUID ] || echo "Invalid ID! Aborting!"
-=======
-STARTGID=
-STARTUID=200
+. ./conf-vars
+#STARTGID=
+#STARTUID=200
 HOME=`head -1 conf-qmail`
 
 ([ -z $STARTGID ] || [ -z $STARTUID ]) && echo "Invalid ID! Aborting!"
 #([ -z $STARTGID ] || [ -z $STARTUID ]) && MSG="Invalid ID! Aborting!"
 #( [ -n $MSG ] && echo $MSG ; exit )
->>>>>>> dev
 [ $STARTGID ] && [ $STARTUID ] || exit;
 
 #********************************************************************************
@@ -65,8 +58,8 @@ if [ `uname | tr '/:[A-Z]' '..[a-z]'` = "freebsd" ] ; then
    PRG=$(which pw 2>/dev/null)" useradd" ; N="-n" ; fi
 
 # Error:
-[ $PRG ] ||  echo "Didn't know how to create users! Aborting!"
-[ $PRG ] || exit;
+[ "$PRG" ] ||  echo "Didn't know how to create users! Aborting!"
+[ "$PRG" ] || exit;
 
 # users
 if [ $STARTUID ] ; then NUID="$STARTUID" ; fi
@@ -82,7 +75,7 @@ do
     if [ $i -ge 5 ] ; then GID="nofiles" ; fi
     #
     [ $NUID ] && SETNUID="-u $NUID"
-    echo -n "$i: "
+#    echo -n "$i: "
     $PRG -g $GID -s /sbin/nologin $SETNUID -c "" -d $H $N $U && \
 	echo "Added user $U with group $GID!"
     [ $NUID ] && NUID=$(($NUID+1))  # increment the next NUID

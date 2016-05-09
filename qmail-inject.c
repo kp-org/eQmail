@@ -1,3 +1,9 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added parentheses to outer if
+ *  - added 'chdir.h', 'getpid.h'
+ */
 #include "sig.h"
 #include "substdio.h"
 #include "stralloc.h"
@@ -22,6 +28,9 @@
 #include "auto_qmail.h"
 #include "newfield.h"
 #include "constmap.h"
+/* use internal headers instead of unistd.h */
+#include "chdir.h"
+#include "getpid.h"
 
 #define LINELEN 80
 
@@ -106,7 +115,8 @@ void exitnicely()
      if (!stralloc_0(&reciplist.sa[i])) die_nomem();
      qmail_to(&qqt,reciplist.sa[i].s);
     }
-   if (flagrh)
+   if ((flagrh))
+   {
      if (flagresent)
        for (i = 0;i < hrrlist.len;++i)
 	{
@@ -119,9 +129,11 @@ void exitnicely()
          if (!stralloc_0(&hrlist.sa[i])) die_nomem();
 	 qmail_to(&qqt,hrlist.sa[i].s);
 	}
+   }
 
    qqx = qmail_close(&qqt);
    if (*qqx)
+   {
      if (*qqx == 'D') {
        substdio_puts(subfderr,"qmail-inject: fatal: ");
        substdio_puts(subfderr,qqx + 1);
@@ -136,6 +148,7 @@ void exitnicely()
        substdio_flush(subfderr);
        temp();
      }
+   }
   }
 
  _exit(0);
@@ -682,7 +695,7 @@ void getcontrols()
 #define RECIP_HEADER 3
 #define RECIP_AH 4
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -770,4 +783,5 @@ char **argv;
  if (headerbody(subfdin,doheaderfield,finishheader,dobody) == -1)
    die_read();
  exitnicely();
+ return(0);  /* never reached */
 }

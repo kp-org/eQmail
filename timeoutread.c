@@ -1,3 +1,8 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added <unistd.h>
+ */
+#include <unistd.h>
 #include "timeoutread.h"
 #include "select.h"
 #include "error.h"

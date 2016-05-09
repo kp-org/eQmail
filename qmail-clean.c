@@ -1,5 +1,12 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added <unistd.h>
+ *  - added parentheses to while condition
+ */
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include "sig.h"
 #include "now.h"
 #include "str.h"
@@ -30,7 +37,7 @@ void cleanuppid()
  time = now();
  dir = opendir("pid");
  if (!dir) return;
- while (d = readdir(dir))
+ while ((d = readdir(dir)))
   {
    if (str_equal(d->d_name,".")) continue;
    if (str_equal(d->d_name,"..")) continue;
@@ -48,7 +55,7 @@ char fnbuf[FMTQFN];
 
 void respond(s) char *s; { if (substdio_putflush(subfdoutsmall,s,1) == -1) _exit(100); }
 
-void main()
+int main()
 {
  int i;
  int match;
@@ -98,4 +105,5 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
      respond("x");
   }
  _exit(0);
+ return(0);  /* never reached */
 }

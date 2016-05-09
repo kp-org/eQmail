@@ -1,4 +1,13 @@
-#include <unistd.h>		/* replace "readwrite.h" "exit.h" */
+/*
+ *  Revision 20160503, Kai Peter
+ *  - added 'rename.h'
+ *
+ *  Revision 20169503, Kai Peter
+ *  - changed return type of main to int
+ *  - added 'sys/stat.h' to prevent compiler warnings
+ */
+#include <unistd.h>     /* replace "readwrite.h" "exit.h" */
+#include <sys/stat.h>
 #include "prioq.h"
 #include "env.h"
 #include "stralloc.h"
@@ -12,6 +21,7 @@
 #include "str.h"
 #include "myctime.h"
 #include "maildir.h"
+#include "rename.h"
 
 char *mbox;
 char *mboxtmp;
@@ -32,7 +42,7 @@ char outbuf[SUBSTDIO_OUTSIZE];
 
 void die_nomem() { strerr_die2x(111,FATAL,"out of memory"); }
 
-void main()
+int main()
 {
  substdio ssin;
  substdio ssout;
@@ -149,7 +159,7 @@ void main()
    strerr_die4sys(111,FATAL,"unable to write to ",mboxtmp,": ");
  if (rename(mboxtmp,mbox) == -1)
    strerr_die6(111,FATAL,"unable to move ",mboxtmp," to ",mbox,": ",&strerr_sys);
- 
+
  while (prioq_min(&pq2,&pe))
   {
    prioq_delmin(&pq2);
@@ -157,5 +167,5 @@ void main()
      strerr_warn4(WARNING,"$MAILDIR/",filenames.s + pe.id," will be delivered twice; unable to unlink: ",&strerr_sys);
   }
 
- _exit(0);
+ return(0);
 }

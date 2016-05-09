@@ -1,3 +1,8 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added parentheses to while condition
+ */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "stralloc.h"
@@ -104,7 +109,7 @@ void putstats()
 
 stralloc line = {0};
 
-void main()
+int main()
 {
  int channel;
  int match;
@@ -117,7 +122,7 @@ void main()
  if (chdir("queue") == -1) die_chdir();
  readsubdir_init(&rs,"info",die_opendir);
 
- while (x = readsubdir_next(&rs,&id))
+ while ((x = readsubdir_next(&rs,&id)))
    if (x > 0)
     {
      fmtqfn(fnmess,"mess/",id,1);
@@ -171,4 +176,5 @@ void main()
     }
 
  die(0);
+ return(0);  /* never reached */
 }

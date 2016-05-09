@@ -1,4 +1,9 @@
+/*
+ *  Revision 20150504, Kai Peter
+ *  - added '<unistd.h>' to prevent compiler warnings
+ */
 #include <sys/types.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <fcntl.h>

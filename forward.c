@@ -1,3 +1,7 @@
+/*
+ *  Revistion 20160503, Kai Peter
+ *  - changed return type of main to int
+ */
 #include "sig.h"
 #include "readwrite.h"		/* the original definitions */
 #include "exit.h"
@@ -26,7 +30,7 @@ substdio ssout = SUBSTDIO_FDBUF(mywrite,-1,outbuf,sizeof outbuf);
 
 char num[FMT_ULONG];
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -57,4 +61,5 @@ char **argv;
   qqx = qmail_close(&qqt);
   if (*qqx) strerr_die2x(*qqx == 'D' ? 100 : 111,FATAL,qqx + 1);
   strerr_die2x(0,"forward: qp ",num);
+  return(0);  /* never reached */
 }

@@ -1,4 +1,10 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added '<sys/stat.h>, 'byte.h', 'rename.h'
+ */
 #include <unistd.h>		/* replace "readwrite.h" "exit.h" */
+#include <sys/stat.h>
 #include "stralloc.h"
 #include "subfd.h"
 #include "getln.h"
@@ -8,6 +14,8 @@
 #include "error.h"
 #include "case.h"
 #include "auto_qmail.h"
+#include "byte.h"
+#include "rename.h"
 
 void die_temp() { _exit(111); }
 
@@ -67,7 +75,7 @@ int match;
 
 stralloc wildchars = {0};
 
-void main()
+int main()
 {
   int i;
   int numcolons;
@@ -133,4 +141,5 @@ void main()
   if (rename("users/cdb.tmp","users/cdb") == -1) die_rename();
 
   _exit(0);
+  return(0);  /* never reached */
 }

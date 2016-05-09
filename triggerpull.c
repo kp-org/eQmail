@@ -1,6 +1,13 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added 'close.h', declaration of 'write'
+ */
 #include "ndelay.h"
 #include "open.h"
 #include "triggerpull.h"
+
+#include "close.h"
+void write(int _fd, const char *_buf, int b);
 
 void triggerpull()
 {

@@ -1,3 +1,10 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added parentheses to conditions
+ *  - remove unused var 'int z;' from functon 'todo_do'
+ *  - added 'utime.h' and cast pointer of utime()
+ */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>		/* replace "readwrite.h" "exit.h" */
@@ -30,6 +37,7 @@
 #include "constmap.h"
 #include "fmtqfn.h"
 #include "readsubdir.h"
+#include <utime.h>
 
 /* critical timing feature #1: if not triggered, do not busy-loop */
 /* critical timing feature #2: if triggered, respond within fixed time */
@@ -147,7 +155,7 @@ char *recip;
 
   for (i = 0;i <= addr.len;++i)
     if (!i || (i == at + 1) || (i == addr.len) || ((i > at) && (addr.s[i] == '.')))
-      if (x = constmap(&mapvdoms,addr.s + i,addr.len - i)) {
+      if ((x = constmap(&mapvdoms,addr.s + i,addr.len - i))) {
         if (!*x) break;
         if (!stralloc_cats(&rwline,x)) return 0;
         if (!stralloc_cats(&rwline,"-")) return 0;
@@ -442,7 +450,7 @@ void pqstart()
 
  readsubdir_init(&rs,"info",pausedir);
 
- while (x = readsubdir_next(&rs,&id))
+ while ((x = readsubdir_next(&rs,&id)))
    if (x > 0)
      pqadd(id);
 }
@@ -459,7 +467,7 @@ void pqfinish()
      prioq_delmin(&pqchan[c]);
      fnmake_chanaddr(pe.id,c);
      ut[0] = ut[1] = pe.dt;
-     if (utime(fn.s,ut) == -1)
+     if (utime(fn.s, (const struct utimbuf *) &ut) == -1)
        log3("warning: unable to utime ",fn.s,"; message will be retried too soon\n");
     }
 }
@@ -585,7 +593,7 @@ char *recip;
 
  for (i = 0;i <= domainlen;++i)
    if ((i == 0) || (i == domainlen) || (domain[i] == '.'))
-     if (prepend = constmap(&mapvdoms,domain + i,domainlen - i))
+     if ((prepend = constmap(&mapvdoms,domain + i,domainlen - i)))
       {
        if (!*prepend) break;
        i = str_len(prepend);
@@ -1253,7 +1261,7 @@ fd_set *rfds;
  char ch;
  int match;
  unsigned long id;
- int z;
+// int z;
  int c;
  unsigned long uid;
  unsigned long pid;
@@ -1505,7 +1513,7 @@ void reread()
   }
 }
 
-void main()
+int main()
 {
  int fd;
  datetime_sec wakeup;
@@ -1602,4 +1610,5 @@ void main()
  pqfinish();
  log1("status: exiting\n");
  _exit(0);
+ return(0);  /* never reached */
 }

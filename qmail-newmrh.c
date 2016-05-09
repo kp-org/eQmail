@@ -1,4 +1,13 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added 'rename.h'
+ *
+ *  Revision 20160504, Kai Peter
+ *  - changed return type of main to int
+ *  - added '<sys/stat.h> to prevent compiler warnings
+ */
 #include <unistd.h>		/* replace "readwrite.h" "exit.h" */
+#include <sys/stat.h>
 #include "strerr.h"
 #include "stralloc.h"
 #include "substdio.h"
@@ -6,6 +15,8 @@
 #include "open.h"
 #include "auto_qmail.h"
 #include "cdbmss.h"
+#include "case.h"
+#include "rename.h"
 
 #define FATAL "qmail-newmrh: fatal: "
 
@@ -28,7 +39,7 @@ struct cdbmss cdbmss;
 stralloc line = {0};
 int match;
 
-void main()
+int main()
 {
   umask(033);
   if (chdir(auto_qmail) == -1)
@@ -66,4 +77,5 @@ void main()
     strerr_die2sys(111,FATAL,"unable to move control/morercpthosts.tmp to control/morercpthosts.cdb");
 
   _exit(0);
+  return(0);  /* never reached */
 }

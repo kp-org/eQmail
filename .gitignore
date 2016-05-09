@@ -17,3 +17,4 @@ conf-opt
 tmp
 trylib
 qmail-shctl
+*.indi

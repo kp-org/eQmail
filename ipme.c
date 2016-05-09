@@ -1,5 +1,10 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added "close.h"
+ */
 #include <sys/types.h>
 #include <sys/param.h>
+//#include <unistd.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -14,6 +19,9 @@
 #include "ipalloc.h"
 #include "stralloc.h"
 #include "ipme.h"
+
+//#include <arpa/inet.h>
+#include "close.h"
 
 static int ipmeok = 0;
 ipalloc ipme = {0};
@@ -88,6 +96,10 @@ int ipme_init()
     ifr = (struct ifreq *) x;
 #ifdef HASSALEN
     len = sizeof(ifr->ifr_name) + ifr->ifr_addr.sa_len;
+#else   /* Kai */
+    len = sizeof(*ifr);
+#endif
+
     if (len < sizeof(*ifr))
       len = sizeof(*ifr);
     if (ifr->ifr_addr.sa_family == AF_INET) {
@@ -99,7 +111,10 @@ int ipme_init()
           if (!ipalloc_append(&ipme,&ix)) { close(s); return 0; }
     }
 #ifdef INET6
-	else if (ifr->ifr_addr.sa_family == AF_INET6) {
+	else //{
+//      ix.af = AF_INET6;
+
+	if (ifr->ifr_addr.sa_family == AF_INET6) {
       sin6 = (struct sockaddr_in6 *) &ifr->ifr_addr;
       byte_copy(&ix.addr.ip6,16,&sin6->sin6_addr);
       ix.af = AF_INET6;
@@ -108,6 +123,7 @@ int ipme_init()
           if (!ipalloc_append(&ipme,&ix)) { close(s); return 0; }
     }
 #endif
+/*
 #else
     len = sizeof(*ifr);
     if (ioctl(s,SIOCGIFFLAGS,x) == 0)
@@ -122,12 +138,14 @@ int ipme_init()
 #ifdef INET6
       else if (ifr->ifr_addr.sa_family == AF_INET6) {
 	    sin6 = (struct sockaddr_in6 *) &ifr->ifr_addr;
-        ix.af = AF_INET6;
+//        ix.af = AF_INET6;
 	    byte_copy(&ix.addr.ip6,16,&sin6->sin6_addr);
+        ix.af = AF_INET6;
 	    if (!ipalloc_append(&ipme,&ix)) { close(s); return 0; }
 	  }
 #endif
-#endif
+*/
+//#endif
     x += len;
   }
   close(s);

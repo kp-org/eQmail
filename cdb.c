@@ -1,4 +1,9 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added '<unistd.h>'
+ */
 #include <sys/types.h>
+#include <unistd.h>
 #include <errno.h>
 #include "cdb.h"
 
@@ -7,9 +12,13 @@
 #endif
 /* Consolidated cdb_seek.c, cdb_hash.c, cdb_unpack.c to
    cdb.c, original files shipped with qmail-1.03.
-   The cdb code differs from the package cdb-0.75.   */
+   The cdb code differs from the package cdb-0.75.
+   Files:
+     - cdb_seek.c
+     - cdb_hash.c
+     - cdb_unpack.c                                  */
 
-/* file: cdb_seek.c */
+/* file: cdb_seek.c ************************************************* */
 int cdb_bread(fd,buf,len)
 int fd;
 char *buf;
@@ -97,7 +106,7 @@ uint32 *dlen;
   return 0;
 }
 
-/* file: cdb_hash.c */
+/* file: cdb_hash.c ************************************************* */
 uint32 cdb_hash(buf,len)
 unsigned char *buf;
 unsigned int len;
@@ -113,7 +122,7 @@ unsigned int len;
   return h;
 }
 
-/* file: cdb_unpack.c */
+/* file: cdb_unpack.c *********************************************** */
 uint32 cdb_unpack(buf)
 unsigned char *buf;
 {

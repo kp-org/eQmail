@@ -1,3 +1,8 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added 'sig.h'
+ */
 #include <sys/types.h>
 #include <time.h>
 #include "datetime.h"
@@ -9,6 +14,7 @@
 #include "subfd.h"
 #include <unistd.h>		/* replace "readwrite.h" "fork.h" */
 #include "exit.h"
+#include "sig.h"
 
 #define FATAL "predate: fatal: "
 
@@ -19,7 +25,7 @@ static char *montab[12] = {
 char num[FMT_ULONG];
 char outbuf[1024];
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -112,4 +118,5 @@ char **argv;
   if (wait_crashed(wstat))
     strerr_die2x(111,FATAL,"child crashed");
   _exit(wait_exitcode(wstat));
+  return(0);  /* never reached */
 }

@@ -1,3 +1,7 @@
+/*
+ *  Revision 20160504, Kai Peter
+ *  - changed return type of main to int
+ */
 #include <sys/types.h>
 #include <sys/time.h>
 #include <syslog.h>
@@ -45,7 +49,7 @@ void flush()
   bufpos = 0;
 }
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -69,4 +73,5 @@ char **argv;
     if ((ch < 32) || (ch > 126)) ch = '?'; /* logger truncates at 0; GPACIC */
     buf[bufpos++] = ch;
   }
+  return(0);  /* never reached */
 }

@@ -1,3 +1,8 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added 'byte.h'
+ */
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -16,6 +21,7 @@
 #include "auto_break.h"
 #include "auto_qmail.h"
 #include "auto_usera.h"
+#include "byte.h"
 
 void die_chdir()
 {
@@ -228,7 +234,7 @@ int fd;
 substdio ss;
 char ssbuf[SUBSTDIO_INSIZE];
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -309,4 +315,5 @@ char **argv;
   if (substdio_puts(subfdout,".\n") == -1) die_write();
   if (substdio_flush(subfdout) == -1) die_write();
   _exit(0);
+  return(0);  /* never reached */
 }

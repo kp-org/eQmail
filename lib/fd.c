@@ -1,5 +1,10 @@
+/*
+ *  Revision 20160503, Kai Peter
+ *  - removed duplicate '#include "fd.h"'
+ */
 #include <fcntl.h>
 #include "fd.h"
+#include "close.h"
 /* Consolidate the "fd_*.c"  functions into one source
    file. Original files were of date 19980615, shipped
    with qmail-1.03.
@@ -8,7 +13,7 @@
      - fd_copy.c             225    19980615
      - fd_move.c             156    19980615        */
 
-/* file: fd_copy.c */
+/* file: fd_copy.c ******************************** */
 int fd_copy(to,from)
 int to;
 int from;
@@ -19,9 +24,8 @@ int from;
   if (fcntl(from,F_DUPFD,to) == -1) return -1;
   return 0;
 }
-#include "fd.h"
 
-/* file: fd_move.c */
+/* file: fd_move.c ******************************** */
 int fd_move(to,from)
 int to;
 int from;

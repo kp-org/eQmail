@@ -1,3 +1,7 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>		/* replace "readwrite.h" "exit.h" */
@@ -150,7 +154,7 @@ void pidopen()
 
 char tmp[FMT_ULONG];
 
-void main()
+int main()
 {
  unsigned int len;
  char ch;
@@ -250,4 +254,5 @@ void main()
 
  triggerpull();
  die(0);
+ return(0);  /* never reached */
 }

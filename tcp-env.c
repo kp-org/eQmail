@@ -1,8 +1,15 @@
+/*
+ *  Revision 20160504, Kai Peter
+ *  - changed return type of main to int
+ *  - added '<unistd.h>' to prevent compiler warnings
+ *  - casting pointer: '(socklen_t *) &dummy'
+ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/param.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <unistd.h>
 #include "sig.h"
 #include "stralloc.h"
 #include "str.h"
@@ -61,7 +68,7 @@ void mappedtov4(union sockunion *sa)
 #define mappedtov4(A)
 #endif
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char *argv[];
 {
@@ -96,7 +103,7 @@ char *argv[];
    if (!env_put("PROTO=TCP")) die();
 
    dummy = sizeof(salocal);
-   if (getsockname(0,(struct sockaddr *) &salocal,&dummy) == -1) die();
+   if (getsockname(0,(struct sockaddr *) &salocal, (socklen_t *) &dummy) == -1) die();
 	mappedtov4(&salocal);
 	switch(salocal.sa.sa_family) {
 	case AF_INET:
@@ -146,7 +153,7 @@ char *argv[];
    }
 
    dummy = sizeof(saremote);
-   if (getpeername(0,(struct sockaddr *) &saremote,&dummy) == -1) die();
+   if (getpeername(0,(struct sockaddr *) &saremote, (socklen_t *) &dummy) == -1) die();
 	mappedtov4(&saremote);
 
 	switch(saremote.sa.sa_family) {
@@ -210,4 +217,5 @@ char *argv[];
  sig_pipedefault();
  execvp(*argv,argv);
  die();
+ return(0);  /* never reached */
 }
