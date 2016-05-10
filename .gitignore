@@ -18,3 +18,4 @@ tmp
 trylib
 qmail-shctl
 *.indi
+auto_vars.c

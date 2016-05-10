@@ -17,8 +17,8 @@ clean: TARGETS
 conf: configure
 	./configure
 
-install: instnew.sh
-	./instnew.sh
+install: install
+	./install
 
 setup: install
 
@@ -28,30 +28,14 @@ mans:
 libs:
 	cd lib ; make
 
-#auto-int8: compile load auto-int8.c substdio.a error.a str.a fs.a
-#	./compile auto-int8.c
-#	./load auto-int8 substdio.a error.a str.a fs.a
-
-#auto-int8.o: \
-#compile auto-int8.c
-#	./compile auto-int8.c
-
 auto_break.o: compile auto_break.c
 	./compile auto_break.c
 
-#auto_patrn.c: auto-int8 conf-patrn
-#	./auto-int8 auto_patrn `head -1 conf-patrn` > auto_patrn.c
-
 auto_patrn.o: compile conf-patrn
-# auto_patrn.c auto-int8
 	./compile auto-int8.c
 	./load auto-int8 substdio.a error.a str.a fs.a
 	./auto-int8 auto_patrn `head -1 conf-patrn` > auto_patrn.c
 	./compile auto_patrn.c
-
-#auto_patrn.o: \
-#compile auto_patrn.c
-#	./compile auto_patrn.c
 
 auto_qmail.o: compile auto_qmail.c
 	./compile auto_qmail.c
@@ -83,43 +67,46 @@ cdbmake.a: compile makelib cdbmake.c
 cdbmss.o: compile cdbmss.c
 	./compile cdbmss.c
 
-chkspawn: \
-load chkspawn.o substdio.a error.a str.a fs.a auto_spawn.o
-	./load chkspawn substdio.a error.a str.a fs.a auto_spawn.o 
-
-chkspawn.o: compile chkspawn.c 
+chkspawn: compile load chkspawn.c substdio.a error.a str.a fs.a auto_spawn.o
 	./compile chkspawn.c
+	./load chkspawn substdio.a error.a str.a fs.a auto_spawn.o 
 
 commands.o: compile commands.c
 	./compile commands.c
 
-condredirect: \
-load condredirect.o qmail.o strerr.a fd.a sig.a wait.a seek.a env.a \
-substdio.a error.a str.a fs.a auto_qmail.o
-	./load condredirect qmail.o strerr.a fd.a sig.a wait.a \
-	seek.a env.a substdio.a error.a str.a fs.a auto_qmail.o 
-
-condredirect.o: compile condredirect.c
+condredirect: compile load condredirect.c qmail.o strerr.a fd.a sig.a \
+wait.a seek.a env.a substdio.a error.a str.a fs.a auto_qmail.o
 	./compile condredirect.c
+	./load condredirect qmail.o strerr.a fd.a sig.a wait.a \
+	seek.a env.a substdio.a error.a str.a fs.a auto_qmail.o
 
-config: \
-warn-auto.sh config.sh conf-qmail conf-break conf-split
-	cat warn-auto.sh config.sh \
+config: warn-auto.sh config.sh config-plugs.sh conf-qmail conf-break conf-split
+	cat warn-auto.sh config.sh config-plugs.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> config
 	chmod 755 config
 
-config-bfrmt: warn-auto.sh config-bfrmt.sh conf-qmail
-	cat warn-auto.sh config-bfrmt.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g > config-bfrmt
-	chmod 755 config-bfrmt
+#config-plugs: warn-auto.sh config-plugs.sh conf-qmail
+#	cat warn-auto.sh config-plugs.sh \
+#	| sed s}QMAIL}"`head -1 conf-qmail`"}g > config-plugs
+##	chmod 755 config-plugs
 
-config-spp: warn-auto.sh config-spp.sh conf-qmail
-	cat warn-auto.sh config-spp.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g > config-spp
-	chmod 755 config-spp
+#config-bfque: warn-auto.sh config-bfque.sh conf-qmail
+#	cat warn-auto.sh config-bfque.sh \
+#	| sed s}QMAIL}"`head -1 conf-qmail`"}g > config-bfque
+#	chmod 755 config-bfque
+
+#config-bfrmt: warn-auto.sh config-bfrmt.sh conf-qmail
+#	cat warn-auto.sh config-bfrmt.sh \
+#	| sed s}QMAIL}"`head -1 conf-qmail`"}g > config-bfrmt
+#	chmod 755 config-bfrmt
+
+#config-spp: warn-auto.sh config-spp.sh conf-qmail
+#	cat warn-auto.sh config-spp.sh \
+#	| sed s}QMAIL}"`head -1 conf-qmail`"}g > config-spp
+#	chmod 755 config-spp
 
 constmap.o: compile constmap.c
 	./compile constmap.c
@@ -130,8 +117,7 @@ control.o: compile control.c
 date822fmt.o: compile date822fmt.c
 	./compile date822fmt.c
 
-datemail: \
-warn-auto.sh datemail.sh conf-qmail conf-break conf-split
+datemail: warn-auto.sh datemail.sh conf-qmail conf-break conf-split
 	cat warn-auto.sh datemail.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
@@ -205,32 +191,9 @@ wait.a sig.a env.a substdio.a error.a str.a fs.a auto_qmail.o
 gfrom.o: compile gfrom.c
 	./compile gfrom.c
 
-# needed by lock.o
-#hasflock.h: tryflock.c compile load
-#	( ( ./compile tryflock.c && ./load tryflock ) >/dev/null 2>&1 \
-#	&& echo \#define HASFLOCK 1 || exit 0 ) > hasflock.h
-#	rm -f tryflock.o tryflock
-
-hassalen.h: \
-trysalen.c compile
+hassalen.h: trysalen.c compile
 	( ./compile trysalen.c >/dev/null 2>&1 \
 	&& echo \#define HASSALEN 1 || exit 0 ) > hassalen.h
-#	rm -f trysalen.o
-
-#hasshsgr.h: \
-#chkshsgr warn-shsgr tryshsgr.c compile load
-#	./chkshsgr || ( cat warn-shsgr; exit 1 )
-#	( ( ./compile tryshsgr.c \
-#	&& ./load tryshsgr && ./tryshsgr ) >/dev/null 2>&1 \
-#	&& echo \#define HASSHORTSETGROUPS 1 || exit 0 ) > \
-#	hasshsgr.h
-#	rm -f tryshsgr.o tryshsgr
-
-# needed by wait.o (wait_pid)
-#haswaitp.h: trywaitp.c compile load
-#	( ( ./compile trywaitp.c && ./load trywaitp ) >/dev/null 2>&1 \
-#	&& echo \#define HASWAITPID 1 || exit 0 ) > haswaitp.h
-##	rm -f trywaitp.o trywaitp
 
 headerbody.o: compile headerbody.c
 	./compile headerbody.c
@@ -247,11 +210,11 @@ ipalloc.o: compile ipalloc.c
 ipme.o: compile ipme.c hassalen.h
 	./compile ipme.c
 
-ipmeprint: compile load ipmeprint.c ipme.o ip.o ipalloc.o \
-stralloc.a alloc.a substdio.a error.a str.a fs.a
-	./compile ipmeprint.c
-	./load ipmeprint ipme.o ip.o ipalloc.o stralloc.a alloc.a \
-	substdio.a error.a str.a fs.a
+#ipmeprint: compile load ipmeprint.c ipme.o ip.o ipalloc.o \
+#stralloc.a alloc.a substdio.a error.a str.a fs.a
+#	./compile ipmeprint.c
+#	./load ipmeprint ipme.o ip.o ipalloc.o stralloc.a alloc.a \
+#	substdio.a error.a str.a fs.a
 
 it: \
 qmail-local qmail-lspawn qmail-getpw qmail-remote qmail-rspawn \
@@ -260,10 +223,14 @@ predate datemail mailsubj qmail-showctl qmail-newu \
 qmail-pw2u qmail-qread qmail-qstat qmail-tcpto qmail-tcpok \
 qmail-qmqpc qmail-qmqpd qmail-qmtpd \
 qmail-smtpd sendmail tcp-env qmail-newmrh config \
-qreceipt qsmhook qbiff \
+qreceipt qsmhook \
 forward preline condredirect bouncesaying except maildirmake \
-maildir2mbox maildirwatch \
-update_tmprsadh config-spp qmail-bfrmt config-bfrmt ipmeprint
+maildir2mbox \
+update_tmprsadh qmail-before
+# config-plugs
+#config-spp config-bfrmt config-bfque
+#qmail-bfrmt config-bfrmt \
+#qmail-bfque# ipmeprint qbiff maildirwatch
 # this stuff is needed for config.sh only: (?)
 # dnscname dnsptr dnsip dnsmxip dnsfq 
 
@@ -284,26 +251,18 @@ alloc.a substdio.a error.a str.a fs.a datetime.a
 	gfrom.o lock.a getln.a env.a open.a strerr.a stralloc.a \
 	alloc.a substdio.a error.a str.a fs.a datetime.a 
 
-maildirmake: compile \
-load maildirmake.c strerr.a substdio.a error.a str.a
+maildirmake: compile load maildirmake.c strerr.a substdio.a error.a str.a
 	./compile maildirmake.c
 	./load maildirmake strerr.a substdio.a error.a str.a 
 
-maildirwatch: \
-load maildirwatch.o hfield.o headerbody.o maildir.o prioq.o now.o \
-getln.a env.a open.a strerr.a stralloc.a alloc.a substdio.a error.a \
-str.a
-	./load maildirwatch hfield.o headerbody.o maildir.o \
-	prioq.o now.o getln.a env.a open.a strerr.a stralloc.a \
-	alloc.a substdio.a error.a str.a 
+#maildirwatch: load maildirwatch.o hfield.o headerbody.o maildir.o prioq.o now.o \
+#getln.a env.a open.a strerr.a stralloc.a alloc.a substdio.a error.a str.a
+#	./load maildirwatch hfield.o headerbody.o maildir.o \
+#	prioq.o now.o getln.a env.a open.a strerr.a stralloc.a \
+#	alloc.a substdio.a error.a str.a 
 
-maildirwatch.o: \
-compile maildirwatch.c
-# getln.h substdio.h subfd.h substdio.h prioq.h \
-#datetime.h gen_alloc.h stralloc.h gen_alloc.h
-# str.h exit.h hfield.h \
-#open.h headerbody.h maildir.h strerr.h
-	./compile maildirwatch.c
+#maildirwatch.o: compile maildirwatch.c
+#	./compile maildirwatch.c
 
 mailsubj: warn-auto.sh mailsubj.sh conf-qmail conf-break conf-split
 	cat warn-auto.sh mailsubj.sh \
@@ -322,15 +281,14 @@ newfield.o: compile newfield.c
 now.o: compile now.c
 	./compile now.c
 
-predate: compile \
-load predate.c datetime.a strerr.a sig.a fd.a wait.a substdio.a \
-error.a str.a fs.a
+predate: compile load predate.c datetime.a strerr.a sig.a \
+fd.a wait.a substdio.a error.a str.a fs.a
 	./compile predate.c
 	./load predate datetime.a strerr.a sig.a fd.a wait.a \
 	substdio.a error.a str.a fs.a 
 
-preline: compile load preline.c strerr.a fd.a wait.a sig.a env.a \
-getopt.a substdio.a error.a str.a
+preline: compile load preline.c strerr.a fd.a wait.a sig.a \
+env.a getopt.a substdio.a error.a str.a
 	./compile preline.c
 	./load preline strerr.a fd.a wait.a sig.a env.a getopt.a \
 	substdio.a error.a str.a
@@ -341,17 +299,32 @@ prioq.o: compile prioq.c
 prot.o: compile prot.c
 	./compile prot.c
 
-qbiff: compile load qbiff.c headerbody.o hfield.o getln.a env.a \
-open.a stralloc.a alloc.a substdio.a error.a str.a
-	./compile qbiff.c
-	./load qbiff headerbody.o hfield.o getln.a env.a open.a \
-	stralloc.a alloc.a substdio.a error.a str.a 
+#qbiff: compile load qbiff.c headerbody.o hfield.o getln.a env.a \
+#open.a stralloc.a alloc.a substdio.a error.a str.a
+#	./compile qbiff.c
+#	./load qbiff headerbody.o hfield.o getln.a env.a open.a \
+#	stralloc.a alloc.a substdio.a error.a str.a 
 
-qmail-bfrmt: qmail-bfrmt.sh
-	cat warn-auto.sh qmail-bfrmt.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g > qmail-bfrmt
-	chmod 755 qmail-bfrmt && \
-	chgrp qmail qmail-bfrmt
+qmail-before: qmail-before.sh
+	cat warn-auto.sh qmail-before.sh \
+	| sed s}QMAILDIR}"`head -1 conf-qmail`"}g \
+	| sed s}BEFORE}"beforequeue"}g \
+	| sed s}PROG}"qmail-queue"}g > qmail-bfque
+	cat warn-auto.sh qmail-before.sh \
+	| sed s}QMAILDIR}"`head -1 conf-qmail`"}g \
+	| sed s}BEFORE}"beforemote"}g \
+	| sed s}PROG}"qmail-remote"}g > qmail-bfrmt
+	chmod 755 qmail-{bfque,bfrmt} && chgrp qmail qmail-{bfque,bfrmt}
+
+#qmail-bfque: qmail-bfque.sh
+#	cat warn-auto.sh qmail-bfque.sh \
+#	| sed s}QMAILDIR}"`head -1 conf-qmail`"}g > qmail-bfque
+#	chmod 755 qmail-bfque && chgrp qmail qmail-bfque
+
+#qmail-bfrmt: qmail-bfrmt.sh
+#	cat warn-auto.sh qmail-bfrmt.sh \
+#	| sed s}QMAILDIR}"`head -1 conf-qmail`"}g > qmail-bfrmt
+#	chmod 755 qmail-bfrmt && chgrp qmail qmail-bfrmt
 
 qmail-clean: compile load qmail-clean.c fmtqfn.o now.o getln.a sig.a \
 stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_split.o
@@ -396,13 +369,11 @@ substdio.a error.a str.a fs.a auto_qmail.o auto_uids.o auto_spawn.o
 	case.a cdb.a fd.a open.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a auto_qmail.o auto_uids.o auto_spawn.o
 
-qmail-newmrh: compile \
-load qmail-newmrh.c cdbmss.o getln.a open.a cdbmake.a seek.a case.a \
-stralloc.a alloc.a strerr.a substdio.a error.a str.a auto_qmail.o
+qmail-newmrh: compile load qmail-newmrh.c cdbmss.o getln.a open.a cdbmake.a \
+seek.a case.a stralloc.a alloc.a strerr.a substdio.a error.a str.a auto_qmail.o
 	./compile qmail-newmrh.c
-	./load qmail-newmrh cdbmss.o getln.a open.a cdbmake.a \
-	seek.a case.a stralloc.a alloc.a strerr.a substdio.a \
-	error.a str.a auto_qmail.o 
+	./load qmail-newmrh cdbmss.o getln.a open.a cdbmake.a seek.a case.a \
+	stralloc.a alloc.a strerr.a substdio.a error.a str.a auto_qmail.o
 
 qmail-newu: compile load qmail-newu.c cdbmss.o getln.a open.a seek.a \
 cdbmake.a case.a stralloc.a alloc.a substdio.a error.a str.a auto_qmail.o
@@ -418,7 +389,7 @@ auto_break.o auto_qmail.o
 	case.a getopt.a stralloc.a alloc.a substdio.a error.a str.a \
 	fs.a auto_usera.o auto_break.o auto_qmail.o 
 
-qmail-pw2u.o: compile qmail-pw2u.c 
+qmail-pw2u.o: compile qmail-pw2u.c
 	./compile qmail-pw2u.c
 
 qmail-qmqpc: \
@@ -520,11 +491,7 @@ auto_patrn.o auto_spawn.o auto_split.o
 	auto_qmail.o auto_break.o auto_patrn.o auto_spawn.o \
 	auto_split.o 
 
-qmail-showctl.o: \
-compile qmail-showctl.c
-# substdio.h subfd.h substdio.h
-#auto_uids.h auto_qmail.h auto_break.h auto_patrn.h auto_spawn.h \
-#auto_split.h
+qmail-showctl.o: compile qmail-showctl.c
 	./compile qmail-showctl.c
 
 qmail-spp.o: compile qmail-spp.c
@@ -559,15 +526,6 @@ substdio.a error.a str.a fs.a auto_qmail.o
 	./compile qmail-tcpto.c
 	./load qmail-tcpto ip.o now.o open.a lock.a substdio.a \
 	error.a str.a fs.a auto_qmail.o 
-
-#qmail-upq: \
-#warn-auto.sh qmail-upq.sh conf-qmail conf-break conf-split
-#	cat warn-auto.sh qmail-upq.sh \
-#	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-#	| sed s}BREAK}"`head -1 conf-break`"}g \
-#	| sed s}SPLIT}"`head -1 conf-split`"}g \
-#	> qmail-upq
-#	chmod 755 qmail-upq
 
 qmail.o: compile qmail.c
 	./compile qmail.c

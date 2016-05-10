@@ -1,3 +1,4 @@
+
   DOMAIN=$(echo `hostname -f` | cut -d. -f2- | tr '[A-Z]' '[a-z]')
   HOST=$(echo `hostname -f` | cut -d. -f1 | tr '[A-Z]' '[a-z]')
 
@@ -38,5 +39,3 @@
   echo 'Now qmail will refuse to accept SMTP messages except to those hosts.'
   echo 'Make sure to change rcpthosts if you add hosts to locals or virtualdomains!'
 
-. ./config-spp
-. ./config-bfrmt

@@ -16,7 +16,7 @@
 #include "byte.h"
 #include "timeoutconn.h"
 
-#include "ipalloc.h"
+//#include "ipalloc.h"
 
 //extern int read(int _str, void *_buf, int _b);
 

@@ -82,5 +82,8 @@ Makefile-cert
 update_tmprsadh
 config-spp
 qmail-bfrmt
-config-bfrmt
+#config-bfrmt
+qmail-bfque
+#config-bfque
+#config-plugs
 trylib

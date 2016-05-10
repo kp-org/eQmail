@@ -1,5 +1,27 @@
-Commit 1.10p3: !!! NOT PUSHED !!!
-20160507: - Makefile cleanup
+
+20160510: - new revisions (tag 20160510)
+          - removed ipmeprint, qbiff, maildirwatch
+          - added qmail-bfque, consolidated api plugins and config files
+          - clean up of Makefile, FILES
+
+Commit 1.10-Rev.20160509:
+20160509: - new revisions (tag 20160509)
+20160506: - new revisions (tag 20160506)
+20160504: - new revisions (tag 20150504)
+          - added 'pipe.h', 'exec.h', 'close.h'
+20160503: - started adding revision to source files
+          - new revisions: qmail-local.c, hfield.c, case.c, envread.c,
+            fd.c, fmt.c, qreceipt.c, qmshook.c, ipmeprint.c, except.c,
+            maildir.c, maildir*.c, bouncesaying.c, conredirect.c
+          - added 'qread' and 'qwrite' to 'readwrire.h'
+          - auto-int8.c: see changes in revision log
+          - added 'scan_8long()' to 'scan.h'
+20160502: - changed '(s,ip4)' --> '(s,&ip4)' in ip.c (line 74)
+          - eliminated duplicate code in 'ipme.c' for 'HASSALEN 1'
+20160427: - clean up of FILES
+
+Commit 1.10p3:
+20160407: - Makefile cleanup
           - removed dns{cname,ptr,ip,mxip,fq
           - rewrite of "config.sh"
           - added man pages: preline.1, datemail.1

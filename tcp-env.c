@@ -77,7 +77,7 @@ char *argv[];
  int opt;
  int flagremoteinfo;
  unsigned long timeout;
- struct sockaddr_in *v4;
+// struct sockaddr_in *v4;
 
  sig_pipeignore();
 

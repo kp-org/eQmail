@@ -1,4 +1,7 @@
 /*
+ *  Revision 20160510, Kai Peter
+ *  - added cast of some pointers
+ *
  *  Revision 20160509, Kai Peter
  *  - changed return type of main to int
  *  - casting pointers (char *)
@@ -134,7 +137,7 @@ void dropped() {
   out(" but connection died. ");
   if (flagcritical) out("Possible duplicate! ");
 #ifdef TLS
-  if (ssl_err_str) { out(ssl_err_str); out(" "); }
+  if (ssl_err_str) { out((char *)ssl_err_str); out(" "); }
 #endif
   out("(#4.4.2)\n");
   zerodie();
@@ -196,18 +199,18 @@ unsigned long smtpcode()
 
   if (!stralloc_copys(&smtptext,"")) temp_nomem();
 
-  get(&ch); code = ch - '0';
-  get(&ch); code = code * 10 + (ch - '0');
-  get(&ch); code = code * 10 + (ch - '0');
+  get((char *)&ch); code = ch - '0';
+  get((char *)&ch); code = code * 10 + (ch - '0');
+  get((char *)&ch); code = code * 10 + (ch - '0');
   for (;;) {
-    get(&ch);
+    get((char *)&ch);
     if (ch != '-') break;
-    while (ch != '\n') get(&ch);
-    get(&ch);
-    get(&ch);
-    get(&ch);
+    while (ch != '\n') get((char *)&ch);
+    get((char *)&ch);
+    get((char *)&ch);
+    get((char *)&ch);
   }
-  while (ch != '\n') get(&ch);
+  while (ch != '\n') get((char *)&ch);
 
   return code;
 }
@@ -357,7 +360,7 @@ char *partner_fqdn = 0;
 # define TLS_QUIT quit(ssl ? "; connected to " : "; connecting to ", "")
 void tls_quit(const char *s1, const char *s2)
 {
-  out(s1); if (s2) { out(": "); out(s2); } TLS_QUIT;
+  out((char *)s1); if (s2) { out(": "); out((char *)s2); } TLS_QUIT;
 }
 # define tls_quit_error(s) tls_quit(s, ssl_error())
 
@@ -411,7 +414,7 @@ int tls_init()
     for ( ; len && case_diffs(sa->s, "STARTTLS"); ++sa, --len) ;
     if (!len) {
       if (!servercert) return 0;
-      out("ZNo TLS achieved while "); out(servercert);
+      out("ZNo TLS achieved while "); out((char *)servercert);
       out(" exists"); smtptext.len = 0; TLS_QUIT;
     }
   }
@@ -472,7 +475,7 @@ int tls_init()
       SSL_free(myssl);
       if (!servercert) return 0;
       out("ZSTARTTLS rejected while ");
-      out(servercert); out(" exists"); TLS_QUIT;
+      out((char *)servercert); out(" exists"); TLS_QUIT;
     }
     smtptext.len = 0;
   }
@@ -698,7 +701,7 @@ int flagcname;
   canonbox.len = j;
   if (!quote(saout,&canonbox)) temp_nomem();
   if (!stralloc_cats(saout,"@")) temp_nomem();
- 
+
   if (!stralloc_copys(&canonhost,s + j + 1)) temp_nomem();
   if (flagcname)
     switch(dns_cname(&canonhost)) {
@@ -730,8 +733,9 @@ void getcontrols()
 }
 
 #ifdef INET6
-int ipme_is46(mxip)
-struct ip_mx *mxip;
+//int ipme_is46(mxip)
+//struct ip_mx *mxip;
+int ipme_is46(struct ip_mx *mxip)
 {
   switch(mxip->af) {
   case AF_INET:
@@ -768,15 +772,14 @@ char **argv;
   int flagallaliases;
   int flagalias;
   char *relayhost;
- 
+
   sig_pipeignore();
   if (argc < 4) perm_usage();
   if (chdir(auto_qmail) == -1) temp_chdir();
   getcontrols();
- 
- 
+
   if (!stralloc_copys(&host,argv[1])) temp_nomem();
- 
+
   if (!stralloc_copys(&auth_smtp_user,"")) temp_nomem();
   if (!stralloc_copys(&auth_smtp_pass,"")) temp_nomem();
 

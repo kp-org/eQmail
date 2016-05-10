@@ -1,5 +1,9 @@
 /*
  *  Revision 20160509, Kai Peter
+ *  - added string (argument) to call 'err_unimpl()'
+ *  - removed arguments from call 'err_authfail()'
+ *
+ *  Revision 20160509, Kai Peter
  *  - added 'close.h', base64,h, 'fd.h', 'getpid.h', 'chdir.h', 'sleep.h'
  *  - added declaration of 'spp_rcpt_accepted()'
  *  - changed callings 'die_nomem;' to 'die_nomem();'
@@ -897,7 +901,8 @@ char *arg;
       out(", go ahead (#2.0.0)\r\n");
       break;
     case 1:
-      err_authfail(user.s,authcmds[i].text);
+//      err_authfail(user.s,authcmds[i].text);
+      err_authfail();
   }
 }
 
@@ -911,7 +916,7 @@ const char *ssl_verify_err = 0;
 
 void smtp_tls(char *arg)
 {
-  if (ssl) err_unimpl();
+  if (ssl) err_unimpl("unimplemented");
   else if (*arg) out("501 Syntax error (no parameters allowed) (#5.5.4)\r\n");
   else tls_init();
 }

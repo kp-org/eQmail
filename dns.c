@@ -1,4 +1,7 @@
 /*
+ *  Revision 20160510, Kai Peter
+ *  - removed unused vars: 'i' (324), fqdn (383), txt (45)
+ *
  *  Revision 20160509, Kai Peter
  *  - added some parentheses
  *  - added 'byte.h'
@@ -40,7 +43,7 @@ static struct ip_address ip;
 #ifdef INET6
 static struct ip6_address ip6;
 #endif
-static stralloc txt = {0};
+//static stralloc txt = {0};
 unsigned short pref;
 
 static stralloc glue = {0};
@@ -337,7 +340,7 @@ static int iaafmt6(s,ip)
 char *s;
 struct ip6_address *ip;
 {
-  unsigned int i;
+//  unsigned int i;
   int j;
 //  unsigned int len;
   static char data[] = "0123456789abcdef";
@@ -391,9 +394,9 @@ int pref;
   int r;
   struct ip_mx ix = {0};
   int err4 = 0, err6 = 0;
-#ifdef TLS
-  stralloc fqdn = {0};
-#endif
+//#ifdef TLS
+//  stralloc fqdn = {0};
+//#endif
 
  if (!stralloc_copy(&glue,sa)) return DNS_MEM;
  if (!stralloc_0(&glue)) return DNS_MEM;
@@ -405,7 +408,6 @@ int pref;
 	if (!ipalloc_append(ia,&ix)) return DNS_MEM;
 	return 0;
     }
- 
  }
 
 #ifdef INET6
@@ -429,7 +431,7 @@ int pref;
 #endif
 
  switch(resolve(sa,T_A))
-  {
+ {
 	case DNS_MEM: err4 = DNS_MEM; break;
 	case DNS_SOFT: err4 = DNS_SOFT; break;
 	case DNS_HARD: err4 = DNS_HARD; break;
@@ -441,14 +443,14 @@ int pref;
 	ix.pref = pref;
 	if (r == DNS_SOFT) { err4 = DNS_SOFT; break; }
 	if (r == 1) {
-
 #ifdef IX_FQDN
      ix.fqdn = glue.s;
 #endif
 	if (!ipalloc_append(ia,&ix)) { err4 = DNS_MEM; break; }
 	}
-	break;
   }
+  break;
+ }
 #ifdef IX_FQDN
  glue.s = 0;
 #endif
@@ -460,7 +462,7 @@ int pref;
 #else
   return err4;
 #endif
-  }
+//  }
 }
 int dns_ip(ia,sa)
 ipalloc *ia;

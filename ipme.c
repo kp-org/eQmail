@@ -4,7 +4,6 @@
  */
 #include <sys/types.h>
 #include <sys/param.h>
-//#include <unistd.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -19,8 +18,6 @@
 #include "ipalloc.h"
 #include "stralloc.h"
 #include "ipme.h"
-
-//#include <arpa/inet.h>
 #include "close.h"
 
 static int ipmeok = 0;
