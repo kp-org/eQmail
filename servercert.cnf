@@ -1,0 +1,32 @@
+# This is the openssl config file to generate keys for qmail
+
+[ req ]
+# higher values will make things (much) slower
+default_bits = 2048
+# leave the rest of these alone!
+encrypt_key = yes
+distinguished_name = req_dn
+x509_extensions = cert_type
+prompt = no
+
+[ req_dn ]
+# 2-Letter ISO country code
+C=US
+# FULL name of state/province/district (NO abbreviations!)
+ST=Alabama
+# FULL name of city
+# NO abbreviations!
+L=Mobile
+# Full Name of your organization
+# NO abbreviations!
+O=Foobar Systems
+# Leave this alone unless specifically need to change it!
+OU=Automatically-generated Qmail SMTP SSL key
+# This should be a FQDN that resolves to the IP of your server
+CN=localhost
+# This should be the email address for the administrator of the server
+emailAddress=postmaster@localhost
+
+# Leave this alone!
+[ cert_type ]
+nsCertType = server

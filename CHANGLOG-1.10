@@ -1,4 +1,11 @@
-
+Commit 1.10-Rev.20160513
+20160513: - improved mkusers script, added getopts and option switches
+          - improved 'configure', added searchHeaders function
+20160512: - consolidated config(.sh)
+          - added mkservercerts, servercert.cnf
+          - changed TLS make/install process
+          - renamed/changed update_tmprsadh.sh -> mkrsadhkeys.sh
+          - clean up of Makefile, FILES, TARGETS
 20160510: - new revisions (tag 20160510)
           - removed ipmeprint, qbiff, maildirwatch
           - added qmail-bfque, consolidated api plugins and config files

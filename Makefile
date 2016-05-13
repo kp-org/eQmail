@@ -7,26 +7,25 @@ SHELL=/bin/sh
 # link files
 # create man pages
 
-default: conf libs it mans
+default: conf libs it manpages
 
 clean: TARGETS
-	rm -f *.o *.a `cat TARGETS`
+	rm -f *.o *.a cc-*.tmp `cat TARGETS`
 	cd lib ; make clean
 	cd man ; make clean
 
 conf: configure
 	./configure
 
-install: install
+install: setup
+setup:
 	./install
 
-setup: install
-
-mans:
+manpages:
 	cd man/ ; make
 
 libs:
-	cd lib ; make
+	@cd lib ; make
 
 auto_break.o: compile auto_break.c
 	./compile auto_break.c
@@ -80,33 +79,22 @@ wait.a seek.a env.a substdio.a error.a str.a fs.a auto_qmail.o
 	./load condredirect qmail.o strerr.a fd.a sig.a wait.a \
 	seek.a env.a substdio.a error.a str.a fs.a auto_qmail.o
 
-config: warn-auto.sh config.sh config-plugs.sh conf-qmail conf-break conf-split
-	cat warn-auto.sh config.sh config-plugs.sh \
+#config: warn-auto.sh config.sh config-plugs.sh conf-qmail conf-break conf-split
+#	cat warn-auto.sh config.sh config-plugs.sh \
+#	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+#	| sed s}BREAK}"`head -1 conf-break`"}g \
+#	| sed s}SPLIT}"`head -1 conf-split`"}g \
+#	> config
+#	chmod 755 config
+
+config: warn-auto.sh config.sh conf-qmail conf-break conf-split
+	@echo Creating config ...
+	@cat warn-auto.sh config.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> config
 	chmod 755 config
-
-#config-plugs: warn-auto.sh config-plugs.sh conf-qmail
-#	cat warn-auto.sh config-plugs.sh \
-#	| sed s}QMAIL}"`head -1 conf-qmail`"}g > config-plugs
-##	chmod 755 config-plugs
-
-#config-bfque: warn-auto.sh config-bfque.sh conf-qmail
-#	cat warn-auto.sh config-bfque.sh \
-#	| sed s}QMAIL}"`head -1 conf-qmail`"}g > config-bfque
-#	chmod 755 config-bfque
-
-#config-bfrmt: warn-auto.sh config-bfrmt.sh conf-qmail
-#	cat warn-auto.sh config-bfrmt.sh \
-#	| sed s}QMAIL}"`head -1 conf-qmail`"}g > config-bfrmt
-#	chmod 755 config-bfrmt
-
-#config-spp: warn-auto.sh config-spp.sh conf-qmail
-#	cat warn-auto.sh config-spp.sh \
-#	| sed s}QMAIL}"`head -1 conf-qmail`"}g > config-spp
-#	chmod 755 config-spp
 
 constmap.o: compile constmap.c
 	./compile constmap.c
@@ -216,29 +204,23 @@ ipme.o: compile ipme.c hassalen.h
 #	./load ipmeprint ipme.o ip.o ipalloc.o stralloc.a alloc.a \
 #	substdio.a error.a str.a fs.a
 
-it: \
+it: qmail-before\
 qmail-local qmail-lspawn qmail-getpw qmail-remote qmail-rspawn \
 qmail-clean qmail-send qmail-start splogger qmail-queue qmail-inject \
 predate datemail mailsubj qmail-showctl qmail-newu \
 qmail-pw2u qmail-qread qmail-qstat qmail-tcpto qmail-tcpok \
-qmail-qmqpc qmail-qmqpd qmail-qmtpd \
-qmail-smtpd sendmail tcp-env qmail-newmrh config \
+qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-smtpd \
+sendmail tcp-env qmail-newmrh \
 qreceipt qsmhook \
-forward preline condredirect bouncesaying except maildirmake \
-maildir2mbox \
-update_tmprsadh qmail-before
-# config-plugs
-#config-spp config-bfrmt config-bfque
-#qmail-bfrmt config-bfrmt \
-#qmail-bfque# ipmeprint qbiff maildirwatch
+forward preline condredirect bouncesaying except maildirmake maildir2mbox \
+config mkrsadhkeys mkservercerts
+#update_tmprsadh
 # this stuff is needed for config.sh only: (?)
 # dnscname dnsptr dnsip dnsmxip dnsfq 
 
 # idedit config-fast hostname qmail-upq qail elq pinq
 #home home+df proc proc+df binm1 binm1+df binm2 binm2+df \
 #binm3 binm3+df 
-#qmail-pop3d qmail-popup 
-#install-big install instcheck 
 
 maildir.o: compile maildir.c 
 	./compile maildir.c
@@ -316,16 +298,6 @@ qmail-before: qmail-before.sh
 	| sed s}PROG}"qmail-remote"}g > qmail-bfrmt
 	chmod 755 qmail-{bfque,bfrmt} && chgrp qmail qmail-{bfque,bfrmt}
 
-#qmail-bfque: qmail-bfque.sh
-#	cat warn-auto.sh qmail-bfque.sh \
-#	| sed s}QMAILDIR}"`head -1 conf-qmail`"}g > qmail-bfque
-#	chmod 755 qmail-bfque && chgrp qmail qmail-bfque
-
-#qmail-bfrmt: qmail-bfrmt.sh
-#	cat warn-auto.sh qmail-bfrmt.sh \
-#	| sed s}QMAILDIR}"`head -1 conf-qmail`"}g > qmail-bfrmt
-#	chmod 755 qmail-bfrmt && chgrp qmail qmail-bfrmt
-
 qmail-clean: compile load qmail-clean.c fmtqfn.o now.o getln.a sig.a \
 stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_split.o
 	./compile qmail-clean.c
@@ -381,52 +353,37 @@ cdbmake.a case.a stralloc.a alloc.a substdio.a error.a str.a auto_qmail.o
 	./load qmail-newu cdbmss.o getln.a open.a seek.a cdbmake.a \
 	case.a stralloc.a alloc.a substdio.a error.a str.a auto_qmail.o
 
-qmail-pw2u: \
-load qmail-pw2u.o constmap.o control.o open.a getln.a case.a getopt.a \
-stralloc.a alloc.a substdio.a error.a str.a fs.a auto_usera.o \
-auto_break.o auto_qmail.o
+qmail-pw2u: compile load qmail-pw2u.c constmap.o control.o open.a \
+getln.a case.a getopt.a stralloc.a alloc.a substdio.a error.a str.a \
+fs.a auto_usera.o auto_break.o auto_qmail.o
+	./compile qmail-pw2u.c
 	./load qmail-pw2u constmap.o control.o open.a getln.a \
 	case.a getopt.a stralloc.a alloc.a substdio.a error.a str.a \
 	fs.a auto_usera.o auto_break.o auto_qmail.o 
 
-qmail-pw2u.o: compile qmail-pw2u.c
-	./compile qmail-pw2u.c
-
-qmail-qmqpc: \
-load qmail-qmqpc.o slurpclose.o timeoutread.o timeoutwrite.o \
-timeoutconn.o ip.o control.o auto_qmail.o sig.a ndelay.a open.a \
-getln.a substdio.a stralloc.a alloc.a error.a str.a fs.a
+qmail-qmqpc: compile load qmail-qmqpc.c slurpclose.o timeoutread.o \
+timeoutwrite.o timeoutconn.o ip.o control.o auto_qmail.o sig.a ndelay.a \
+open.a getln.a substdio.a stralloc.a alloc.a error.a str.a fs.a
+	./compile qmail-qmqpc.c
 	./load qmail-qmqpc slurpclose.o timeoutread.o \
 	timeoutwrite.o timeoutconn.o ip.o control.o auto_qmail.o \
 	sig.a ndelay.a open.a getln.a substdio.a stralloc.a alloc.a \
 	error.a str.a fs.a
 
-qmail-qmqpc.o: \
-compile qmail-qmqpc.c
-	./compile qmail-qmqpc.c
-
-qmail-qmqpd: \
-load qmail-qmqpd.o received.o now.o date822fmt.o qmail.o auto_qmail.o \
-env.a substdio.a sig.a error.a wait.a fd.a str.a datetime.a fs.a
+qmail-qmqpd: compile load qmail-qmqpd.c received.o now.o date822fmt.o qmail.o \
+auto_qmail.o env.a substdio.a sig.a error.a wait.a fd.a str.a datetime.a fs.a
+	./compile qmail-qmqpd.c
 	./load qmail-qmqpd received.o now.o date822fmt.o qmail.o \
 	auto_qmail.o env.a substdio.a sig.a error.a wait.a fd.a \
 	str.a datetime.a fs.a 
 
-qmail-qmqpd.o: compile qmail-qmqpd.c
-	./compile qmail-qmqpd.c
-
-qmail-qmtpd: \
-load qmail-qmtpd.o rcpthosts.o control.o constmap.o received.o \
-date822fmt.o now.o qmail.o cdb.a fd.a wait.a datetime.a open.a \
-getln.a sig.a case.a env.a stralloc.a alloc.a substdio.a error.a \
-str.a fs.a auto_qmail.o
-	./load qmail-qmtpd rcpthosts.o control.o constmap.o \
-	received.o date822fmt.o now.o qmail.o cdb.a fd.a wait.a \
-	datetime.a open.a getln.a sig.a case.a env.a stralloc.a \
-	alloc.a substdio.a error.a str.a fs.a auto_qmail.o 
-
-qmail-qmtpd.o: compile qmail-qmtpd.c
+qmail-qmtpd: compile load qmail-qmtpd.c rcpthosts.o control.o constmap.o \
+received.o date822fmt.o now.o qmail.o cdb.a fd.a wait.a datetime.a open.a \
+getln.a sig.a case.a env.a stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o
 	./compile qmail-qmtpd.c
+	./load qmail-qmtpd rcpthosts.o control.o constmap.o received.o date822fmt.o \
+	now.o qmail.o cdb.a fd.a wait.a datetime.a open.a getln.a sig.a case.a env.a \
+	stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o
 
 qmail-qread: compile load qmail-qread.c fmtqfn.o readsubdir.o date822fmt.o \
 datetime.a open.a getln.a stralloc.a alloc.a substdio.a error.a str.a fs.a \
@@ -622,23 +579,44 @@ trigger.o: compile trigger.c
 triggerpull.o: compile triggerpull.c
 	./compile triggerpull.c
 
-cert cert-req: Makefile-cert
-	@$(MAKE) -sf $< $@
+#cert cert-req: Makefile-cert
+#	@$(MAKE) -sf $< $@
 
-Makefile-cert: \
-conf-qmail conf-users conf-groups Makefile-cert.mk
-	@cat Makefile-cert.mk \
+# create Makefile-cert from Makefile-cert.mk
+#Makefile-cert: \
+#conf-qmail conf-users conf-groups Makefile-cert.mk
+#	@cat Makefile-cert.mk \
+#	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+#	> $@
+
+mkrsadhkeys: \
+conf-qmail conf-users conf-groups mkrsadhkeys.sh warn-auto.sh
+	@cat warn-auto.sh mkrsadhkeys.sh\
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}UID}"`head -2 conf-users | tail -1`"}g \
+	| sed s}GID}"`head -1 conf-groups`"}g \
 	> $@
+	@echo creating $@
+	@chmod 755 $@
+#	| sed s}UGQMAILD}"`head -2 conf-users | tail -1`.`head -1 conf-groups`"}g \
 
-update_tmprsadh: \
-conf-qmail conf-users conf-groups update_tmprsadh.sh
-	@cat update_tmprsadh.sh\
-	| sed s}UGQMAILD}"`head -2 conf-users|tail -1`:`head -1 conf-groups`"}g \
+#update_tmprsadh: \
+#conf-qmail conf-users conf-groups update_tmprsadh.sh
+#	@cat update_tmprsadh.sh\
+#	| sed s}UGQMAILD}"`head -2 conf-users|tail -1`:`head -1 conf-groups`"}g \
+#	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+#	> $@
+#	chmod 755 update_tmprsadh 
+
+#tmprsadh: update_tmprsadh
+#	echo "Creating new temporary RSA and DH parameters"
+#	./update_tmprsadh
+
+mkservercerts: mkservercerts.sh conf-users conf-groups warn-auto.sh
+	@cat warn-auto.sh mkservercerts.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}UID}"`head -2 conf-users | tail -1`"}g \
+	| sed s}GID}"`head -1 conf-groups`"}g \
 	> $@
-	chmod 755 update_tmprsadh 
-
-tmprsadh: update_tmprsadh
-	echo "Creating new temporary RSA and DH parameters"
-	./update_tmprsadh
+	@echo creating $@
+	@chmod 755 $@

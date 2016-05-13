@@ -1,7 +1,7 @@
 #!/bin/sh
 #********************************************************************************
 # Configure script of eQmail-1.10
-#CRITICAL="0"
+CRITICAL=""
 
 echo -n "Checking system ... "
 OS=`uname -s | tr '/:[A-Z]' '..[a-z]'` ; echo -n $OS > systype
@@ -11,18 +11,20 @@ ARCH=`uname -m` ; echo -n ":$ARCH" >> systype
 echo "build on "${ARCH}"!"
 
 # check for system tools (required)
-for f in hostname [ test make perl
+for f in bash hostname [ test make perl
 do
-   echo -n "Checking for $f ... "
-   which $f 2>/dev/null
-   if [ $? -ne 0 ] ; then echo "not found!" ; exit 1 ; fi
+  echo -n "Checking for $f ... "
+  which $f 2>/dev/null
+  if [ $? -ne 0 ] ; then echo "not found!" ; exit 1 ; fi
 done
+
 # check for optional tools
 for f in php
 do
-   echo -n "Checking for $f ... "
-   which $f 2>/dev/null
-   if [ $? -ne 0 ] ; then echo "not found!" ; else echo $f > _$f.tmp ; fi
+  echo -n "Checking for $f ... "
+  which $f 2>/dev/null
+  if [ $? -ne 0 ] ; then echo "not found! Ignoring!" 
+  else echo $f > _$f.tmp ; fi
 done
 
 #********************************************************************************
@@ -33,7 +35,7 @@ do
   t=`echo $cf | cut -d- -f2`
   if [ ! $t == "cc" ] && [ ! $t == "ld" ] && \
      [ ! $t == "groups" ] && [ ! $t == "patrn" ] && [ ! $t == "opt" ] ; then
-  echo -n "Checking config file $cf ... "
+     echo -n "Checking config file $cf ... "
 #     echo -n "Found $cf ... "
      # user alias
      if [ $t == "users" ] ; then t="usera" ; fi
@@ -48,11 +50,12 @@ done
 #
 echo "int auto_spawn = `head -1 conf-spawn`;" > auto_spawn.c
 echo "int auto_split = `head -1 conf-split`;" > auto_split.c
+. inc/chkcc.inc
 
 #********************************************************************************
 # checking that users from conf-users are exists
-  id -u $(head -1 conf-users) 2>&1 >/dev/null  #|| (echo "run mkusers" ; exit 1)
-  if [ $? -ne 0 ] ; then echo "Create users first!" ; exit 1 ; fi
+#  id -u $(head -1 conf-users) 2>&1 >/dev/null  #|| (echo "run mkusers" ; exit 1)
+#  if [ $? -ne 0 ] ; then echo "Create users first!" ; exit 1 ; fi
 for i in 2 3 4 5 6 7 8
 do
   id -u `head -$i conf-users | tail -1` 2>&1 >/dev/null
@@ -77,15 +80,30 @@ echo " ... auto_uids.c created!"
 
 #********************************************************************************
 # check for header files
-CCOPTS=""
+CCOPTS=" -I ./inc"
+
+function searchHeaders () {
+  # search for headers given by the '-I' option in conf-cc
+  R=1 ; [ -f cc-inc.tmp ] && ( \
+  for l in $(cat cc-inc.tmp | grep $1) ; do
+    if [ -d $l ] || [ -f $1 ] ; then R=0 ; fi
+  done )
+  return $R
+}
+
 echo -n "Checking for select.h ..."
 if [ -f /usr/include/sys/select.h ] ; then CCOPTS="$CCOPTS -DHAS_SELECT_H"
    else echo -n " not" ; fi
 echo " found!"
-#echo -n "Checking for openssl.h ..."
-#if [ -f /usr/include/ssl.openssl.h ] ; then CCOPTS="$CCOPTS -DHAS_SELECT_H"
-#   else echo -n " not" ; fi
-#echo " found!"
+
+echo -n "Checking for openssl headers ..."
+if [ ! -d /usr/include/openssl ] ; then
+   searchHeaders openssl
+#   if [ ! -d /usr/local/openssl/include ] ; then
+   if [ $R -ne 0 ] ; then
+      echo -ne " NOT" ; CRITICAL="$CRITICAL openssl" ; fi
+fi
+echo " found!"
 
 # On linux we have flock, other systems have lockf instead
 echo -n "Checking for flock/lockf ..."
@@ -93,7 +111,6 @@ which flock 2>/dev/null >/dev/null
 if [ $? -eq 0 ] ; then CCOPTS="$CCOPTS -DHASFLOCK=1" ; echo -n " flock"
    else echo -n " lockf" ; fi
 echo " found!"
-
 
 #********************************************************************************
 # Create compile, load, makelib
@@ -133,4 +150,9 @@ rm -f trylib
 
 #********************************************************************************
 echo
-echo "Done! Now run make."
+if [ $CRITICAL ] ; then
+   echo "Critical:"$CRITICAL "not found!"; 
+#   exit
+ else
+   echo "Done! Now run make."
+fi

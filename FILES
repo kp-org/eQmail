@@ -221,6 +221,8 @@ cdbmss.c
 coe.3
 coe.h
 coe.c
+constmap.h
+constmap.c
 fd.h
 fd.c
 #fifo_make.3
@@ -368,9 +370,10 @@ maildir.5
 maildir.h
 maildir.c
 tcp-environ.5
-constmap.h
-constmap.c
 qmail-spp.8
 smtpplugins.man
 qmail-before.sh
 qmail-bfrmt.man
+
+mkrsadhkeys
+mkservercerts

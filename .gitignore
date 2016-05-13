@@ -5,6 +5,7 @@ extras
 *.bck
 *.orig
 *.rej
+*.tmp
 *.o
 *.a
 *.0
@@ -14,8 +15,9 @@ makelib
 _*
 trysyslog
 conf-opt
+conf-vars
+auto_vars.c
 tmp
 trylib
 qmail-shctl
 *.indi
-auto_vars.c

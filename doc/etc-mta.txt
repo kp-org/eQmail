@@ -1,0 +1,46 @@
+The /etc/mta configuration switch
+
+UNIX vendors generally supply a sendmail binary in /usr/lib/sendmail. UNIX mail 
+clients generally send mail by running /usr/lib/sendmail.
+
+This mechanism provides very little opportunity for reconfiguration. What happens 
+if the system administrator decides to use another MTA? He has to remove 
+/usr/lib/sendmail and replace it with an appropriate executable or symlink for the new MTA.
+
+Unfortunately, each operating system upgrade includes a new version of sendmail. The 
+system administrator's /usr/lib/sendmail replacement is obliterated.
+
+Solution: UNIX vendors can move the sendmail binary elsewhere, and supply /usr/lib/sendmail 
+as a symlink to the binary. OS upgrades will change the sendmail binary without touching 
+the symlink. The system administrator can safely change the symlink to point to his new MTA.
+
+/etc/mta is a refined version of this solution, dealing with several MTA features above and 
+beyond /usr/lib/sendmail. Here's the picture:
+
+- /etc/mta/send sends a message, and offers sendmail-style options.
+- /etc/mta/rmail sends a message, and offers rmail-style options.
+- /etc/mta/start starts mail delivery (and perhaps SMTP service) in the background.
+- /etc/mta/stop stops mail delivery (and perhaps SMTP service).
+- /etc/mta/showqueue displays the mail queue in a human-readable format.
+- /etc/mta/runqueue starts delivery of all messages in the queue.
+- /etc/mta/hourly performs hourly tasks such as log rotation. (Most MTAs handle these 
+  functions automatically inside /etc/mta/start.)
+- /etc/mta/showfailures displays a list of unreachable hosts in a human-readable format.
+- /etc/mta/clearfailures empties the list of unreachable hosts.
+- /etc/mta/newaliases tells the MTA that /etc/aliases has changed.
+- /etc/mta/newconf tells the MTA to read new configuration files on the fly. (This might 
+  not handle as many configuration changes as stop+start, and it usually does not include newaliases.)
+- /etc/mta is actually a symlink to a new /usr/lib/mta/sendmail directory. The system administrator 
+  can replace /etc/mta with a symlink to an analogous directory for another MTA.
+
+For compatibility, /usr/lib/sendmail is symlinked to /etc/mta/send; /usr/bin/newaliases is symlinked 
+to /etc/mta/newaliases; /usr/bin/mailq is symlinked to /etc/mta/showqueue; /usr/bin/hoststat is 
+symlinked to /etc/mta/showfailures; /usr/bin/purgestat is symlinked to /etc/mta/clearfailures; and /
+bin/rmail is symlinked to /etc/mta/rmail.
+
+I have a script that converts a sendmail installation into an installation that uses /etc/mta. 
+Exception: The system's boot scripts should be changed to use /etc/mta/start; my script doesn't know how to do this.
+
+Note that some vendors have changed the paths for sendmail, newaliases, et al.; for example, 
+/usr/lib/sendmail is sometimes called /usr/sbin/sendmail, and /usr/bin/mailq is sometimes called 
+/usr/ucb/mailq. My script checks all the usual locations and sets up appropriate symlinks.

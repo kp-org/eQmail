@@ -61,12 +61,12 @@ mkfifo -m 0622     $QMAILDIR/queue/lock/trigger 2>/dev/null
 chown $UIDS.$GIDQ  $QMAILDIR/queue/lock/trigger
 
 # bin
-cp bouncesaying condredirect datemail except forward \
-   maildir2mbox maildirmake mailsubj predate                   $QMAILDIR/bin
+cp bouncesaying condredirect datemail except forward maildir2mbox \
+   maildirmake mailsubj mkservercerts mkrsadhkeys predate         $QMAILDIR/bin
 cp qmail-{bfque,bfrmt,clean,getpw,inject,local,lspawn,newmrh,newu} \
    qmail-{pw2u,qmqpc,qmqpd,qmtpd,qread,qstat,queue,remote} \
-   qmail-{rspawn,send,showctl,smtpd,start,tcpok,tcpto}         $QMAILDIR/bin
-cp qreceipt qsmhook sendmail splogger tcp-env update_tmprsadh  $QMAILDIR/bin
+   qmail-{rspawn,send,showctl,smtpd,start,tcpok,tcpto}            $QMAILDIR/bin
+cp qreceipt qsmhook sendmail splogger tcp-env                     $QMAILDIR/bin
 
 chown $UIDO.$GIDQ  $QMAILDIR/bin/*
 chmod 0755         $QMAILDIR/bin/*
@@ -78,8 +78,6 @@ chmod 0700 $QMAILDIR/bin/qmail-{lspawn,start,newu,newmrh}
 chown $UIDQ.$GIDQ  $QMAILDIR/bin/qmail-queue
 chmod 04711        $QMAILDIR/bin/qmail-queue
 
-#  c(auto_qmail,"bin","update_tmprsadh",auto_uido,auto_gidq,0755);
-
 # create aliases
 cd $QMAILDIR/alias
 touch .qmail-root
@@ -89,4 +87,5 @@ chmod 644 .*
 chown $UIDA.qmail .*
 cd $OLDPWD
 
+# control
 . ./config

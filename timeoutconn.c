@@ -88,8 +88,8 @@ int timeout;
 
   if (ndelay_on(s) == -1) return -1;
 
+/* the rest below is duplicate of ipv4 */
   /* XXX: could bind s */
-
   if (connect(s,(struct sockaddr *) &sin,sizeof(sin)) == 0) {
     ndelay_off(s);
     return 0;

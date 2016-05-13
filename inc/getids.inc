@@ -1,7 +1,8 @@
 #!/bin/sh
 #********************************************************************************
-#
-#echo -n "Checking users and groups"
+# Get users/groups from 'conf-{users,groups}'.  Used by the 'configure' and     *
+# 'install' scripts.
+#********************************************************************************
 UIDA="$(id -u `head -1 conf-users | tail -1`)"
 UIDD="$(id -u `head -2 conf-users | tail -1`)"
 UIDL="$(id -u `head -3 conf-users | tail -1`)"

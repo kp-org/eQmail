@@ -81,17 +81,17 @@ strerr.a: ../makelib strerr.c
 wait.a: ../makelib wait.c
 	../makelib ../wait.a wait.o
 
-dns.o: compile dns.c
-	./compile dns.c
+#dns.o: compile dns.c
+#	./compile dns.c
 
-timeoutconn.o: compile timeoutconn.c
-	./compile timeoutconn.c
+#timeoutconn.o: compile timeoutconn.c
+#	./compile timeoutconn.c
 
-timeoutread.o: compile timeoutread.c
-	./compile timeoutread.c
+#timeoutread.o: compile timeoutread.c
+#	./compile timeoutread.c
 
-timeoutwrite.o: compile timeoutwrite.c
-	./compile timeoutwrite.c
+#timeoutwrite.o: compile timeoutwrite.c
+#	./compile timeoutwrite.c
 
-token822.o: compile token822.c
-	./compile token822.c
+#token822.o: compile token822.c
+#	./compile token822.c
