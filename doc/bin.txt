@@ -1,0 +1,48 @@
+from https://cr.yp.to/qmail/var-qmail.html
+
+
+
+Precompiled var-qmail packages
+
+Installing a var-qmail package has five effects:
+the qmail uids and gids are created if necessary;
+qmail, dot-forward, and fastforward are installed in /var/qmail;
+/var/qmail/rc is created to invoke dot-forward and the operating system's normal /var/spool/mail delivery agent;
+/var/qmail/alias/.qmail-default is created to use /etc/aliases from fastforward; and
+the qmail config-fast script is run, to set up normal machine-specific defaults in /var/qmail/control.
+Running qmail
+
+A var-qmail package does not set up qmail to receive and deliver mail. A user has to follow the instructions in /var/qmail/doc/fastforward/ALIASES and in /var/qmail/doc/INSTALL starting at step 9:
+create /etc/aliases if it does not exist;
+run /var/qmail/bin/newaliases to create /etc/aliases.cdb;
+remove sendmail if necessary;
+link /usr/{lib,sbin}/sendmail to /var/qmail/bin/sendmail;
+run /var/qmail/rc, now and after a reboot;
+start qmail-smtpd on port 25, now and after a reboot, through inetd or tcpserver.
+There is an aftermarket of third-party qmail-run packages that automate this process. Here are some problems faced by the authors of qmail-run packages:
+Removing sendmail: How is the sendmail daemon killed? Is there any risk to user processes? How is the sendmail queue flushed? How is the sendmail binary disabled?
+Editing boot scripts: How is /var/qmail/rc added to the boot scripts? Are the boot scripts always in a safe state if the power goes out? If there is a sendmail invocation, how is it identified and removed?
+Editing /etc/inetd.conf: How is qmail-smtpd added to /etc/inetd.conf? Is /etc/inetd.conf always in a safe state if the power goes out? If there is an existing smtp line, how is it identified and removed?
+Of course, these aren't problems for an operating system that includes qmail as the default MTA.
+qmail-run packages can also make extra links from /usr/bin and /usr/sbin into /var/qmail/bin:
+
+Normal users run datemail, dot-forward, elq, fastforward, maildir2mbox, maildirmake, maildirwatch, mailsubj, newinclude, pinq, printforward, printmaillist, qail, qmail-inject, qmail-showctl, qmail-tcpto, setmaillist, setforward, and sendmail.
+System administrators run newaliases, qmail-newmrh, qmail-newu, qmail-pw2u, qmail-qread, qmail-qstat, and qmail-tcpok.
+Building a var-qmail package
+
+Here's what I do to put a var-qmail package together:
+Download qmail 1.03. Remove -s from conf-ld. Compile and install. Strip the binaries in /var/qmail/bin.
+Download, compile, and install dot-forward.
+Download, compile, and install fastforward.
+Make an empty directory for the binary package. Move there.
+Copy /var/qmail/{boot,doc,doc/*,bin,man/*}/*.
+Create an add-group script. ``add-group $group'' uses OS utilities to add $group to /etc/group.
+Create an add-account script. ``add-account $account $group $home'' uses OS utilities to add $account to /etc/passwd with group $group and home directory $home.
+Copy idedit, install-big, and config-fast from the qmail source directory.
+Copy BIN.Makefile from the qmail source directory to Makefile.
+Edit the last several lines of Makefile to handle the system's grep, hostname, and binmail.
+Find the byte positions of auto_uid* and auto_gid* in install-big, qmail-lspawn, qmail-queue, qmail-rspawn, qmail-showctl, and qmail-start in the qmail source directory, using nm and system-specific knowledge. List the byte positions on the idedit lines in Makefile.
+Copy BIN.README from the qmail source directory to README.
+Edit README to show the compilation environment.
+chmod 644 *.
+chmod 755 idedit install-big config-fast add-group add-account.

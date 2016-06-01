@@ -1,9 +1,8 @@
 qmail
 nofiles
 
-These are the qmail groups. The second group should not have access to
-any files, but it must be usable for processes; this requirement
+These are the qmail groups. The second group should not have access
+to any files, but it must be usable for processes; this requirement
 excludes the ``nogroup'' and ``nobody'' groups on many systems.
 
-The names can be changed but the order for what a group is for have to
-been kept!
+The names can be changed but the order have to been kept!

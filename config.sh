@@ -2,10 +2,12 @@
 # some basics
 DOMAIN=$(echo `hostname -f` | cut -d. -f2- | tr '[A-Z]' '[a-z]')
 HOST=$(echo `hostname -f` | cut -d. -f1 | tr '[A-Z]' '[a-z]')
+FQDN="$HOST"
+if [ "$HOST" != "$DOMAIN" ] ; then FQDN="$HOST"."$DOMAIN" ; fi
 
 [ -f QMAIL/control/me ] || (
-  echo Putting "$HOST.$DOMAIN" into control/me...
-  echo "$HOST.$DOMAIN" > QMAIL/control/me
+  echo Putting "$FQDN" into control/me...
+  echo "$FQDN" > QMAIL/control/me
   chmod 644 QMAIL/control/me
   )
 
@@ -23,8 +25,8 @@ HOST=$(echo `hostname -f` | cut -d. -f1 | tr '[A-Z]' '[a-z]')
 
 [ -f QMAIL/control/locals ] || (
   echo ' '
-  echo Adding "$HOST.$DOMAIN" to control/locals...
-  echo "$HOST.$DOMAIN" >> QMAIL/control/locals
+  echo Adding "$FQDN" to control/locals...
+  echo "$FQDN" >> QMAIL/control/locals
   )
 
 echo ' '
@@ -42,21 +44,7 @@ echo ' '
 echo 'Now qmail will refuse to accept SMTP messages except to those hosts.'
 echo 'Make sure to change rcpthosts if you add hosts to locals or virtualdomains!'
 
-# create servercert.cnf and TLS/SSL keys and certificates
-[ -f QMAIL/control/servercert.cnf ] || (
-  cat servercert.cnf | sed s{localhost{"`hostname -f`"{g \
-  > QMAIL/control/servercert.cnf
-  chmod 640 QMAIL/control/servercert.cnf
-  chown root.qmail QMAIL/control/servercert.cnf
-  echo
-  echo "Edit QMAIL/control/servercert.cnf before creating certificates."
-  )
-mkdir -p QMAIL/control/tlshosts
-[ -f QMAIL/control/servercert.pem ] || ( \
-  ./mkrsadhkeys
-  ./mkservercerts
-  )
-
+#********************************************************************************
 # create control/smtpplugins
 [ -f QMAIL/control/smtpplugins ] || \
 ( echo "Creating empty smtpplugins config file..."
@@ -96,3 +84,21 @@ np=\"\$BINDIR/qmail-remote\" ; exec \$np \"\$@\"
 "       >> QMAIL/control/beforemote
 chown root:qmail QMAIL/control/beforemote
 chmod 644 QMAIL/control/beforemote     )
+
+#********************************************************************************
+# create servercert.cnf and TLS/SSL keys and certificates
+[ -f QMAIL/control/servercert.cnf ] || (
+  cat servercert.cnf | sed s{localhost{"`hostname -f`"{g \
+  > QMAIL/control/servercert.cnf
+  chmod 640 QMAIL/control/servercert.cnf
+  chown root:qmail QMAIL/control/servercert.cnf
+#  echo
+#  echo "Edit QMAIL/control/servercert.cnf before creating certificates."
+  )
+mkdir -p QMAIL/control/tlshosts
+[ -f QMAIL/control/servercert.pem ] || ( \
+  echo
+  echo "Creating temporary keys and self-signed certificate ..."
+  ./mkrsadhkeys
+  ./mkservercerts
+  )

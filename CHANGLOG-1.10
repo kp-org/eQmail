@@ -1,3 +1,12 @@
+20160530: - some correction at install script
+20160523: - new revision (tag 20160523), qmail-start
+20160520: - install script: set rights/owner for qmail home dir
+20160519: - changed dot to colon for chown arguments
+          - removed bash style syntax
+
+20160517: - extended qmail-qstat to count more queue dirs
+20160516: - added to extend $(MAN)PATH variables (experimental)
+
 Commit 1.10-Rev.20160513
 20160513: - improved mkusers script, added getopts and option switches
           - improved 'configure', added searchHeaders function

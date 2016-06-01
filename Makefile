@@ -10,7 +10,7 @@ SHELL=/bin/sh
 default: conf libs it manpages
 
 clean: TARGETS
-	rm -f *.o *.a cc-*.tmp `cat TARGETS`
+	rm -f *.o *.a cc-*.tmp _has*.tmp `cat TARGETS`
 	cd lib ; make clean
 	cd man ; make clean
 
@@ -79,14 +79,6 @@ wait.a seek.a env.a substdio.a error.a str.a fs.a auto_qmail.o
 	./load condredirect qmail.o strerr.a fd.a sig.a wait.a \
 	seek.a env.a substdio.a error.a str.a fs.a auto_qmail.o
 
-#config: warn-auto.sh config.sh config-plugs.sh conf-qmail conf-break conf-split
-#	cat warn-auto.sh config.sh config-plugs.sh \
-#	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-#	| sed s}BREAK}"`head -1 conf-break`"}g \
-#	| sed s}SPLIT}"`head -1 conf-split`"}g \
-#	> config
-#	chmod 755 config
-
 config: warn-auto.sh config.sh conf-qmail conf-break conf-split
 	@echo Creating config ...
 	@cat warn-auto.sh config.sh \
@@ -120,51 +112,6 @@ datetime.a: compile makelib datetime.c
 dns.o: compile dns.c
 	./compile dns.c
 
-#dnscname: load dnscname.o dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-#alloc.a substdio.a error.a str.a fs.a dns.lib
-#	./load dnscname dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-#	alloc.a substdio.a error.a str.a fs.a  `cat dns.lib`
-
-#dnscname.o: compile dnscname.c
-#	./compile dnscname.c
-
-#dnsdoe.o: compile dnsdoe.c
-#	./compile dnsdoe.c
-
-#dnsfq: load dnsfq.o dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-#alloc.a substdio.a error.a str.a fs.a dns.lib
-#	./load dnsfq dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-#	alloc.a substdio.a error.a str.a fs.a  `cat dns.lib`
-
-#dnsfq.o: compile dnsfq.c
-#	./compile dnsfq.c
-
-#dnsip: libs \
-#load dnsip.o dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-#substdio.a error.a str.a fs.a dns.lib
-#	./load dnsip dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-#	alloc.a substdio.a error.a str.a fs.a `cat dns.lib`
-
-#dnsip.o: compile dnsip.c
-#	./compile dnsip.c
-
-#dnsmxip: \
-#load dnsmxip.o dns.o dnsdoe.o ip.o ipalloc.o now.o stralloc.a alloc.a \
-#substdio.a error.a str.a fs.a dns.lib
-#	./load dnsmxip dns.o dnsdoe.o ip.o ipalloc.o now.o \
-#	stralloc.a alloc.a substdio.a error.a str.a fs.a  `cat dns.lib`
-
-#dnsmxip.o: compile dnsmxip.c
-#	./compile dnsmxip.c
-
-#dnsptr: \
-#load dnsptr.o dns.o dnsdoe.o ip.o ipalloc.o stralloc.a alloc.a \
-#substdio.a error.a str.a fs.a dns.lib
-#	./load dnsptr dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-#	alloc.a substdio.a error.a str.a fs.a  `cat dns.lib`
-
-#dnsptr.o: compile dnsptr.c
-#	./compile dnsptr.c
 
 except: compile load except.c strerr.a error.a substdio.a str.a wait.a
 	./compile except.c
@@ -198,12 +145,6 @@ ipalloc.o: compile ipalloc.c
 ipme.o: compile ipme.c hassalen.h
 	./compile ipme.c
 
-#ipmeprint: compile load ipmeprint.c ipme.o ip.o ipalloc.o \
-#stralloc.a alloc.a substdio.a error.a str.a fs.a
-#	./compile ipmeprint.c
-#	./load ipmeprint ipme.o ip.o ipalloc.o stralloc.a alloc.a \
-#	substdio.a error.a str.a fs.a
-
 it: qmail-before\
 qmail-local qmail-lspawn qmail-getpw qmail-remote qmail-rspawn \
 qmail-clean qmail-send qmail-start splogger qmail-queue qmail-inject \
@@ -214,13 +155,7 @@ sendmail tcp-env qmail-newmrh \
 qreceipt qsmhook \
 forward preline condredirect bouncesaying except maildirmake maildir2mbox \
 config mkrsadhkeys mkservercerts
-#update_tmprsadh
-# this stuff is needed for config.sh only: (?)
-# dnscname dnsptr dnsip dnsmxip dnsfq 
-
-# idedit config-fast hostname qmail-upq qail elq pinq
-#home home+df proc proc+df binm1 binm1+df binm2 binm2+df \
-#binm3 binm3+df 
+# idedit qmail-upq
 
 maildir.o: compile maildir.c 
 	./compile maildir.c
@@ -236,15 +171,6 @@ alloc.a substdio.a error.a str.a fs.a datetime.a
 maildirmake: compile load maildirmake.c strerr.a substdio.a error.a str.a
 	./compile maildirmake.c
 	./load maildirmake strerr.a substdio.a error.a str.a 
-
-#maildirwatch: load maildirwatch.o hfield.o headerbody.o maildir.o prioq.o now.o \
-#getln.a env.a open.a strerr.a stralloc.a alloc.a substdio.a error.a str.a
-#	./load maildirwatch hfield.o headerbody.o maildir.o \
-#	prioq.o now.o getln.a env.a open.a strerr.a stralloc.a \
-#	alloc.a substdio.a error.a str.a 
-
-#maildirwatch.o: compile maildirwatch.c
-#	./compile maildirwatch.c
 
 mailsubj: warn-auto.sh mailsubj.sh conf-qmail conf-break conf-split
 	cat warn-auto.sh mailsubj.sh \
@@ -281,12 +207,6 @@ prioq.o: compile prioq.c
 prot.o: compile prot.c
 	./compile prot.c
 
-#qbiff: compile load qbiff.c headerbody.o hfield.o getln.a env.a \
-#open.a stralloc.a alloc.a substdio.a error.a str.a
-#	./compile qbiff.c
-#	./load qbiff headerbody.o hfield.o getln.a env.a open.a \
-#	stralloc.a alloc.a substdio.a error.a str.a 
-
 qmail-before: qmail-before.sh
 	cat warn-auto.sh qmail-before.sh \
 	| sed s}QMAILDIR}"`head -1 conf-qmail`"}g \
@@ -296,7 +216,8 @@ qmail-before: qmail-before.sh
 	| sed s}QMAILDIR}"`head -1 conf-qmail`"}g \
 	| sed s}BEFORE}"beforemote"}g \
 	| sed s}PROG}"qmail-remote"}g > qmail-bfrmt
-	chmod 755 qmail-{bfque,bfrmt} && chgrp qmail qmail-{bfque,bfrmt}
+	chmod 754 qmail-bfque qmail-bfrmt
+	chgrp qmail qmail-bfque qmail-bfrmt
 
 qmail-clean: compile load qmail-clean.c fmtqfn.o now.o getln.a sig.a \
 stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_split.o
@@ -579,16 +500,6 @@ trigger.o: compile trigger.c
 triggerpull.o: compile triggerpull.c
 	./compile triggerpull.c
 
-#cert cert-req: Makefile-cert
-#	@$(MAKE) -sf $< $@
-
-# create Makefile-cert from Makefile-cert.mk
-#Makefile-cert: \
-#conf-qmail conf-users conf-groups Makefile-cert.mk
-#	@cat Makefile-cert.mk \
-#	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-#	> $@
-
 mkrsadhkeys: \
 conf-qmail conf-users conf-groups mkrsadhkeys.sh warn-auto.sh
 	@cat warn-auto.sh mkrsadhkeys.sh\
@@ -598,19 +509,6 @@ conf-qmail conf-users conf-groups mkrsadhkeys.sh warn-auto.sh
 	> $@
 	@echo creating $@
 	@chmod 755 $@
-#	| sed s}UGQMAILD}"`head -2 conf-users | tail -1`.`head -1 conf-groups`"}g \
-
-#update_tmprsadh: \
-#conf-qmail conf-users conf-groups update_tmprsadh.sh
-#	@cat update_tmprsadh.sh\
-#	| sed s}UGQMAILD}"`head -2 conf-users|tail -1`:`head -1 conf-groups`"}g \
-#	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-#	> $@
-#	chmod 755 update_tmprsadh 
-
-#tmprsadh: update_tmprsadh
-#	echo "Creating new temporary RSA and DH parameters"
-#	./update_tmprsadh
 
 mkservercerts: mkservercerts.sh conf-users conf-groups warn-auto.sh
 	@cat warn-auto.sh mkservercerts.sh \

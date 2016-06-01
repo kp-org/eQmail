@@ -13,11 +13,11 @@ if [ $? -ne 0 ] ; then
 
 "$OPENSSL" genrsa -out QMAIL/control/rsa2048.new 2048 &&
 chmod 600 QMAIL/control/rsa2048.new &&
-chown UID.GID QMAIL/control/rsa2048.new &&
+chown UID:GID QMAIL/control/rsa2048.new &&
 mv -f QMAIL/control/rsa2048.new QMAIL/control/rsa2048.pem
 echo
 
 "$OPENSSL" dhparam -2 -out QMAIL/control/dh2048.new 2048 &&
 chmod 600 QMAIL/control/dh2048.new &&
-chown UID.GID QMAIL/control/dh2048.new &&
+chown UID:GID QMAIL/control/dh2048.new &&
 mv -f QMAIL/control/dh2048.new QMAIL/control/dh2048.pem

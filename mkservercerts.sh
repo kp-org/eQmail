@@ -40,7 +40,7 @@ echo "Creating self-signed certificate"
 	-config ${CNFFILE} -out ${PEMFILE} -keyout ${PEMFILE} -rand ${RNDFILE} || cleanup
 echo "Certificate details"
 "$OPENSSL" x509 -subject -dates -fingerprint -noout -in ${PEMFILE} || cleanup
-chown UID.GID ${PEMFILE}
+chown UID:GID ${PEMFILE}
 chmod 0640 ${PEMFILE}
 [ -L ${CONFDIR}/clientcert.pem ] || ln -s ${PEMFILE} ${CONFDIR}/clientcert.pem
 rm -f $RNDFILE

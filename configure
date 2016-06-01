@@ -19,12 +19,12 @@ do
 done
 
 # check for optional tools
-for f in php
+for f in svc start-stop-daemon tcpserver xinetd php
 do
   echo -n "Checking for $f ... "
   which $f 2>/dev/null
   if [ $? -ne 0 ] ; then echo "not found! Ignoring!" 
-  else echo $f > _$f.tmp ; fi
+  else echo `which "$f"` > _has.$f.tmp ; fi
 done
 
 #********************************************************************************
@@ -36,7 +36,6 @@ do
   if [ ! $t == "cc" ] && [ ! $t == "ld" ] && \
      [ ! $t == "groups" ] && [ ! $t == "patrn" ] && [ ! $t == "opt" ] ; then
      echo -n "Checking config file $cf ... "
-#     echo -n "Found $cf ... "
      # user alias
      if [ $t == "users" ] ; then t="usera" ; fi
      echo "char auto_$t[] = \""`head -1 $cf`"\";" > auto_"$t".c
@@ -82,13 +81,14 @@ echo " ... auto_uids.c created!"
 # check for header files
 CCOPTS=" -I ./inc"
 
-function searchHeaders () {
+#function searchHeaders () {
+searchHeaders() {
   # search for headers given by the '-I' option in conf-cc
-  R=1 ; [ -f cc-inc.tmp ] && ( \
+  RC=1 ; [ -f cc-inc.tmp ] && ( \
   for l in $(cat cc-inc.tmp | grep $1) ; do
-    if [ -d $l ] || [ -f $1 ] ; then R=0 ; fi
+    if [ -d $l ] || [ -f $1 ] ; then RC=0 ; fi
   done )
-  return $R
+  return $RC
 }
 
 echo -n "Checking for select.h ..."
@@ -100,7 +100,7 @@ echo -n "Checking for openssl headers ..."
 if [ ! -d /usr/include/openssl ] ; then
    searchHeaders openssl
 #   if [ ! -d /usr/local/openssl/include ] ; then
-   if [ $R -ne 0 ] ; then
+   if [ $RC -ne 0 ] ; then
       echo -ne " NOT" ; CRITICAL="$CRITICAL openssl" ; fi
 fi
 echo " found!"
