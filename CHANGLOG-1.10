@@ -23,7 +23,7 @@ Commit 1.10p3: !!! NOT PUSHED !!!
           - added "file exists" check to config.sh
 20160405: - consolidated strerr_* into strerr.c
           - removed 'socket.lib'
-		  - moved libresolv check (dns.lib) to configure script, added trylib.c
+          - moved libresolv check (dns.lib) to configure script, added trylib.c
           - removed HASSIG* code (trysgprm.c, trysgact.c, sig.c)
           - moved seek.c, sig.c, stralloc.c, wait.c --> lib/
           - moved seek.h, sig.h, stralloc.h, wait.h --> inc/
@@ -41,8 +41,7 @@ Commit 1.10p2:
           - removed hier.c, install.c, install-big.c, instcheck.c
 20160324: - moved byte.h, case.h, coe.h, env.h, error.h, str.h, gen_alloc.h,
             gen_allocdefs.h, fd.h, exit.h, fifo.h, fmt.h, lock.h, open.h,
-            scan.c, ndelay.h
-			to inc/
+            scan.c, ndelay.h to inc/
           - moved alloc.c, byte.c, case.c, coe.c, env.c, envread.c, error.c,
             error_{str,temp}.c, str.c, fd.c, fmt.c, open.c, scan.c, ndelay.c
             to lib/

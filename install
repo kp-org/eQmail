@@ -1,17 +1,22 @@
 #!/bin/sh
+#********************************************************************************
 # eQmail-1.10 install script
-
-QMAILDIR=`head -1 conf-qmail`/test
+#
+# Having a comfortable shell like bash available always would make
+# things much easier and the code more compact!
+#********************************************************************************
+QMAILDIR=`head -1 conf-qmail`
+SPLIT=`head -1 conf-split`
 . inc/getids.inc
 
 # man pages
-mkdir -p $QMAILDIR/man/{man1,man5,man7,man8}
 for i in 1 5 7 8 ; do
-cp man/$i/* $QMAILDIR/man/man$i
+  [ -d $QMAILDIR/man/man$i ] || mkdir -p $QMAILDIR/man/man$i
+  cp man/$i/* $QMAILDIR/man/man$i
 done
 
 chmod -R 0644 $QMAILDIR/man
-chmod 0755 $QMAILDIR/man $QMAILDIR/man/{man1,man5,man7,man8}
+chmod 0755 $QMAILDIR/man $QMAILDIR/man/*
 
 # doc
 mkdir -p $QMAILDIR/doc
@@ -27,66 +32,94 @@ cp doc/UPGRADE  $QMAILDIR/doc
 chmod 0644 $QMAILDIR/doc/*
 
 # top level
-#QMAILDIR=$QMAILDIR/test
-mkdir -p $QMAILDIR/{alias,bin,control,queue,users}
-chmod 02755        $QMAILDIR/alias
-chown $UIDA.$GIDQ  $QMAILDIR/alias
-chown $UIDO.$GIDQ  $QMAILDIR/{bin,control,users}
+T=$QMAILDIR           # just to shortening next commands (T: tmp)
+mkdir -p $T/alias $T/bin $T/control/bootctrl $T/queue
+#chmod 2755            $QMAILDIR/alias
+#chown $UIDA:$GIDQ     $QMAILDIR/alias
+chown -R $UIDO:$GIDQ  $QMAILDIR/bin $QMAILDIR/control
+# dir users could be special: if it exists don't touch it!
+[ -d $T/users ] || (mkdir $T/users ; chown $UIDO:$GIDQ $T/users)
 
 # queue
-mkdir -p $QMAILDIR/queue/{bounce,info,intd,local,lock,mess,pid,remote,todo}
+T=$QMAILDIR/queue     # just to shortening next commands (T: tmp)
+mkdir -p $T/bounce $T/lock $T/pid
 i=0
-until [ $i -eq `head -1 conf-split` ]
+#until [ $i -eq `head -1 conf-split` ]
+until [ $i -eq "$SPLIT" ]
 do
-  mkdir -p $QMAILDIR/queue/{info,intd,local,mess,remote,todo}/$i
-  let i=$i+1
+  # Create splitted queue subdirectories
+  mkdir -p $T/info/$i $T/intd/$i $T/local/$i $T/mess/$i $T/remote/$i $T/todo/$i
+  i=$(($i+1))
 done
 # set all:
-chown -R $UIDQ.$GIDQ  $QMAILDIR/queue
+chown -R $UIDQ:$GIDQ  $QMAILDIR/queue
 chmod -R 0750         $QMAILDIR/queue
 # set new: bounce, info, local, remote
-chown -R $UIDS.$GIDQ  $QMAILDIR/queue/{bounce,info,local,remote}
-chmod -R 0700         $QMAILDIR/queue/{info,intd,local,pid,remote}
+chown -R $UIDS:$GIDQ  $T/bounce $T/info $T/local $T/remote
+chmod -R 0700         $T/info $T/intd $T/local $T/pid $T/remote
+# upgrade/qmail-fixq: set correct mode of files (messages)
+find $QMAILDIR/queue/ -type f -exec chmod 644 {} + -exec chown $UIDQ:0 {} +
 
 # special files in 'lock'
-dd if=/dev/zero of=$QMAILDIR/queue/lock/tcpto bs=2048 count=1 status=none
-chown $UIDR.$GIDQ  $QMAILDIR/queue/lock/tcpto
+dd if=/dev/zero of=$QMAILDIR/queue/lock/tcpto bs=2048 count=1 2>/dev/null
+chown $UIDR:$GIDQ  $QMAILDIR/queue/lock/tcpto
 chmod 0644         $QMAILDIR/queue/lock/tcpto
 
-dd if=/dev/zero of=$QMAILDIR/queue/lock/sendmutex bs=8 count=0 status=none
-chown $UIDS.$GIDQ  $QMAILDIR/queue/lock/sendmutex
+touch $QMAILDIR/queue/lock/sendmutex
+chown $UIDS:$GIDQ  $QMAILDIR/queue/lock/sendmutex
 chmod 0600         $QMAILDIR/queue/lock/sendmutex
 
-mkfifo -m 0622     $QMAILDIR/queue/lock/trigger 2>/dev/null
-chown $UIDS.$GIDQ  $QMAILDIR/queue/lock/trigger
+mkfifo             $QMAILDIR/queue/lock/trigger 2>/dev/null
+chown $UIDS:$GIDQ  $QMAILDIR/queue/lock/trigger
+chmod 0622         $QMAILDIR/queue/lock/trigger
 
 # bin
-cp bouncesaying condredirect datemail elq except forward maildir2mbox \
-   maildirmake maildirwatch mailsubj pinq predate qail qbiff   $QMAILDIR/bin
-cp qmail-{bfrmt,clean,getpw,inject,local,lspawn,newmrh,newu} \
-   qmail-{pw2u,qmqpc,qmqpd,qmtpd,qread,qstat,queue,remote} \
-   qmail-{rspawn,send,showctl,smtpd,start,tcpok,tcpto}         $QMAILDIR/bin
-cp qreceipt qsmhook sendmail splogger tcp-env update_tmprsadh  $QMAILDIR/bin
+cp bouncesaying condredirect datemail except forward maildir2mbox \
+   maildirmake mailsubj mksrvrcerts mkrsadhkeys predate preline $QMAILDIR/bin
+cp qmail-bfque qmail-bfrmt qmail-clean qmail-fixq qmail-getpw qmail-inject \
+   qmail-local qmail-lspawn qmail-newmrh qmail-newu qmail-pw2u \
+   qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-qstat \
+   qmail-queue qmail-remote qmail-rspawn qmail-send qmail-shcfg \
+   qmail-smtpd qmail-start qmail-tcpok qmail-tcpto              $QMAILDIR/bin
+cp qreceipt sendmail splogger tcp-env                           $QMAILDIR/bin
 
-chown $UIDO.$GIDQ  $QMAILDIR/bin/*
+chown $UIDO:$GIDQ  $QMAILDIR/bin/*
 chmod 0755         $QMAILDIR/bin/*
 
-chmod 0711 $QMAILDIR/bin/qmail-{getpw,local,remote,rspawn,clean,send,pw2u} splogger
-chmod 0700 $QMAILDIR/bin/qmail-{lspawn,start,newu,newmrh}
+cd "$QMAILDIR/bin"
+chmod 0711 qmail-getpw qmail-local qmail-remote qmail-rspawn \
+           qmail-clean qmail-send qmail-pw2u splogger
+chmod 0700 qmail-lspawn qmail-start qmail-newu qmail-newmrh
+cd $OLDPWD
+chown $UIDQ:$GIDQ  $QMAILDIR/bin/qmail-queue
+chmod 4711         $QMAILDIR/bin/qmail-queue
 
-#  c(auto_qmail,"bin","qmail-queue",auto_uidq,auto_gidq,04711);
-chown $UIDQ.$GIDQ  $QMAILDIR/bin/qmail-queue
-chmod 04711        $QMAILDIR/bin/qmail-queue
-
-#  c(auto_qmail,"bin","update_tmprsadh",auto_uido,auto_gidq,0755);
-
-# create aliases
+# alias dir
 cd $QMAILDIR/alias
 touch .qmail-root
 echo root > .qmail-postmaster
-ln -s .qmail-postmaster .qmail-mailer-daemon
-chmod 644 .*
-chown $UIDA.qmail .*
+[ -L .qmail-mailer-daemon ] || ln -s .qmail-postmaster .qmail-mailer-daemon
+chmod 644 .qmail-*
+../bin/maildirmake .Maildir 2>/dev/null
+cd $OLDPWD
+chown -R $UIDA:$GIDQ $QMAILDIR/alias
+chmod 2755           $QMAILDIR/alias
+
+# at least set rights and group of the home dir
+chmod 755 $QMAILDIR ; chgrp $GIDQ $QMAILDIR
+
+# rename 'control' to 'etc' and create a link
+cd $QMAILDIR
+[ -d etc ] || mv control etc
+[ -L control ] || ln -s etc control
 cd $OLDPWD
 
+# basic configuration
 . ./config
+
+# extend $PATH (experimental)
+if [ -d /etc/profile.d ] ; then
+   echo "export PATH=$PATH:$QMAILDIR/bin"        > /etc/profile.d/eqmail.sh
+   echo "export MANPATH=$MANPATH:$QMAILDIR/man" >> /etc/profile.d/eqmail.sh
+   . /etc/profile
+fi
