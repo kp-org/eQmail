@@ -256,7 +256,7 @@ stralloc.a alloc.a substdio.a error.a str.a fs.a
 it: \
 qmail-local qmail-lspawn qmail-getpw qmail-remote qmail-rspawn \
 qmail-clean qmail-send qmail-start splogger qmail-queue qmail-inject \
-predate datemail mailsubj qmail-showctl qmail-newu \
+predate datemail mailsubj qmail-newu \
 qmail-pw2u qmail-qread qmail-qstat qmail-tcpto qmail-tcpok \
 qmail-qmqpc qmail-qmqpd qmail-qmtpd \
 qmail-smtpd sendmail tcp-env qmail-newmrh config \
@@ -358,6 +358,9 @@ stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_split.o
 	./compile qmail-clean.c
 	./load qmail-clean fmtqfn.o now.o getln.a sig.a stralloc.a \
 	alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_split.o
+
+qmail-fixq: qmail-fixq.sh
+	sh ./qmail-fixq.sh
 
 qmail-getpw: \
 load qmail-getpw.o case.a substdio.a error.a str.a fs.a auto_break.o \
@@ -511,21 +514,10 @@ stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_split.o env.a
 	wait.a seek.a fd.a sig.a open.a lock.a stralloc.a alloc.a \
 	substdio.a error.a str.a fs.a auto_qmail.o auto_split.o env.a
 
-qmail-showctl: \
-load qmail-showctl.o auto_uids.o control.o open.a getln.a stralloc.a \
-alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_break.o \
-auto_patrn.o auto_spawn.o auto_split.o
-	./load qmail-showctl auto_uids.o control.o open.a getln.a \
-	stralloc.a alloc.a substdio.a error.a str.a fs.a \
-	auto_qmail.o auto_break.o auto_patrn.o auto_spawn.o \
-	auto_split.o 
-
-qmail-showctl.o: \
-compile qmail-showctl.c
-# substdio.h subfd.h substdio.h
-#auto_uids.h auto_qmail.h auto_break.h auto_patrn.h auto_spawn.h \
-#auto_split.h
-	./compile qmail-showctl.c
+qmail-shcfg: conf.tmp qmail-shcfg.sh warn-auto.sh
+	@echo build $@
+	@cat warn-auto.sh conf.tmp qmail-shcfg.sh > qmail-shcfg
+	@chmod 0755 qmail-shcfg
 
 qmail-spp.o: compile qmail-spp.c
 	./compile qmail-spp.c

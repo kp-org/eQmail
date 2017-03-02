@@ -1,7 +1,7 @@
 #!/bin/sh
 #********************************************************************************
 # Configure script of eQmail-1.10
-CRITICAL=""
+#CRITICAL="0"
 
 echo -n "Checking system ... "
 OS=`uname -s | tr '/:[A-Z]' '..[a-z]'` ; echo -n $OS > systype
@@ -11,32 +11,32 @@ ARCH=`uname -m` ; echo -n ":$ARCH" >> systype
 echo "build on "${ARCH}"!"
 
 # check for system tools (required)
-for f in nslookup bash hostname [ test make perl
+for f in hostname [ test make perl
 do
-  echo -n "Checking for $f ... "
-  which $f 2>/dev/null
-  if [ $? -ne 0 ] ; then echo "not found!" ; exit 1 ; fi
+   echo -n "Checking for $f ... "
+   which $f 2>/dev/null
+   if [ $? -ne 0 ] ; then echo "not found!" ; exit 1 ; fi
 done
-
 # check for optional tools
-for f in svc start-stop-daemon tcpserver xinetd php awk
+for f in php
 do
-  echo -n "Checking for $f ... "
-  which $f 2>/dev/null
-  if [ $? -ne 0 ] ; then echo "not found! Ignoring!" 
-  else echo `which "$f"` > _has.$f.tmp ; fi
+   echo -n "Checking for $f ... "
+   which $f 2>/dev/null
+   if [ $? -ne 0 ] ; then echo "not found!" ; else echo $f > _$f.tmp ; fi
 done
 
 #********************************************************************************
 # Checking conf-* files
 for cf in $(ls conf-*)
 do
+#  echo "Checking config file $cf ... done!"
   t=`echo $cf | cut -d- -f2`
-  if [ ! "$t" = "cc" ] && [ ! "$t" = "ld" ] && \
-     [ ! "$t" = "groups" ] && [ ! "$t" = "patrn" ] && [ ! "$t" = "opt" ] ; then
-     echo -n "Checking config file $cf ... "
+  if [ ! $t == "cc" ] && [ ! $t == "ld" ] && \
+     [ ! $t == "groups" ] && [ ! $t == "patrn" ] && [ ! $t == "opt" ] ; then
+  echo -n "Checking config file $cf ... "
+#     echo -n "Found $cf ... "
      # user alias
-     if [ "$t" = "users" ] ; then t="usera" ; fi
+     if [ $t == "users" ] ; then t="usera" ; fi
      echo "char auto_$t[] = \""`head -1 $cf`"\";" > auto_"$t".c
      if [ $? -eq 0 ] ; then
         echo "auto_$t.c created!"
@@ -45,21 +45,14 @@ do
      fi
   fi
 done
-# queue split
+#
+echo "int auto_spawn = `head -1 conf-spawn`;" > auto_spawn.c
 echo "int auto_split = `head -1 conf-split`;" > auto_split.c
-# paternalism
-p=`echo "ibase=8; \`head -1 conf-patrn\`" | bc`
-echo "int auto_patrn = $p;" > auto_patrn.c
-# silent spawn limit
-fd_max=`expr \`ulimit -n\` - 4`
-fd_spn=`head -1 conf-spawn`
-if [ $fd_spn -gt $fd_max ] ; then fd_spn=$fd_max ; fi
-echo "int auto_spawn = $fd_spn;" > auto_spawn.c
 
 #********************************************************************************
 # checking that users from conf-users are exists
-#  id -u $(head -1 conf-users) 2>&1 >/dev/null  #|| (echo "run mkusers" ; exit 1)
-#  if [ $? -ne 0 ] ; then echo "Create users first!" ; exit 1 ; fi
+  id -u $(head -1 conf-users) 2>&1 >/dev/null  #|| (echo "run mkusers" ; exit 1)
+  if [ $? -ne 0 ] ; then echo "Create users first!" ; exit 1 ; fi
 for i in 2 3 4 5 6 7 8
 do
   id -u `head -$i conf-users | tail -1` 2>&1 >/dev/null
@@ -82,50 +75,9 @@ echo "int auto_gidq = $GIDQ;" >> auto_uids.c
 echo "int auto_gidn = $GIDN;" >> auto_uids.c
 echo " ... auto_uids.c created!"
 
-. ./inc/conf.inc      # save values of conf-* files temporarily
-
 #********************************************************************************
-# IMPORTANT: check for OpenSSL and its header files (needed with '-DTLS' only)
-CCOPTS=" -I ./inc"
-
-searchHeaders() {
-  # search for headers given by the '-I' option in conf-cc
-  SSLHDRS=""
-  for f in $(head -1 conf-cc | cut -d\- -f2-)
-  do
-    echo "$f" | grep '^-I' | grep 'openssl' 2>&1 >/dev/null
-    if [ $? = "0" ] ; then SSLHDRS=$(echo $f | cut -d- -f2 | cut -dI -f2) ; fi
-  done
-  # given include dir doesn't exists
-  if [ ! -d "$SSLHDRS" ] ; then SSLHDRS="" ; fi
-}
-# needed with '-DTLS' only
-if (head -1 conf-cc | grep -e '\-DTLS' > /dev/null) ; then
-   # check for OpenSSL binary
-   echo -n "Checking for OpenSSL binary ... "
-   for f in openssl eopenssl
-   do
-       TMP=`which $f 2>/dev/null`
-       if [ "$TMP" ] ; then
-          SSLVER=`$TMP version | cut -d\  -f1 | tr [A-Z] [a-z]`
-          if [ "$SSLVER" = "openssl" ] ; then SSLBIN="$TMP" ; fi
-       fi
-   done
-   if [ ! "$SSLBIN" ] ; then echo "NOT FOUND!" ; CRITICAL="$CRITICAL openssl binary" ; fi
-   echo "$SSLBIN" | tee ssl.bin
-   # check for openssl headers
-   echo -n "Checking for openssl headers ..."
-   searchHeaders
-   if [ ! -d "$SSLHDRS" ] ; then
-      # if nothing was found check the standard location
-      if [ ! -d /usr/include/openssl ] ; then
-         echo -ne " NOT" ; CRITICAL="$CRITICAL openssl headers" ; fi
-   fi
-   echo " found!"
-fi
-
-#********************************************************************************
-# check for other header files
+# check for header files
+CCOPTS=""
 echo -n "Checking for select.h ..."
 if [ -f /usr/include/sys/select.h ] ; then CCOPTS="$CCOPTS -DHAS_SELECT_H"
    else echo -n " not" ; fi
@@ -137,6 +89,7 @@ which flock 2>/dev/null >/dev/null
 if [ $? -eq 0 ] ; then CCOPTS="$CCOPTS -DHASFLOCK=1" ; echo -n " flock"
    else echo -n " lockf" ; fi
 echo " found!"
+
 
 #********************************************************************************
 # Create compile, load, makelib
@@ -172,17 +125,8 @@ echo -n "Checking for libresolv ..."
 ((./load trylib -lresolv) >/dev/null 2>&1 && echo "-lresolv" || exit 0)> dns.lib
 [ -s dns.lib ] || echo -n " not"
 echo " found!"
-# OpenBSD has 'eopenssl'
-if [ `grep -e openbsd systype` ] ; then
-  echo " -L/usr/local/lib/eopenssl" >> ssl.lib
-fi
 rm -f trylib
 
 #********************************************************************************
 echo
-if [ "$CRITICAL" ] ; then
-   printf "\033[1m""Critical:$CRITICAL not found!""\033[0m\n"
-#   exit 1
- else
-   echo "Done! Now run make."
-fi
+echo "Done! Now run make."
