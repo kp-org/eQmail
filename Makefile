@@ -10,7 +10,7 @@ SHELL=/bin/sh
 default: conf libs it mans
 
 clean: TARGETS
-	rm -f *.o *.a `cat TARGETS`
+	rm -f *.o *.a *.tmp `cat TARGETS`
 	cd lib ; make clean
 	cd man ; make clean
 
@@ -195,6 +195,9 @@ dns.o: compile dns.c
 except: compile load except.c strerr.a error.a substdio.a str.a wait.a
 	./compile except.c
 	./load except strerr.a error.a substdio.a str.a wait.a
+
+fmtqfn.o: compile fmtqfn.c
+	./compile fmtqfn.c
 
 forward: compile load forward.c qmail.o strerr.a alloc.a fd.a \
 wait.a sig.a env.a substdio.a error.a str.a fs.a auto_qmail.o
