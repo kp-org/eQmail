@@ -266,7 +266,8 @@ qmail-smtpd sendmail tcp-env qmail-newmrh config \
 qreceipt qsmhook qbiff \
 forward preline condredirect bouncesaying except maildirmake \
 maildir2mbox maildirwatch \
-update_tmprsadh config-spp qmail-bfrmt config-bfrmt ipmeprint
+update_tmprsadh config-spp qmail-bfrmt config-bfrmt ipmeprint \
+mkrsadhkeys mksrvrcerts
 # this stuff is needed for config.sh only: (?)
 # dnscname dnsptr dnsip dnsmxip dnsfq 
 
@@ -679,3 +680,23 @@ conf-qmail conf-users conf-groups update_tmprsadh.sh
 tmprsadh: update_tmprsadh
 	echo "Creating new temporary RSA and DH parameters"
 	./update_tmprsadh
+
+mkrsadhkeys: \
+conf-qmail conf-users conf-groups mkrsadhkeys.sh warn-auto.sh
+	@cat warn-auto.sh mkrsadhkeys.sh\
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}UID}"`head -2 conf-users | tail -1`"}g \
+	| sed s}GID}"`head -1 conf-groups`"}g \
+	> $@
+	@echo creating $@
+	@chmod 755 $@
+
+mksrvrcerts: mksrvrcerts.sh conf-users conf-groups warn-auto.sh
+	@cat warn-auto.sh mksrvrcerts.sh \
+	| sed s}OPENSSLBIN}"`head -1 ssl.bin`"}g \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}UID}"`head -2 conf-users | tail -1`"}g \
+	| sed s}GID}"`head -1 conf-groups`"}g \
+	> $@
+	@echo creating $@
+	@chmod 755 $@
