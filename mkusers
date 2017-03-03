@@ -75,16 +75,16 @@ do
   i=$(($i+1))  # increment the loop counter
 #  if [ $U != "root" ] ; then
   if [ `id -u $U` 2>/dev/null -ne 0 ] ; then
-	H=$HOME ; GID="qmail"
+    H=$HOME ; GID="qmail"
     if [ $U = "alias" ] ; then H=$HOME/alias ; fi
-	# switch the group (the first 4 users have 'qmail', than 'nofiles')
+    # switch the group (the first 4 users have 'qmail', than 'nofiles')
 #    if [ $NUID -ge $(($STARTUID+4)) ] ; then GID="nofiles" ; fi
     if [ $i -ge 5 ] ; then GID="nofiles" ; fi
     #
     [ $NUID ] && SETNUID="-u $NUID"
     echo -n "$i: "
     $PRG -g $GID -s /sbin/nologin $SETNUID -c "" -d $H $N $U && \
-	echo "Added user $U with group $GID!"
+    echo "Added user $U with group $GID!"
     [ $NUID ] && NUID=$(($NUID+1))  # increment the next NUID
   fi
 done

@@ -1,1 +1,0 @@
-char auto_break[] = "+";
