@@ -72,16 +72,16 @@ bouncesaying: load bouncesaying.c strerr.a error.a substdio.a str.a wait.a
 	./compile bouncesaying.c
 	./load bouncesaying strerr.a error.a substdio.a str.a wait.a
 
-cdb.a: compile makelib cdb.c
-	./compile cdb.c
-	./makelib cdb.a cdb.o
+#cdb.a: compile makelib cdb.c
+#	./compile cdb.c
+#	./makelib cdb.a cdb.o
 
-cdbmake.a: compile makelib cdbmake.c
-	./compile cdbmake.c
-	./makelib cdbmake.a cdbmake.o
+#cdbmake.a: compile makelib cdbmake.c
+#	./compile cdbmake.c
+#	./makelib cdbmake.a cdbmake.o
 
-cdbmss.o: compile cdbmss.c
-	./compile cdbmss.c
+#cdbmss.o: compile cdbmss.c
+#	./compile cdbmss.c
 
 chkspawn: \
 load chkspawn.o substdio.a error.a str.a fs.a auto_spawn.o
@@ -145,52 +145,6 @@ datetime.a: compile makelib datetime.c
 
 dns.o: compile dns.c
 	./compile dns.c
-
-#dnscname: load dnscname.o dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-#alloc.a substdio.a error.a str.a fs.a dns.lib
-#	./load dnscname dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-#	alloc.a substdio.a error.a str.a fs.a  `cat dns.lib`
-
-#dnscname.o: compile dnscname.c
-#	./compile dnscname.c
-
-#dnsdoe.o: compile dnsdoe.c
-#	./compile dnsdoe.c
-
-#dnsfq: load dnsfq.o dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-#alloc.a substdio.a error.a str.a fs.a dns.lib
-#	./load dnsfq dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-#	alloc.a substdio.a error.a str.a fs.a  `cat dns.lib`
-
-#dnsfq.o: compile dnsfq.c
-#	./compile dnsfq.c
-
-#dnsip: libs \
-#load dnsip.o dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-#substdio.a error.a str.a fs.a dns.lib
-#	./load dnsip dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-#	alloc.a substdio.a error.a str.a fs.a `cat dns.lib`
-
-#dnsip.o: compile dnsip.c
-#	./compile dnsip.c
-
-#dnsmxip: \
-#load dnsmxip.o dns.o dnsdoe.o ip.o ipalloc.o now.o stralloc.a alloc.a \
-#substdio.a error.a str.a fs.a dns.lib
-#	./load dnsmxip dns.o dnsdoe.o ip.o ipalloc.o now.o \
-#	stralloc.a alloc.a substdio.a error.a str.a fs.a  `cat dns.lib`
-
-#dnsmxip.o: compile dnsmxip.c
-#	./compile dnsmxip.c
-
-#dnsptr: \
-#load dnsptr.o dns.o dnsdoe.o ip.o ipalloc.o stralloc.a alloc.a \
-#substdio.a error.a str.a fs.a dns.lib
-#	./load dnsptr dns.o dnsdoe.o ip.o ipalloc.o stralloc.a \
-#	alloc.a substdio.a error.a str.a fs.a  `cat dns.lib`
-
-#dnsptr.o: compile dnsptr.c
-#	./compile dnsptr.c
 
 except: compile load except.c strerr.a error.a substdio.a str.a wait.a
 	./compile except.c
@@ -267,9 +221,7 @@ qreceipt qsmhook qbiff \
 forward preline condredirect bouncesaying except maildirmake \
 maildir2mbox maildirwatch \
 update_tmprsadh config-spp qmail-bfrmt config-bfrmt ipmeprint \
-mkrsadhkeys mksrvrcerts
-# this stuff is needed for config.sh only: (?)
-# dnscname dnsptr dnsip dnsmxip dnsfq 
+mkrsadhkeys mksrvrcerts qmail-fixq qmail-shcfg
 
 # idedit config-fast hostname qmail-upq qail elq pinq
 #home home+df proc proc+df binm1 binm1+df binm2 binm2+df \
@@ -400,25 +352,25 @@ myctime.o slurpclose.o  datetime.a auto_qmail.o auto_patrn.o
 	substdio.a
 
 qmail-lspawn: compile load qmail-lspawn.c spawn.o prot.o slurpclose.o \
-coe.o sig.a wait.a case.a cdb.a fd.a open.a stralloc.a alloc.a \
+sig.a wait.a case.a cdb.a fd.a open.a stralloc.a alloc.a \
 substdio.a error.a str.a fs.a auto_qmail.o auto_uids.o auto_spawn.o
 	./compile qmail-lspawn.c
-	./load qmail-lspawn spawn.o prot.o slurpclose.o coe.o sig.a wait.a \
+	./load qmail-lspawn spawn.o prot.o slurpclose.o sig.a wait.a \
 	case.a cdb.a fd.a open.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a auto_qmail.o auto_uids.o auto_spawn.o
 
 qmail-newmrh: compile \
-load qmail-newmrh.c cdbmss.o getln.a open.a cdbmake.a seek.a case.a \
+load qmail-newmrh.c cdb.a getln.a open.a seek.a case.a buffer.a \
 stralloc.a alloc.a strerr.a substdio.a error.a str.a auto_qmail.o
 	./compile qmail-newmrh.c
-	./load qmail-newmrh cdbmss.o getln.a open.a cdbmake.a \
+	./load qmail-newmrh cdb.a getln.a open.a buffer.a \
 	seek.a case.a stralloc.a alloc.a strerr.a substdio.a \
 	error.a str.a auto_qmail.o
 
-qmail-newu: compile load qmail-newu.c cdbmss.o getln.a open.a seek.a \
-cdbmake.a case.a stralloc.a alloc.a substdio.a error.a str.a auto_qmail.o
+qmail-newu: compile load qmail-newu.c cdb.a getln.a open.a seek.a \
+case.a stralloc.a alloc.a substdio.a error.a str.a auto_qmail.o
 	./compile qmail-newu.c
-	./load qmail-newu cdbmss.o getln.a open.a seek.a cdbmake.a \
+	./load qmail-newu cdb.a getln.a open.a seek.a buffer.a \
 	case.a stralloc.a alloc.a substdio.a error.a str.a auto_qmail.o
 
 qmail-pw2u: \
@@ -503,11 +455,11 @@ error.a str.a fs.a auto_qmail.o base64.o dns.lib tls.o ssl_timeoutio.o
 	lock.a seek.a getln.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a auto_qmail.o  base64.o `cat dns.lib`
 
-qmail-rspawn: compile load qmail-rspawn.c spawn.o tcpto_clean.o now.o coe.o \
+qmail-rspawn: compile load qmail-rspawn.c spawn.o tcpto_clean.o now.o \
 sig.a open.a seek.a lock.a wait.a fd.a stralloc.a alloc.a substdio.a error.a \
 str.a auto_qmail.o auto_uids.o auto_spawn.o
 	./compile qmail-rspawn.c
-	./load qmail-rspawn spawn.o tcpto_clean.o now.o coe.o \
+	./load qmail-rspawn spawn.o tcpto_clean.o now.o \
 	sig.a open.a seek.a lock.a wait.a fd.a stralloc.a alloc.a \
 	substdio.a error.a str.a auto_qmail.o auto_uids.o auto_spawn.o
 

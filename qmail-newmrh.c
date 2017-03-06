@@ -5,7 +5,7 @@
 #include "getln.h"
 #include "open.h"
 #include "auto_qmail.h"
-#include "cdbmss.h"
+#include "cdbmake.h"
 
 #define FATAL "qmail-newmrh: fatal: "
 
@@ -24,7 +24,8 @@ substdio ssin;
 int fd;
 int fdtemp;
 
-struct cdbmss cdbmss;
+//struct cdbmss cdbmss;
+struct cdb_make c;
 stralloc line = {0};
 int match;
 
@@ -42,8 +43,9 @@ void main()
   fdtemp = open_trunc("control/morercpthosts.tmp");
   if (fdtemp == -1) die_write();
 
-  if (cdbmss_start(&cdbmss,fdtemp) == -1) die_write();
-
+//  if (cdbmss_start(&cdbmss,fdtemp) == -1) die_write();
+  if (cdb_make_start(&c,fdtemp) == -1) die_write();
+  
   for (;;) {
     if (getln(&ssin,&line,&match,'\n') != 0) die_read();
     case_lowerb(line.s,line.len);
@@ -52,14 +54,16 @@ void main()
       if (line.s[line.len - 1] == '\n') { --line.len; continue; }
       if (line.s[line.len - 1] == '\t') { --line.len; continue; }
       if (line.s[0] != '#')
-	if (cdbmss_add(&cdbmss,line.s,line.len,"",0) == -1)
-	  die_write();
+//	if (cdbmss_add(&cdbmss,line.s,line.len,"",0) == -1)
+    if (cdb_make_add(&c,line.s,line.len,"",0) == -1)
+      die_write();
       break;
     }
     if (!match) break;
   }
 
-  if (cdbmss_finish(&cdbmss) == -1) die_write();
+//  if (cdbmss_finish(&cdbmss) == -1) die_write();
+  if (cdb_make_finish(&c) == -1) die_write();
   if (fsync(fdtemp) == -1) die_write();
   if (close(fdtemp) == -1) die_write(); /* NFS stupidity */
   if (rename("control/morercpthosts.tmp","control/morercpthosts.cdb") == -1)

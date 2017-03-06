@@ -1,4 +1,4 @@
-#include "cdb.h"
+#include "cdbread.h"
 #include "byte.h"
 #include "open.h"
 #include "error.h"
@@ -11,6 +11,8 @@ static int flagrh = 0;
 static stralloc rh = {0};
 static struct constmap maprh;
 static int fdmrh;
+
+static struct cdb c;
 
 int rcpthosts_init()
 {
@@ -46,14 +48,17 @@ int len;
       if (constmap(&maprh,buf + j,len - j)) return 1;
 
   if (fdmrh != -1) {
-    uint32 dlen;
+//    uint32 dlen;
     int r;
 
-    for (j = 0;j < len;++j)
-      if (!j || (buf[j] == '.')) {
-	r = cdb_seek(fdmrh,buf + j,len - j,&dlen);
-	if (r) return r;
-      }
+//    for (j = 0;j < len;++j)
+//      if (!j || (buf[j] == '.')) {
+//      r = cdb_seek(fdmrh,buf + j,len - j,&dlen);
+//      }
+    cdb_init(&c,fdmrh);
+    r = cdb_find(&c,buf,len);
+    cdb_free(&c);
+    if (r) return r;
   }
 
   return 0;

@@ -6,7 +6,8 @@
 #include "scan.h"
 #include "exit.h"
 #include "error.h"
-#include "cdb.h"
+//#include "cdb.h"
+#include "cdbread.h"
 #include "case.h"
 #include "slurpclose.h"
 #include "auto_qmail.h"
@@ -14,6 +15,9 @@
 #include "qlx.h"
 
 char *aliasempty;
+
+// switched to new cdb:
+static struct cdb c;
 
 void initialize(argc,argv)
 int argc;
@@ -101,11 +105,17 @@ char *local;
    uint32 dlen;
    unsigned int i;
 
-   r = cdb_seek(fd,"",0,&dlen);
+/* switch to new cdb lib */
+//   r = cdb_seek(fd,"",0,&dlen);
+cdb_init(&c,fd);
+r = cdb_find(&c,"",0);
    if (r != 1) _exit(QLX_CDB);
-   if (!stralloc_ready(&wildchars,(unsigned int) dlen)) _exit(QLX_NOMEM);
-   wildchars.len = dlen;
-   if (cdb_bread(fd,wildchars.s,wildchars.len) == -1) _exit(QLX_CDB);
+//   if (!stralloc_ready(&wildchars,(unsigned int) dlen)) _exit(QLX_NOMEM);
+if (!stralloc_ready(&wildchars,cdb_datalen(&c))) _exit(QLX_NOMEM);
+//   wildchars.len = dlen;
+wildchars.len = cdb_datalen(&c);
+//   if (cdb_bread(fd,wildchars.s,wildchars.len) == -1) _exit(QLX_CDB);
+if (cdb_read(&c,wildchars.s,wildchars.len,cdb_datapos(&c)) == -1) _exit(QLX_CDB);
 
    i = lower.len;
    flagwild = 0;
@@ -115,13 +125,18 @@ char *local;
      /* i > 0 */
      if (!flagwild || (i == 1) || (byte_chr(wildchars.s,wildchars.len,lower.s[i - 1]) < wildchars.len))
       {
-       r = cdb_seek(fd,lower.s,i,&dlen);
+//       r = cdb_seek(fd,lower.s,i,&dlen);
+       r = cdb_find(&c,lower.s,i);
        if (r == -1) _exit(QLX_CDB);
        if (r == 1)
         {
-         if (!stralloc_ready(&nughde,(unsigned int) dlen)) _exit(QLX_NOMEM);
-         nughde.len = dlen;
-         if (cdb_bread(fd,nughde.s,nughde.len) == -1) _exit(QLX_CDB);
+// switch to new cdb lib:
+//         if (!stralloc_ready(&nughde,(unsigned int) dlen)) _exit(QLX_NOMEM);
+//         nughde.len = dlen;
+//         if (cdb_bread(fd,nughde.s,nughde.len) == -1) _exit(QLX_CDB);
+         if (!stralloc_ready(&nughde,cdb_datalen(&c))) _exit(QLX_NOMEM);
+         nughde.len = cdb_datalen(&c);
+         if (cdb_read(&c,nughde.s,nughde.len,cdb_datapos(&c)) == -1) _exit(QLX_CDB);
          if (flagwild)
 	   if (!stralloc_cats(&nughde,local + i - 1)) _exit(QLX_NOMEM);
          if (!stralloc_0(&nughde)) _exit(QLX_NOMEM);
