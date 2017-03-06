@@ -94,7 +94,7 @@ searchHeaders() {
   for f in $(head -1 conf-cc | cut -d\- -f2-)
   do
     echo "$f" | grep '^-I' | grep 'openssl' 2>&1 >/dev/null
-    if [ $? = "0" ] ; then SSLHDRS=$(echo $f | cut -d- -f2 | cut -dI -f2) ; fi
+    if [ $? == "0" ] ; then SSLHDRS=$(echo $f | cut -d- -f2 | cut -dI -f2) ; fi
   done
   # given include dir doesn't exists
   if [ ! -d "$SSLHDRS" ] ; then SSLHDRS="" ; fi
