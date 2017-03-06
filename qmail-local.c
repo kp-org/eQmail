@@ -1,19 +1,24 @@
+/*  Revision 20160709, Kai Peter
+ *  - switched to 'buffer'
+ *  Revision 20160503, Kai Peter
+ *  - added explicit braces to inline if-else block (line 321)
+ *  - changed return type of main to int
+ */
+
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>		/* replace "readwrite.h" "fork.h" */
+#include <unistd.h>
+#include "buffer.h"
 #include "sig.h"
 #include "env.h"
 #include "byte.h"
-#include "exit.h"
 #include "open.h"
 #include "wait.h"
 #include "lock.h"
 #include "seek.h"
-#include "substdio.h"
 #include "getln.h"
 #include "strerr.h"
-#include "subfd.h"
-#include "sgetopt.h"
+#include "getoptb.h"
 #include "alloc.h"
 #include "error.h"
 #include "stralloc.h"
@@ -83,8 +88,10 @@ char *dir;
  int loop;
  struct stat st;
  int fd;
- substdio ss;
- substdio ssout;
+// substdio ss;
+// substdio ssout;
+ buffer ss;
+ buffer ssout; // = BUFFER_INIT(write,1,outbuf,sizeof outbuf);
 
  sig_alarmcatch(sigalrm);
  if (chdir(dir) == -1) { if (error_temp(errno)) _exit(1); _exit(2); }
@@ -111,18 +118,24 @@ char *dir;
  fd = open_excl(fntmptph);
  if (fd == -1) _exit(1);
 
- substdio_fdbuf(&ss,read,0,buf,sizeof(buf));
- substdio_fdbuf(&ssout,write,fd,outbuf,sizeof(outbuf));
- if (substdio_put(&ssout,rpline.s,rpline.len) == -1) goto fail;
- if (substdio_put(&ssout,dtline.s,dtline.len) == -1) goto fail;
+// substdio_fdbuf(&ss,read,0,buf,sizeof(buf));
+// substdio_fdbuf(&ssout,write,fd,outbuf,sizeof(outbuf));
+// if (substdio_put(&ssout,rpline.s,rpline.len) == -1) goto fail;
+// if (substdio_put(&ssout,dtline.s,dtline.len) == -1) goto fail;
+ buffer_init(&ss,read,0,buf,sizeof(buf));
+ buffer_init(&ssout,write,fd,outbuf,sizeof(outbuf));
+ if (buffer_put(&ssout,rpline.s,rpline.len) == -1) goto fail;
+ if (buffer_put(&ssout,dtline.s,dtline.len) == -1) goto fail;
 
- switch(substdio_copy(&ssout,&ss))
+// switch(substdio_copy(&ssout,&ss))
+ switch(buffer_copy(&ssout,&ss))
   {
    case -2: tryunlinktmp(); _exit(4);
    case -3: goto fail;
   }
 
- if (substdio_flush(&ssout) == -1) goto fail;
+// if (substdio_flush(&ssout) == -1) goto fail;
+ if (buffer_flush(&ssout) == -1) goto fail;
  if (fsync(fd) == -1) goto fail;
  if (close(fd) == -1) goto fail; /* NFS dorks */
 
@@ -169,8 +182,10 @@ void mailfile(fn)
 char *fn;
 {
  int fd;
- substdio ss;
- substdio ssout;
+// substdio ss;
+// substdio ssout;
+ buffer ss;
+ buffer ssout;
  int match;
  seek_pos pos;
  int flaglocked;
@@ -190,11 +205,16 @@ char *fn;
  seek_end(fd);
  pos = seek_cur(fd);
 
- substdio_fdbuf(&ss,read,0,buf,sizeof(buf));
- substdio_fdbuf(&ssout,write,fd,outbuf,sizeof(outbuf));
- if (substdio_put(&ssout,ufline.s,ufline.len)) goto writeerrs;
- if (substdio_put(&ssout,rpline.s,rpline.len)) goto writeerrs;
- if (substdio_put(&ssout,dtline.s,dtline.len)) goto writeerrs;
+// substdio_fdbuf(&ss,read,0,buf,sizeof(buf));
+// substdio_fdbuf(&ssout,write,fd,outbuf,sizeof(outbuf));
+// if (substdio_put(&ssout,ufline.s,ufline.len)) goto writeerrs;
+// if (substdio_put(&ssout,rpline.s,rpline.len)) goto writeerrs;
+// if (substdio_put(&ssout,dtline.s,dtline.len)) goto writeerrs;
+ buffer_init(&ss,read,0,buf,sizeof(buf));
+ buffer_init(&ssout,write,fd,outbuf,sizeof(outbuf));
+ if (buffer_put(&ssout,ufline.s,ufline.len)) goto writeerrs;
+ if (buffer_put(&ssout,rpline.s,rpline.len)) goto writeerrs;
+ if (buffer_put(&ssout,dtline.s,dtline.len)) goto writeerrs;
  for (;;)
   {
    if (getln(&ss,&messline,&match,'\n') != 0) 
@@ -205,16 +225,21 @@ char *fn;
     }
    if (!match && !messline.len) break;
    if (gfrom(messline.s,messline.len))
-     if (substdio_bput(&ssout,">",1)) goto writeerrs;
-   if (substdio_bput(&ssout,messline.s,messline.len)) goto writeerrs;
+//     if (substdio_bput(&ssout,">",1)) goto writeerrs;
+     if (buffer_put(&ssout,">",1)) goto writeerrs;
+//   if (substdio_bput(&ssout,messline.s,messline.len)) goto writeerrs;
+   if (buffer_put(&ssout,messline.s,messline.len)) goto writeerrs;
    if (!match)
     {
-     if (substdio_bputs(&ssout,"\n")) goto writeerrs;
+//     if (substdio_bputs(&ssout,"\n")) goto writeerrs;
+     if (buffer_puts(&ssout,"\n")) goto writeerrs;
      break;
     }
   }
- if (substdio_bputs(&ssout,"\n")) goto writeerrs;
- if (substdio_flush(&ssout)) goto writeerrs;
+// if (substdio_bputs(&ssout,"\n")) goto writeerrs;
+// if (substdio_flush(&ssout)) goto writeerrs;
+ if (buffer_puts(&ssout,"\n")) goto writeerrs;
+ if (buffer_flush(&ssout)) goto writeerrs;
  if (fsync(fd) == -1) goto writeerrs;
  close(fd);
  return;
@@ -266,11 +291,13 @@ char **recips;
 {
  struct qmail qqt;
  char *qqx;
- substdio ss;
+// substdio ss;
+ buffer ss;
  int match;
 
  if (seek_begin(0) == -1) temp_rewind();
- substdio_fdbuf(&ss,read,0,buf,sizeof(buf));
+// substdio_fdbuf(&ss,read,0,buf,sizeof(buf));
+ buffer_init(&ss,read,0,buf,sizeof(buf));
 
  if (qmail_open(&qqt) == -1) temp_fork();
  mailforward_qp = qmail_qp(&qqt);
@@ -291,10 +318,12 @@ char **recips;
 void bouncexf()
 {
  int match;
- substdio ss;
+// substdio ss;
+ buffer ss;
 
  if (seek_begin(0) == -1) temp_rewind();
- substdio_fdbuf(&ss,read,0,buf,sizeof(buf));
+// substdio_fdbuf(&ss,read,0,buf,sizeof(buf));
+ buffer_init(&ss,read,0,buf,sizeof(buf));
  for (;;)
   {
    if (getln(&ss,&messline,&match,'\n') != 0) temp_read();
@@ -316,10 +345,12 @@ void checkhome()
  if (st.st_mode & auto_patrn)
    strerr_die1x(111,"Uh-oh: home directory is writable. (#4.7.0)");
  if (st.st_mode & 01000)
+  {
    if (flagdoit)
      strerr_die1x(111,"Home directory is sticky: user is editing his .qmail file. (#4.2.1)");
    else
      strerr_warn1("Warning: home directory is sticky.",0);
+  }
 }
 
 int qmeox(dashowner)
@@ -389,7 +420,7 @@ int *cutable;
       i = safeext.len - 7;
       if (!byte_diff("default",7,safeext.s + i))
 	if (i <= str_len(ext)) /* paranoia */
-	  if (!env_put2("DEFAULT",ext + i)) temp_nomem();
+	  if (!env_put("DEFAULT",ext + i)) temp_nomem();
     }
     return;
   }
@@ -402,7 +433,7 @@ int *cutable;
       if (!stralloc_cats(&qme,"default")) temp_nomem();
       if (qmeexists(fd,cutable)) {
 	if (i <= str_len(ext)) /* paranoia */
-	  if (!env_put2("DEFAULT",ext + i)) temp_nomem();
+	  if (!env_put("DEFAULT",ext + i)) temp_nomem();
         return;
       }
     }
@@ -417,20 +448,23 @@ char count_buf[FMT_ULONG];
 
 void count_print()
 {
- substdio_puts(subfdoutsmall,"did ");
- substdio_put(subfdoutsmall,count_buf,fmt_ulong(count_buf,count_file));
- substdio_puts(subfdoutsmall,"+");
- substdio_put(subfdoutsmall,count_buf,fmt_ulong(count_buf,count_forward));
- substdio_puts(subfdoutsmall,"+");
- substdio_put(subfdoutsmall,count_buf,fmt_ulong(count_buf,count_program));
- substdio_puts(subfdoutsmall,"\n");
+// Kai: subfdoutsmall uses 256b of buffer size, buffer_1 8092b (default)
+// substdio_puts(subfdoutsmall,"did ");
+ buffer_puts(buffer_1,"did ");
+ buffer_put(buffer_1,count_buf,fmt_ulong(count_buf,count_file));
+ buffer_puts(buffer_1,"+");
+ buffer_put(buffer_1,count_buf,fmt_ulong(count_buf,count_forward));
+ buffer_puts(buffer_1,"+");
+ buffer_put(buffer_1,count_buf,fmt_ulong(count_buf,count_program));
+ buffer_puts(buffer_1,"\n");
  if (mailforward_qp)
   {
-   substdio_puts(subfdoutsmall,"qp ");
-   substdio_put(subfdoutsmall,count_buf,fmt_ulong(count_buf,mailforward_qp));
-   substdio_puts(subfdoutsmall,"\n");
+   buffer_puts(buffer_1,"qp ");
+   buffer_put(buffer_1,count_buf,fmt_ulong(count_buf,mailforward_qp));
+   buffer_puts(buffer_1,"\n");
   }
- substdio_flush(subfdoutsmall);
+// substdio_flush(subfdoutsmall);
+ buffer_flush(buffer_1);
 }
 
 void sayit(type,cmd,len)
@@ -438,14 +472,17 @@ char *type;
 char *cmd;
 int len;
 {
- substdio_puts(subfdoutsmall,type);
- substdio_put(subfdoutsmall,cmd,len);
- substdio_putsflush(subfdoutsmall,"\n");
+// buffer_puts(subfdoutsmall,type);
+// buffer_put(subfdoutsmall,cmd,len);
+// buffer_putsflush(subfdoutsmall,"\n");
+ buffer_puts(buffer_1,type);
+ buffer_put(buffer_1,cmd,len);
+ buffer_putsflush(buffer_1,"\n");
 }
 
-void main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
+//int argc;
+//char **argv;
 {
  int opt;
  int i;
@@ -490,10 +527,10 @@ char **argv;
    strerr_die5x(111,"Unable to switch to ",homedir,": ",error_str(errno),". (#4.3.0)");
  checkhome();
 
- if (!env_put2("HOST",host)) temp_nomem();
- if (!env_put2("HOME",homedir)) temp_nomem();
- if (!env_put2("USER",user)) temp_nomem();
- if (!env_put2("LOCAL",local)) temp_nomem();
+ if (!env_put("HOST",host)) temp_nomem();
+ if (!env_put("HOME",homedir)) temp_nomem();
+ if (!env_put("USER",user)) temp_nomem();
+ if (!env_put("LOCAL",local)) temp_nomem();
 
  if (!stralloc_copys(&envrecip,local)) temp_nomem();
  if (!stralloc_cats(&envrecip,"@")) temp_nomem();
@@ -501,7 +538,7 @@ char **argv;
 
  if (!stralloc_copy(&foo,&envrecip)) temp_nomem();
  if (!stralloc_0(&foo)) temp_nomem();
- if (!env_put2("RECIPIENT",foo.s)) temp_nomem();
+ if (!env_put("RECIPIENT",foo.s)) temp_nomem();
 
  if (!stralloc_copys(&dtline,"Delivered-To: ")) temp_nomem();
  if (!stralloc_cat(&dtline,&envrecip)) temp_nomem();
@@ -510,12 +547,12 @@ char **argv;
 
  if (!stralloc_copy(&foo,&dtline)) temp_nomem();
  if (!stralloc_0(&foo)) temp_nomem();
- if (!env_put2("DTLINE",foo.s)) temp_nomem();
+ if (!env_put("DTLINE",foo.s)) temp_nomem();
 
  if (flagdoit)
    bouncexf();
 
- if (!env_put2("SENDER",sender)) temp_nomem();
+ if (!env_put("SENDER",sender)) temp_nomem();
 
  if (!quote2(&foo,sender)) temp_nomem();
  if (!stralloc_copys(&rpline,"Return-Path: <")) temp_nomem();
@@ -525,7 +562,7 @@ char **argv;
 
  if (!stralloc_copy(&foo,&rpline)) temp_nomem();
  if (!stralloc_0(&foo)) temp_nomem();
- if (!env_put2("RPLINE",foo.s)) temp_nomem();
+ if (!env_put("RPLINE",foo.s)) temp_nomem();
 
  if (!stralloc_copys(&ufline,"From ")) temp_nomem();
  if (*sender)
@@ -550,16 +587,16 @@ char **argv;
 
  if (!stralloc_copy(&foo,&ufline)) temp_nomem();
  if (!stralloc_0(&foo)) temp_nomem();
- if (!env_put2("UFLINE",foo.s)) temp_nomem();
+ if (!env_put("UFLINE",foo.s)) temp_nomem();
 
  x = ext;
- if (!env_put2("EXT",x)) temp_nomem();
+ if (!env_put("EXT",x)) temp_nomem();
  x += str_chr(x,'-'); if (*x) ++x;
- if (!env_put2("EXT2",x)) temp_nomem();
+ if (!env_put("EXT2",x)) temp_nomem();
  x += str_chr(x,'-'); if (*x) ++x;
- if (!env_put2("EXT3",x)) temp_nomem();
+ if (!env_put("EXT3",x)) temp_nomem();
  x += str_chr(x,'-'); if (*x) ++x;
- if (!env_put2("EXT4",x)) temp_nomem();
+ if (!env_put("EXT4",x)) temp_nomem();
 
  if (!stralloc_copys(&safeext,ext)) temp_nomem();
  case_lowerb(safeext.s,safeext.len);
@@ -571,15 +608,15 @@ char **argv;
  i = byte_rchr(host,i,'.');
  if (!stralloc_copyb(&foo,host,i)) temp_nomem();
  if (!stralloc_0(&foo)) temp_nomem();
- if (!env_put2("HOST2",foo.s)) temp_nomem();
+ if (!env_put("HOST2",foo.s)) temp_nomem();
  i = byte_rchr(host,i,'.');
  if (!stralloc_copyb(&foo,host,i)) temp_nomem();
  if (!stralloc_0(&foo)) temp_nomem();
- if (!env_put2("HOST3",foo.s)) temp_nomem();
+ if (!env_put("HOST3",foo.s)) temp_nomem();
  i = byte_rchr(host,i,'.');
  if (!stralloc_copyb(&foo,host,i)) temp_nomem();
  if (!stralloc_0(&foo)) temp_nomem();
- if (!env_put2("HOST4",foo.s)) temp_nomem();
+ if (!env_put("HOST4",foo.s)) temp_nomem();
 
  flagforwardonly = 0;
  qmesearch(&fd,&flagforwardonly);
@@ -607,7 +644,7 @@ char **argv;
 	}
       }
  if (!stralloc_0(&ueo)) temp_nomem();
- if (!env_put2("NEWSENDER",ueo.s)) temp_nomem();
+ if (!env_put("NEWSENDER",ueo.s)) temp_nomem();
 
  if (!stralloc_ready(&cmds,0)) temp_nomem();
  cmds.len = 0;

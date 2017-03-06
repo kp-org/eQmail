@@ -385,15 +385,19 @@ env.a stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o
 	getln.a sig.a getopt.a datetime.a token822.o env.a stralloc.a \
 	alloc.a substdio.a error.a str.a fs.a auto_qmail.o 
 
+# getopt.a --> getoptb
 qmail-local: compile load qmail-local.c qmail.o quote.o now.o gfrom.o \
-myctime.o slurpclose.o case.a getln.a getopt.a sig.a open.a seek.a \
-lock.a fd.a wait.a env.a stralloc.a alloc.a strerr.a substdio.a \
-error.a str.a fs.a datetime.a auto_qmail.o auto_patrn.o
+myctime.o slurpclose.o  datetime.a auto_qmail.o auto_patrn.o
+#case.a getln.a getoptb.a sig.a open.a seek.a \
+#lock.a fd.a wait.a env.a stralloc.a alloc.a strerr.a substdio.a \
+#error.a str.a fs.a
 	./compile qmail-local.c
 	./load qmail-local qmail.o quote.o now.o gfrom.o myctime.o \
-	slurpclose.o case.a getln.a getopt.a sig.a open.a seek.a lock.a \
-	fd.a wait.a env.a stralloc.a alloc.a strerr.a substdio.a \
-	error.a str.a fs.a datetime.a auto_qmail.o auto_patrn.o
+	slurpclose.o case.a getln.a getoptb.a sig.a open.a seek.a lock.a \
+	buffer.a \
+	fd.a wait.a env.a stralloc.a alloc.a strerr.a \
+	error.a str.a fs.a datetime.a auto_qmail.o auto_patrn.o \
+	substdio.a
 
 qmail-lspawn: compile load qmail-lspawn.c spawn.o prot.o slurpclose.o \
 coe.o sig.a wait.a case.a cdb.a fd.a open.a stralloc.a alloc.a \
@@ -409,7 +413,7 @@ stralloc.a alloc.a strerr.a substdio.a error.a str.a auto_qmail.o
 	./compile qmail-newmrh.c
 	./load qmail-newmrh cdbmss.o getln.a open.a cdbmake.a \
 	seek.a case.a stralloc.a alloc.a strerr.a substdio.a \
-	error.a str.a auto_qmail.o 
+	error.a str.a auto_qmail.o
 
 qmail-newu: compile load qmail-newu.c cdbmss.o getln.a open.a seek.a \
 cdbmake.a case.a stralloc.a alloc.a substdio.a error.a str.a auto_qmail.o
