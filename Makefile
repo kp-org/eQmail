@@ -223,12 +223,6 @@ maildir2mbox maildirwatch \
 config-spp qmail-bfrmt config-bfrmt ipmeprint \
 mkrsadhkeys mksrvrcerts qmail-fixq qmail-shcfg
 
-# idedit config-fast hostname qmail-upq qail elq pinq
-#home home+df proc proc+df binm1 binm1+df binm2 binm2+df \
-#binm3 binm3+df 
-#qmail-pop3d qmail-popup 
-#install-big install instcheck 
-
 maildir.o: compile maildir.c 
 	./compile maildir.c
 

@@ -16,6 +16,14 @@ CMD="(echo ehlo ; sleep 1)"
 #echo $CMD
 #$CMD | telnet 127.0.0.1 25
 #exitcode
+
+(echo ehlo ; sleep 1 ; echo "MAIL FROM: qmail-test@.aldox.de" ; \
+             echo "RCPT TO: kp1@gorre.aldox.de" ; \
+             echo "DATA" ; \
+             echo "test telnet 127.0.0.1" ; echo "." ; echo "quit" \
+           ) | nc localhost 25
+exitcode
+exit
 (echo ehlo ; sleep 1 ; echo "MAIL FROM: qmail-test@.aldox.de" ; \
              echo "RCPT TO: kp1@gorre.aldox.de" ; \
              echo "DATA" ; \
@@ -50,8 +58,6 @@ exit
            ) | openssl s_client -starttls smtp -connect ::1:25
 exitcode
 exit
-ssh sorlag  "echo from sorlag | sendmail -f qmail-test@aldox.de kp1@gorre.aldox.de"
-exitcode
 
 #example qmail-smtpd (with CRLF's)
 #(echo ehlo ; sleep 1 ;echo "MAIL FROM: kp@wrack.aldox.de" ; echo "RCPT TO: kp@wrack.aldox.de" ; sleep 1 ; echo "DATA" ; sleep 1 ; printf "dddd\r\n\r\n.\r\n") #| /var/qmail/test/bin/qmail-smtpd /bin/false
