@@ -19,10 +19,7 @@ char *aliasempty;
 // switched to new cdb:
 static struct cdb c;
 
-void initialize(argc,argv)
-int argc;
-char **argv;
-{
+void initialize(int argc,char **argv) {
   aliasempty = argv[1];
   if (!aliasempty) _exit(100);
 }
@@ -77,33 +74,32 @@ stralloc lower = {0};
 stralloc nughde = {0};
 stralloc wildchars = {0};
 
-void nughde_get(local)
-char *local;
+void nughde_get(char *local)
 {
- char *(args[3]);
- int pi[2];
- int gpwpid;
- int gpwstat;
- int r;
- int fd;
- int flagwild;
+  char *(args[3]);
+  int pi[2];
+  int gpwpid;
+  int gpwstat;
+  int r;
+  int fd;
+  int flagwild;
 
- if (!stralloc_copys(&lower,"!")) _exit(QLX_NOMEM);
- if (!stralloc_cats(&lower,local)) _exit(QLX_NOMEM);
- if (!stralloc_0(&lower)) _exit(QLX_NOMEM);
- case_lowerb(lower.s,lower.len);
+  if (!stralloc_copys(&lower,"!")) _exit(QLX_NOMEM);
+  if (!stralloc_cats(&lower,local)) _exit(QLX_NOMEM);
+  if (!stralloc_0(&lower)) _exit(QLX_NOMEM);
+  case_lowerb(lower.s,lower.len);
 
- if (!stralloc_copys(&nughde,"")) _exit(QLX_NOMEM);
+  if (!stralloc_copys(&nughde,"")) _exit(QLX_NOMEM);
 
- fd = open_read("users/cdb");
- if (fd == -1)
-   if (errno != error_noent)
-     _exit(QLX_CDB);
+  fd = open_read("users/cdb");
+  if (fd == -1)
+    if (errno != error_noent)
+      _exit(QLX_CDB);
 
- if (fd != -1)
+  if (fd != -1)
   {
-   uint32 dlen;
-   unsigned int i;
+    uint32 dlen;
+    unsigned int i;
 
 /* switch to new cdb lib */
 //   r = cdb_seek(fd,"",0,&dlen);
@@ -117,132 +113,132 @@ wildchars.len = cdb_datalen(&c);
 //   if (cdb_bread(fd,wildchars.s,wildchars.len) == -1) _exit(QLX_CDB);
 if (cdb_read(&c,wildchars.s,wildchars.len,cdb_datapos(&c)) == -1) _exit(QLX_CDB);
 
-   i = lower.len;
-   flagwild = 0;
+    i = lower.len;
+    flagwild = 0;
 
-   do
+    do
     {
-     /* i > 0 */
-     if (!flagwild || (i == 1) || (byte_chr(wildchars.s,wildchars.len,lower.s[i - 1]) < wildchars.len))
+      /* i > 0 */
+      if (!flagwild || (i == 1) || (byte_chr(wildchars.s,wildchars.len,lower.s[i - 1]) < wildchars.len))
       {
 //       r = cdb_seek(fd,lower.s,i,&dlen);
-       r = cdb_find(&c,lower.s,i);
-       if (r == -1) _exit(QLX_CDB);
-       if (r == 1)
+        r = cdb_find(&c,lower.s,i);
+        if (r == -1) _exit(QLX_CDB);
+        if (r == 1)
         {
 // switch to new cdb lib:
 //         if (!stralloc_ready(&nughde,(unsigned int) dlen)) _exit(QLX_NOMEM);
 //         nughde.len = dlen;
 //         if (cdb_bread(fd,nughde.s,nughde.len) == -1) _exit(QLX_CDB);
-         if (!stralloc_ready(&nughde,cdb_datalen(&c))) _exit(QLX_NOMEM);
-         nughde.len = cdb_datalen(&c);
-         if (cdb_read(&c,nughde.s,nughde.len,cdb_datapos(&c)) == -1) _exit(QLX_CDB);
-         if (flagwild)
-	   if (!stralloc_cats(&nughde,local + i - 1)) _exit(QLX_NOMEM);
-         if (!stralloc_0(&nughde)) _exit(QLX_NOMEM);
-         close(fd);
-         return;
+          if (!stralloc_ready(&nughde,cdb_datalen(&c))) _exit(QLX_NOMEM);
+          nughde.len = cdb_datalen(&c);
+          if (cdb_read(&c,nughde.s,nughde.len,cdb_datapos(&c)) == -1) _exit(QLX_CDB);
+          if (flagwild)
+            if (!stralloc_cats(&nughde,local + i - 1)) _exit(QLX_NOMEM);
+          if (!stralloc_0(&nughde)) _exit(QLX_NOMEM);
+          close(fd);
+          return;
         }
       }
-     --i;
-     flagwild = 1;
+      --i;
+      flagwild = 1;
     }
-   while (i);
+    while (i);
 
-   close(fd);
+    close(fd);
   }
 
- if (pipe(pi) == -1) _exit(QLX_SYS);
- args[0] = "bin/qmail-getpw";
- args[1] = local;
- args[2] = 0;
- switch(gpwpid = vfork())
+  if (pipe(pi) == -1) _exit(QLX_SYS);
+  args[0] = "bin/qmail-getpw";
+  args[1] = local;
+  args[2] = 0;
+  switch(gpwpid = fork())
   {
-   case -1:
-     _exit(QLX_SYS);
-   case 0:
-     if (prot_gid(auto_gidn) == -1) _exit(QLX_USAGE);
-     if (prot_uid(auto_uidp) == -1) _exit(QLX_USAGE);
-     close(pi[0]);
-     if (fd_move(1,pi[1]) == -1) _exit(QLX_SYS);
-     execv(*args,args);
-     _exit(QLX_EXECPW);
+    case -1:
+      _exit(QLX_SYS);
+    case 0:
+      if (prot_gid(auto_gidn) == -1) _exit(QLX_USAGE);
+      if (prot_uid(auto_uidp) == -1) _exit(QLX_USAGE);
+      close(pi[0]);
+      if (fd_move(1,pi[1]) == -1) _exit(QLX_SYS);
+      execv(*args,args);
+      _exit(QLX_EXECPW);
   }
- close(pi[1]);
+  close(pi[1]);
 
- if (slurpclose(pi[0],&nughde,128) == -1) _exit(QLX_SYS);
+  if (slurpclose(pi[0],&nughde,128) == -1) _exit(QLX_SYS);
 
- if (wait_pid(&gpwstat,gpwpid) != -1)
+  if (wait_pid(&gpwstat,gpwpid) != -1)
   {
-   if (wait_crashed(gpwstat)) _exit(QLX_SYS);
-   if (wait_exitcode(gpwstat) != 0) _exit(wait_exitcode(gpwstat));
+    if (wait_crashed(gpwstat)) _exit(QLX_SYS);
+    if (wait_exitcode(gpwstat) != 0) _exit(wait_exitcode(gpwstat));
   }
 }
 
-int spawn(fdmess,fdout,s,r,at)
-int fdmess; int fdout;
-char *s; char *r; int at;
+int spawn(int fdmess,int fdout,char *s,char *r,int at)
+//int fdmess; int fdout;
+//char *s; char *r; int at;
 {
- int f;
+  int f;
 
- if (!(f = fork()))
+  if (!(f = fork()))
   {
-   char *(args[11]);
-   unsigned long u;
-   int n;
-   int uid;
-   int gid;
-   char *x;
-   unsigned int xlen;
+    char *(args[11]);
+    unsigned long u;
+    int n;
+    int uid;
+    int gid;
+    char *x;
+    unsigned int xlen;
 
-   r[at] = 0;
-   if (!r[0]) _exit(0); /* <> */
+    r[at] = 0;
+    if (!r[0]) _exit(0); /* <> */
 
-   if (chdir(auto_qmail) == -1) _exit(QLX_USAGE);
+    if (chdir(auto_qmail) == -1) _exit(QLX_USAGE);
 
-   nughde_get(r);
+    nughde_get(r);
 
-   x = nughde.s;
-   xlen = nughde.len;
+    x = nughde.s;
+    xlen = nughde.len;
 
-   args[0] = "bin/qmail-local";
-   args[1] = "--";
-   args[2] = x;
-   n = byte_chr(x,xlen,0); if (n++ == xlen) _exit(QLX_USAGE); x += n; xlen -= n;
+    args[0] = "bin/qmail-local";
+    args[1] = "--";
+    args[2] = x;
+    n = byte_chr(x,xlen,0); if (n++ == xlen) _exit(QLX_USAGE); x += n; xlen -= n;
 
-   scan_ulong(x,&u);
-   uid = u;
-   n = byte_chr(x,xlen,0); if (n++ == xlen) _exit(QLX_USAGE); x += n; xlen -= n;
+    scan_ulong(x,&u);
+    uid = u;
+    n = byte_chr(x,xlen,0); if (n++ == xlen) _exit(QLX_USAGE); x += n; xlen -= n;
 
-   scan_ulong(x,&u);
-   gid = u;
-   n = byte_chr(x,xlen,0); if (n++ == xlen) _exit(QLX_USAGE); x += n; xlen -= n;
+    scan_ulong(x,&u);
+    gid = u;
+    n = byte_chr(x,xlen,0); if (n++ == xlen) _exit(QLX_USAGE); x += n; xlen -= n;
 
-   args[3] = x;
-   n = byte_chr(x,xlen,0); if (n++ == xlen) _exit(QLX_USAGE); x += n; xlen -= n;
+    args[3] = x;
+    n = byte_chr(x,xlen,0); if (n++ == xlen) _exit(QLX_USAGE); x += n; xlen -= n;
 
-   args[4] = r;
-   args[5] = x;
-   n = byte_chr(x,xlen,0); if (n++ == xlen) _exit(QLX_USAGE); x += n; xlen -= n;
+    args[4] = r;
+    args[5] = x;
+    n = byte_chr(x,xlen,0); if (n++ == xlen) _exit(QLX_USAGE); x += n; xlen -= n;
 
-   args[6] = x;
-   n = byte_chr(x,xlen,0); if (n++ == xlen) _exit(QLX_USAGE); x += n; xlen -= n;
+    args[6] = x;
+    n = byte_chr(x,xlen,0); if (n++ == xlen) _exit(QLX_USAGE); x += n; xlen -= n;
 
-   args[7] = r + at + 1;
-   args[8] = s;
-   args[9] = aliasempty;
-   args[10] = 0;
+    args[7] = r + at + 1;
+    args[8] = s;
+    args[9] = aliasempty;
+    args[10] = 0;
 
-   if (fd_move(0,fdmess) == -1) _exit(QLX_SYS);
-   if (fd_move(1,fdout) == -1) _exit(QLX_SYS);
-   if (fd_copy(2,1) == -1) _exit(QLX_SYS);
-   if (prot_gid(gid) == -1) _exit(QLX_USAGE);
-   if (prot_uid(uid) == -1) _exit(QLX_USAGE);
-   if (!getuid()) _exit(QLX_ROOT);
+    if (fd_move(0,fdmess) == -1) _exit(QLX_SYS);
+    if (fd_move(1,fdout) == -1) _exit(QLX_SYS);
+    if (fd_copy(2,1) == -1) _exit(QLX_SYS);
+    if (prot_gid(gid) == -1) _exit(QLX_USAGE);
+    if (prot_uid(uid) == -1) _exit(QLX_USAGE);
+    if (!getuid()) _exit(QLX_ROOT);
 
-   execv(*args,args);
-   if (error_temp(errno)) _exit(QLX_EXECSOFT);
-   _exit(QLX_EXECHARD);
+    execv(*args,args);
+    if (error_temp(errno)) _exit(QLX_EXECSOFT);
+    _exit(QLX_EXECHARD);
   }
- return f;
+  return f;
 }

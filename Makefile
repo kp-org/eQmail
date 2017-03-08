@@ -220,7 +220,7 @@ qmail-smtpd sendmail tcp-env qmail-newmrh config \
 qreceipt qsmhook qbiff \
 forward preline condredirect bouncesaying except maildirmake \
 maildir2mbox maildirwatch \
-update_tmprsadh config-spp qmail-bfrmt config-bfrmt ipmeprint \
+config-spp qmail-bfrmt config-bfrmt ipmeprint \
 mkrsadhkeys mksrvrcerts qmail-fixq qmail-shcfg
 
 # idedit config-fast hostname qmail-upq qail elq pinq

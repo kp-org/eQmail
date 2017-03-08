@@ -9,17 +9,14 @@
 
 static char *binqqargs[2] = { 0, 0 } ;
 
-static void setup_qqargs()
-{
+static void setup_qqargs() {
   if(!binqqargs[0])
     binqqargs[0] = env_get("QMAILQUEUE");
   if(!binqqargs[0])
     binqqargs[0] = "bin/qmail-queue";
 }
 
-int qmail_open(qq)
-struct qmail *qq;
-{
+int qmail_open(struct qmail *qq) {
   int pim[2];
   int pie[2];
 
@@ -28,7 +25,7 @@ struct qmail *qq;
   if (pipe(pim) == -1) return -1;
   if (pipe(pie) == -1) { close(pim[0]); close(pim[1]); return -1; }
 
-  switch(qq->pid = vfork()) {
+  switch(qq->pid = fork()) {
     case -1:
       close(pim[0]); close(pim[1]);
       close(pie[0]); close(pie[1]);
@@ -50,28 +47,23 @@ struct qmail *qq;
   return 0;
 }
 
-unsigned long qmail_qp(qq) struct qmail *qq;
-{
+unsigned long qmail_qp(struct qmail *qq) {
   return qq->pid;
 }
 
-void qmail_fail(qq) struct qmail *qq;
-{
+void qmail_fail(struct qmail *qq) {
   qq->flagerr = 1;
 }
 
-void qmail_put(qq,s,len) struct qmail *qq; char *s; int len;
-{
+void qmail_put(struct qmail *qq, char *s, int len) {
   if (!qq->flagerr) if (substdio_put(&qq->ss,s,len) == -1) qq->flagerr = 1;
 }
 
-void qmail_puts(qq,s) struct qmail *qq; char *s;
-{
+void qmail_puts(qq,s) struct qmail *qq; char *s; {
   if (!qq->flagerr) if (substdio_puts(&qq->ss,s) == -1) qq->flagerr = 1;
 }
 
-void qmail_from(qq,s) struct qmail *qq; char *s;
-{
+void qmail_from(struct qmail *qq, char *s) {
   if (substdio_flush(&qq->ss) == -1) qq->flagerr = 1;
   close(qq->fdm);
   substdio_fdbuf(&qq->ss,write,qq->fde,qq->buf,sizeof(qq->buf));
@@ -80,16 +72,13 @@ void qmail_from(qq,s) struct qmail *qq; char *s;
   qmail_put(qq,"",1);
 }
 
-void qmail_to(qq,s) struct qmail *qq; char *s;
-{
+void qmail_to(struct qmail *qq, char *s) {
   qmail_put(qq,"T",1);
   qmail_puts(qq,s);
   qmail_put(qq,"",1);
 }
 
-char *qmail_close(qq)
-struct qmail *qq;
-{
+char *qmail_close(struct qmail *qq) {
   int wstat;
   int exitcode;
 
@@ -129,7 +118,7 @@ struct qmail *qq;
     case 120: return "Zunable to exec qq (#4.3.0)";
     default:
       if ((exitcode >= 11) && (exitcode <= 40))
-	return "Dqq permanent problem (#5.3.0)";
+    return "Dqq permanent problem (#5.3.0)";
       return "Zqq temporary problem (#4.3.0)";
   }
 }
