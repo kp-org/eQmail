@@ -24,3 +24,7 @@ tcpserver
 boot
 lib-1*
 inc-1*
+testing
+lib/dns
+lib/socket
+*.bck.c
