@@ -255,7 +255,7 @@ do
       if [ ! -f "$CONFDIR/$f" ] ; then FMT="0" ; else FMT="2" ; fi
       DEFAULT="No virtual domains defined."
       printContent;;
-	clientcert|servercert)
+    clientcert|servercert)
       if [ ! -f "$CONFDIR/$f".pem ] ; then
          printf "\033[1m%s\n\t\033[91m%s\033[0m%s\n" "$f:" "Critical" ": not found!"
       else FMT="3" ; printContent ; fi

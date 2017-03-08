@@ -616,26 +616,26 @@ trigger.o: compile trigger.c
 triggerpull.o: compile triggerpull.c
 	./compile triggerpull.c
 
-cert cert-req: Makefile-cert
-	@$(MAKE) -sf $< $@
+#cert cert-req: Makefile-cert
+#	@$(MAKE) -sf $< $@
 
-Makefile-cert: \
-conf-qmail conf-users conf-groups Makefile-cert.mk
-	@cat Makefile-cert.mk \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	> $@
+#Makefile-cert: \
+#conf-qmail conf-users conf-groups Makefile-cert.mk
+#	@cat Makefile-cert.mk \
+#	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+#	> $@
 
-update_tmprsadh: \
-conf-qmail conf-users conf-groups update_tmprsadh.sh
-	@cat update_tmprsadh.sh\
-	| sed s}UGQMAILD}"`head -2 conf-users|tail -1`:`head -1 conf-groups`"}g \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	> $@
-	chmod 755 update_tmprsadh 
+#update_tmprsadh: \
+#conf-qmail conf-users conf-groups update_tmprsadh.sh
+#	@cat update_tmprsadh.sh\
+#	| sed s}UGQMAILD}"`head -2 conf-users|tail -1`:`head -1 conf-groups`"}g \
+#	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+#	> $@
+#	chmod 755 update_tmprsadh 
 
-tmprsadh: update_tmprsadh
-	echo "Creating new temporary RSA and DH parameters"
-	./update_tmprsadh
+#tmprsadh: update_tmprsadh
+#	echo "Creating new temporary RSA and DH parameters"
+#	./update_tmprsadh
 
 mkrsadhkeys: \
 conf-qmail conf-users conf-groups mkrsadhkeys.sh warn-auto.sh
