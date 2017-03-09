@@ -17,13 +17,13 @@ CMD="(echo ehlo ; sleep 1)"
 #$CMD | telnet 127.0.0.1 25
 #exitcode
 
-(echo ehlo ; sleep 1 ; echo "MAIL FROM: qmail-test@.aldox.de" ; \
-             echo "RCPT TO: kp1@gorre.aldox.de" ; \
-             echo "DATA" ; \
-             echo "test telnet 127.0.0.1" ; echo "." ; echo "quit" \
-           ) | nc localhost 25
-exitcode
-exit
+#(echo ehlo ; sleep 1 ; echo "MAIL FROM: qmail-test@.aldox.de" ; \
+#             echo "RCPT TO: kp1@gorre.aldox.de" ; \
+#             echo "DATA" ; \
+#             echo "test telnet 127.0.0.1" ; echo "." ; echo "quit" \
+#           ) | nc localhost 25
+#exitcode
+#exit
 (echo ehlo ; sleep 1 ; echo "MAIL FROM: qmail-test@.aldox.de" ; \
              echo "RCPT TO: kp1@gorre.aldox.de" ; \
              echo "DATA" ; \
@@ -43,8 +43,15 @@ exitcode
 (echo ehlo ; sleep 1 ; echo "MAIL FROM: qmail-test@.aldox.de" ; \
              echo "RCPT TO: kp1@gorre.aldox.de" ; \
              echo "DATA" ; \
-             printf "test tls 25 localhost\r\n\r\n.\r\n"
-           ) | openssl s_client -starttls smtp -connect localhost:25
+             printf "test tls 25 localhost ipv4\r\n\r\n.\r\n" \
+           ) | openssl s_client -4 -starttls smtp -connect localhost:25
+exitcode
+
+(echo ehlo ; sleep 1 ; echo "MAIL FROM: qmail-test@.aldox.de" ; \
+             echo "RCPT TO: kp1@gorre.aldox.de" ; \
+             echo "DATA" ; \
+             printf "test tls 25 localhost ipv6\r\n\r\n.\r\n " ; echo "quit" \
+           ) | openssl s_client -6 -starttls smtp -connect localhost:25
 exitcode
 
 exit
@@ -54,9 +61,10 @@ exit
 (echo ehlo ; sleep 1 ; echo "MAIL FROM: qmail-test@.aldox.de" ; \
              echo "RCPT TO: kp1@gorre.aldox.de" ; \
              echo "DATA" ; \
-             echo "test tls 25 ::1" ; echo "." ; echo "quit" \
-           ) | openssl s_client -starttls smtp -connect ::1:25
+             echo "test tls port 25 ipv4" ; echo "." ; echo "quit" \
+           ) | openssl s_client -4 -starttls smtp -connect localhost:25
 exitcode
+
 exit
 
 #example qmail-smtpd (with CRLF's)

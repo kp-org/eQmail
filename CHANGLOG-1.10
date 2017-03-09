@@ -1,6 +1,138 @@
-Commit 1.10p3: !!! NOT PUSHED !!!
-20160507: - Makefile cleanup
-          - removed dns{cname,ptr,ip,mxip,fq
+20170223: - added 'preline' to install script
+20170217: - added check for 'awk' to configure
+
+20170214: - added 'conf-queue'
+          - changed default home dir to '/usr/local/eqmail' (conf-home)
+          - moved 'conf-qmail' to 'conf-home' (link conf-qmail->conf-home
+          - added libs 'socket.a', 'dns.a' to standard libs in folder lib
+20170209: - new: lib/uint{16,32}p.c
+20170206: - fixed typo in qmail-shcfg
+20160929: - new revision of qmail-remote.c (tls patch of F. Vermeulen)
+20160919: - ipme.c: switched to 'getifaddr' (thanks to Erwin Hoffmann),
+            removed '#include "hassalen.h"'
+20160912: - consolidated coe{h,c} into fd.a
+20160729: - Experimental: moved 'qmail-tcpto' to new ip stack (from ucspi)
+          - added 'error_isdir' to 'error.h', 'error.c'
+20160728: - syntax in 'qmail-shcfg.sh' (cross-platform)
+          - added 'tai.{h,c}', 'taia.{h,c}' and 'iopause.{h,c}'
+
+Snapshot 20160725:
+20160725: - improved cross-platform compatibility (install, some tools)
+          - some small corrections:
+            --> 'install': set permissions of alias folder
+            --> syntax of 'for loop' in 'buffer.c' and 'env.c'
+          - correction: show correct silent concurrency limit in 'qmail-shcfg'
+20160720: - added 'chkqueue' to qmail-fixq
+
+Commit 20160720: switched from substdio to buffer
+20160715: - moved to getoptb.{h,c}
+20160714: - new revisions (tag 20160714)
+            --> switched to 'buffer', 'unistd.h'
+          - moved 'prot.c' to lib/
+          - renamed 'qmail-eqfix' to 'qmail-fixq'
+          - fixed permissions in 'install'/'qmail-fixq'
+20160713: - new revisions (tag 20160713)
+            --> switched to 'buffer'
+          - removed 'qsmhook'
+          - replaced 'chkspawn' through auto check in 'configure'
+          - removed 'substdio', 'readwrite.h'
+20160712: - removed 'auto-int8.c', create 'auto_patrn.c' through configure script
+          - new revisions (tag 20160712)
+            --> switched to 'buffer'
+20160711: - new revisions (tag 20160711)
+            --> updated 'str.{h,c}
+            --> switched to 'buffer'
+            --> changed parameter declarations
+20160708: - replaced 'uint32.h' by 'uint_t.h'
+
+Snapshot 20160708
+20160706: - some code clean-up
+20160705: - new revisions (tag 20160705)
+          - fixed to set the mode 0622 of 'lock/trigger'
+          - switched to new(er) cdb lib, removed old cdb lib
+          - added strerr.{h,c} and commands.{h,c} w/ 'buffer' from ucspi-tcp-0.88
+          - started to switch to buffer
+20160704: - new revisions (tag 20160704)
+          - updated 'qmail-newmrh' to new(er) cdb lib
+          - install: separate handling of 'users' dir
+20160703: - new revisions (tag 20160703)
+          - updated 'rcpthosts.c' to new(er) cdb lib
+          - added newer cdb lib from ucspi-tcp-0.88
+          - added 'error_proto' to error.{h,c}
+		  - added buffer lib from ucspi-tcp-0.88
+
+Commit 20160703: env lib reworked
+20160630: - reworked environment lib
+20160629: - added qmail-eqfix
+20160628: - Revision 20160628, updated (some) libs to version of ucspi-tcp-0.88
+20160627: - added 'list ID's' and 'delete message' to qmail-qstat
+20160624: - introduced dir 'control/bootctrl'
+
+Snapshot 20160623
+20160623: - qmail-smtpd.c: don't offer auth if no checkpassordtool is given
+          - removed 'chkcc.inc'
+20160622: - configure: improved openssl checks
+          - removed some special bash-style code
+20160621: - install: changed 'dd' command to 'touch' for sendmutex (netbsd),
+            removed state parameter from 'dd' command
+
+Snapshot 20160613
+20160610: - improved compatibility of shell scripts ('/bin/sh', 'printf')
+          - added 'smtpplugins' to qmail-shcfg
+
+Snapshot 20160609
+20160608: - renamed function 'fmtqfn' to 'fmt_qfn'
+          - adjusted linking of 'auto_split.o' (is in 'lib' now)
+          - config.sh: check if TLS is compiled-in before create keys/certs
+          - replaced 'vfork' by 'fork' (qmail.c, qmail-{l,r}spawn.c, qmail-spp.c)
+20160607: - replaced 'qmail-showctl' by 'qmail-shcfg'
+20160603: - added 'qmail-shctl' as replacement of 'qmail-showctl'
+
+Commit 1.10-Rev.20160530 stable
+20160530: - some correction at install script
+20160523: - new revision (tag 20160523), qmail-start
+20160520: - install script: set rights/owner for qmail home dir
+20160519: - changed '.' (dot) to ':' (colon) for chown arguments
+          - removed bash style syntax
+20160517: - extended qmail-qstat to count more queue dirs
+20160516: - added to extend $(MAN)PATH variables (experimental)
+
+Commit 1.10-Rev.20160513
+20160513: - improved mkusers script, added getopts and option switches
+          - improved 'configure', added searchHeaders function
+20160512: - consolidated config(.sh)
+          - added mkservercerts, servercert.cnf
+          - changed TLS make/install process
+          - renamed/changed update_tmprsadh.sh -> mkrsadhkeys.sh
+          - clean up of Makefile, FILES, TARGETS
+20160510: - new revisions (tag 20160510)
+          - removed ipmeprint, qbiff, maildirwatch
+          - added qmail-bfque, consolidated api plugins and config files
+          - clean up of Makefile, FILES
+
+Commit 1.10-Rev.20160509:
+20160509: - new revisions (tag 20160509)
+20160506: - new revisions (tag 20160506)
+20160504: - new revisions (tag 20150504)
+          - added 'pipe.h', 'exec.h', 'close.h'
+20160503: - started adding revision to source files
+          - new revisions: qmail-local.c, hfield.c, case.c, envread.c,
+            fd.c, fmt.c, qreceipt.c, qmshook.c, ipmeprint.c, except.c,
+            maildir.c, maildir*.c, bouncesaying.c, conredirect.c
+          - added 'qread' and 'qwrite' to 'readwrire.h'
+          - auto-int8.c: see changes in revision log
+          - _DONE_ added 'scan_8long()' to 'scan.h'
+20160502: - changed '(s,ip4)' --> '(s,&ip4)' in ip.c (line 74)
+          - eliminated duplicate code in 'ipme.c' for 'HASSALEN 1'
+20160427: - clean up of FILES
+
+
+
+
+--> rollback! - anything above needs reviewed! *****************************
+Commit 1.10p3:
+20160407: - Makefile cleanup
+          - removed dns{cname,ptr,ip,mxip,fq ...)
           - rewrite of "config.sh"
           - added man pages: preline.1, datemail.1
           - added an example to maildir2mbox.1 (like pinq)
@@ -23,7 +155,7 @@ Commit 1.10p3: !!! NOT PUSHED !!!
           - added "file exists" check to config.sh
 20160405: - consolidated strerr_* into strerr.c
           - removed 'socket.lib'
-          - moved libresolv check (dns.lib) to configure script, added trylib.c
+		  - moved libresolv check (dns.lib) to configure script, added trylib.c
           - removed HASSIG* code (trysgprm.c, trysgact.c, sig.c)
           - moved seek.c, sig.c, stralloc.c, wait.c --> lib/
           - moved seek.h, sig.h, stralloc.h, wait.h --> inc/
@@ -41,7 +173,8 @@ Commit 1.10p2:
           - removed hier.c, install.c, install-big.c, instcheck.c
 20160324: - moved byte.h, case.h, coe.h, env.h, error.h, str.h, gen_alloc.h,
             gen_allocdefs.h, fd.h, exit.h, fifo.h, fmt.h, lock.h, open.h,
-            scan.c, ndelay.h to inc/
+            scan.c, ndelay.h
+			to inc/
           - moved alloc.c, byte.c, case.c, coe.c, env.c, envread.c, error.c,
             error_{str,temp}.c, str.c, fd.c, fmt.c, open.c, scan.c, ndelay.c
             to lib/
