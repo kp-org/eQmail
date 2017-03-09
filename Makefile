@@ -17,10 +17,11 @@ clean: TARGETS
 conf: configure
 	./configure
 
-install: instnew.sh
-	./instnew.sh
-
-setup: install
+# 'make install' will not work here usually ...
+install: setup
+# ... so we route 'install' to target 'setup'
+setup:
+	@./install
 
 mans:
 	cd man/ ; make
