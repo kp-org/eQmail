@@ -2,6 +2,10 @@
 
 SHELL=/bin/sh
 
+COMPILE=./compile
+LOAD=./load
+MAKELIB=.makelib
+
 # create libs (*.a)
 # create object files (*.o)
 # link files
@@ -98,7 +102,7 @@ condredirect: \
 load condredirect.o qmail.o strerr.a fd.a sig.a wait.a seek.a env.a \
 substdio.a error.a str.a fs.a auto_qmail.o
 	./load condredirect qmail.o strerr.a fd.a sig.a wait.a \
-	seek.a env.a substdio.a error.a str.a fs.a auto_qmail.o 
+	seek.a env.a substdio.a error.a str.a fs.a auto_qmail.o alloc.a
 
 condredirect.o: compile condredirect.c
 	./compile condredirect.c
@@ -158,7 +162,7 @@ forward: compile load forward.c qmail.o strerr.a alloc.a fd.a \
 wait.a sig.a env.a substdio.a error.a str.a fs.a auto_qmail.o
 	./compile forward.c
 	./load forward qmail.o strerr.a alloc.a fd.a wait.a sig.a \
-	env.a substdio.a error.a str.a fs.a auto_qmail.o 
+	env.a substdio.a error.a str.a fs.a auto_qmail.o alloc.a
 
 gfrom.o: compile gfrom.c
 	./compile gfrom.c
@@ -284,7 +288,7 @@ preline: compile load preline.c strerr.a fd.a wait.a sig.a env.a \
 getopt.a substdio.a error.a str.a
 	./compile preline.c
 	./load preline strerr.a fd.a wait.a sig.a env.a getopt.a \
-	substdio.a error.a str.a
+	substdio.a error.a str.a alloc.a
 
 prioq.o: compile prioq.c
 	./compile prioq.c
@@ -338,7 +342,8 @@ myctime.o slurpclose.o  datetime.a auto_qmail.o auto_patrn.o
 #case.a getln.a getoptb.a sig.a open.a seek.a \
 #lock.a fd.a wait.a env.a stralloc.a alloc.a strerr.a substdio.a \
 #error.a str.a fs.a
-	./compile qmail-local.c
+#	./compile qmail-local.c
+	$(COMPILE) qmail-local.c
 	./load qmail-local qmail.o quote.o now.o gfrom.o myctime.o \
 	slurpclose.o case.a getln.a getoptb.a sig.a open.a seek.a lock.a \
 	buffer.a \
@@ -397,7 +402,7 @@ load qmail-qmqpd.o received.o now.o date822fmt.o qmail.o auto_qmail.o \
 env.a substdio.a sig.a error.a wait.a fd.a str.a datetime.a fs.a
 	./load qmail-qmqpd received.o now.o date822fmt.o qmail.o \
 	auto_qmail.o env.a substdio.a sig.a error.a wait.a fd.a \
-	str.a datetime.a fs.a 
+	str.a datetime.a fs.a alloc.a
 
 qmail-qmqpd.o: compile qmail-qmqpd.c
 	./compile qmail-qmqpd.c
@@ -410,7 +415,7 @@ str.a fs.a auto_qmail.o
 	./load qmail-qmtpd rcpthosts.o control.o constmap.o \
 	received.o date822fmt.o now.o qmail.o cdb.a fd.a wait.a \
 	datetime.a open.a getln.a sig.a case.a env.a stralloc.a \
-	alloc.a substdio.a error.a str.a fs.a auto_qmail.o 
+	alloc.a substdio.a error.a str.a fs.a auto_qmail.o
 
 qmail-qmtpd.o: compile qmail-qmtpd.c
 	./compile qmail-qmtpd.c

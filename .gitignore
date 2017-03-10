@@ -28,3 +28,4 @@ testing
 lib/dns
 lib/socket
 *.bck.c
+CHANGELOG-1.10
