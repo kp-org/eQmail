@@ -10,11 +10,15 @@
 #include "datetime.h"
 #include "now.h"
 #include "triggerpull.h"
-#include "extra.h"
+//#include "extra.h"
 #include "auto_qmail.h"
 #include "auto_uids.h"
 #include "date822fmt.h"
 #include "fmtqfn.h"
+
+/* the 'EXTRA' was in 'extra.h' before (used here only!) */
+#define QUEUE_EXTRA ""
+#define QUEUE_EXTRALEN 0
 
 #define DEATH 86400 /* 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR 1003

@@ -33,67 +33,30 @@ mans:
 libs:
 	cd lib ; make
 
-#auto-int8: compile load auto-int8.c substdio.a error.a str.a fs.a
-#	./compile auto-int8.c
-#	./load auto-int8 substdio.a error.a str.a fs.a
+auto_break.o:
+	$(COMPILE) auto_break.c
 
-#auto-int8.o: \
-#compile auto-int8.c
-#	./compile auto-int8.c
+auto_patrn.o:
+	$(COMPILE) auto_patrn.c
 
-auto_break.o: compile auto_break.c
-	./compile auto_break.c
+auto_qmail.o:
+	$(COMPILE) auto_qmail.c
 
-#auto_patrn.c: auto-int8 conf-patrn
-#	./auto-int8 auto_patrn `head -1 conf-patrn` > auto_patrn.c
+auto_spawn.o:
+	$(COMPILE) auto_spawn.c
 
-auto_patrn.o: compile conf-patrn
-# auto_patrn.c auto-int8
-	./compile auto-int8.c
-	./load auto-int8 substdio.a error.a str.a fs.a
-	./auto-int8 auto_patrn `head -1 conf-patrn` > auto_patrn.c
-	./compile auto_patrn.c
+auto_split.o:
+	$(COMPILE) auto_split.c
 
-#auto_patrn.o: \
-#compile auto_patrn.c
-#	./compile auto_patrn.c
+auto_uids.o:
+	$(COMPILE) auto_uids.c
 
-auto_qmail.o: compile auto_qmail.c
-	./compile auto_qmail.c
-
-auto_spawn.o: compile auto_spawn.c
-	./compile auto_spawn.c
-
-auto_split.o: compile auto_split.c
-	./compile auto_split.c
-
-auto_uids.o: compile auto_uids.c
-	./compile auto_uids.c
-
-auto_usera.o: compile auto_usera.c
-	./compile auto_usera.c
+auto_usera.o:
+	$(COMPILE) auto_usera.c
 
 bouncesaying: load bouncesaying.c strerr.a error.a substdio.a str.a wait.a
 	./compile bouncesaying.c
 	./load bouncesaying strerr.a error.a substdio.a str.a wait.a
-
-#cdb.a: compile makelib cdb.c
-#	./compile cdb.c
-#	./makelib cdb.a cdb.o
-
-#cdbmake.a: compile makelib cdbmake.c
-#	./compile cdbmake.c
-#	./makelib cdbmake.a cdbmake.o
-
-#cdbmss.o: compile cdbmss.c
-#	./compile cdbmss.c
-
-chkspawn: \
-load chkspawn.o substdio.a error.a str.a fs.a auto_spawn.o
-	./load chkspawn substdio.a error.a str.a fs.a auto_spawn.o 
-
-chkspawn.o: compile chkspawn.c 
-	./compile chkspawn.c
 
 commands.o: compile commands.c
 	./compile commands.c
@@ -107,24 +70,14 @@ substdio.a error.a str.a fs.a auto_qmail.o
 condredirect.o: compile condredirect.c
 	./compile condredirect.c
 
-config: \
-warn-auto.sh config.sh conf-qmail conf-break conf-split
+mkconfig: \
+warn-auto.sh mkconfig.sh conf-home conf-break conf-split
 	cat warn-auto.sh config.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}QMAIL}"`head -1 conf-home`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
-	> config
-	chmod 755 config
-
-config-bfrmt: warn-auto.sh config-bfrmt.sh conf-qmail
-	cat warn-auto.sh config-bfrmt.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g > config-bfrmt
-	chmod 755 config-bfrmt
-
-config-spp: warn-auto.sh config-spp.sh conf-qmail
-	cat warn-auto.sh config-spp.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g > config-spp
-	chmod 755 config-spp
+	> mkconfig
+	chmod 755 mkconfig
 
 constmap.o: compile constmap.c
 	./compile constmap.c
@@ -221,12 +174,14 @@ qmail-clean qmail-send qmail-start splogger qmail-queue qmail-inject \
 predate datemail mailsubj qmail-newu \
 qmail-pw2u qmail-qread qmail-qstat qmail-tcpto qmail-tcpok \
 qmail-qmqpc qmail-qmqpd qmail-qmtpd \
-qmail-smtpd sendmail tcp-env qmail-newmrh config \
-qreceipt qsmhook qbiff \
+qmail-smtpd sendmail tcp-env qmail-newmrh mkconfig \
+qreceipt \
 forward preline condredirect bouncesaying except maildirmake \
-maildir2mbox maildirwatch \
-config-spp qmail-bfrmt config-bfrmt ipmeprint \
+maildir2mbox \
+qmail-before ipmeprint \
 mkrsadhkeys mksrvrcerts qmail-fixq qmail-shcfg
+
+#config-spp qmail-before config-bfrmt \
 
 maildir.o: compile maildir.c 
 	./compile maildir.c
@@ -243,22 +198,6 @@ maildirmake: compile \
 load maildirmake.c strerr.a substdio.a error.a str.a
 	./compile maildirmake.c
 	./load maildirmake strerr.a substdio.a error.a str.a 
-
-maildirwatch: \
-load maildirwatch.o hfield.o headerbody.o maildir.o prioq.o now.o \
-getln.a env.a open.a strerr.a stralloc.a alloc.a substdio.a error.a \
-str.a
-	./load maildirwatch hfield.o headerbody.o maildir.o \
-	prioq.o now.o getln.a env.a open.a strerr.a stralloc.a \
-	alloc.a substdio.a error.a str.a 
-
-maildirwatch.o: \
-compile maildirwatch.c
-# getln.h substdio.h subfd.h substdio.h prioq.h \
-#datetime.h gen_alloc.h stralloc.h gen_alloc.h
-# str.h exit.h hfield.h \
-#open.h headerbody.h maildir.h strerr.h
-	./compile maildirwatch.c
 
 mailsubj: warn-auto.sh mailsubj.sh conf-qmail conf-break conf-split
 	cat warn-auto.sh mailsubj.sh \
@@ -293,20 +232,32 @@ getopt.a substdio.a error.a str.a
 prioq.o: compile prioq.c
 	./compile prioq.c
 
-prot.o: compile prot.c
-	./compile prot.c
+#prot.o: compile prot.c
+#	./compile prot.c
 
-qbiff: compile load qbiff.c headerbody.o hfield.o getln.a env.a \
-open.a stralloc.a alloc.a substdio.a error.a str.a
-	./compile qbiff.c
-	./load qbiff headerbody.o hfield.o getln.a env.a open.a \
-	stralloc.a alloc.a substdio.a error.a str.a 
+#qbiff: compile load qbiff.c headerbody.o hfield.o getln.a env.a \
+#open.a stralloc.a alloc.a substdio.a error.a str.a
+#	./compile qbiff.c
+#	./load qbiff headerbody.o hfield.o getln.a env.a open.a \
+#	stralloc.a alloc.a substdio.a error.a str.a 
 
-qmail-bfrmt: qmail-bfrmt.sh
-	cat warn-auto.sh qmail-bfrmt.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g > qmail-bfrmt
-	chmod 755 qmail-bfrmt && \
-	chgrp qmail qmail-bfrmt
+qmail-before: qmail-before.sh
+	cat warn-auto.sh qmail-before.sh \
+	| sed s}QMAILDIR}"`head -1 conf-qmail`"}g \
+	| sed s}BEFORE}"beforequeue"}g \
+	| sed s}PROG}"qmail-queue"}g > qmail-bfque
+	cat warn-auto.sh qmail-before.sh \
+	| sed s}QMAILDIR}"`head -1 conf-qmail`"}g \
+	| sed s}BEFORE}"beforemote"}g \
+	| sed s}PROG}"qmail-remote"}g > qmail-bfrmt
+	chmod 754 qmail-bfque qmail-bfrmt
+	chgrp qmail qmail-bfque qmail-bfrmt
+
+#qmail-bfrmt: qmail-bfrmt.sh
+#	cat warn-auto.sh qmail-bfrmt.sh \
+#	| sed s}QMAIL}"`head -1 conf-qmail`"}g > qmail-bfrmt
+#	chmod 755 qmail-bfrmt && \
+#	chgrp qmail qmail-bfrmt
 
 qmail-clean: compile load qmail-clean.c fmtqfn.o now.o getln.a sig.a \
 stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_split.o
@@ -512,15 +463,6 @@ substdio.a error.a str.a fs.a auto_qmail.o
 	./load qmail-tcpto ip.o now.o open.a lock.a substdio.a \
 	error.a str.a fs.a auto_qmail.o 
 
-#qmail-upq: \
-#warn-auto.sh qmail-upq.sh conf-qmail conf-break conf-split
-#	cat warn-auto.sh qmail-upq.sh \
-#	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-#	| sed s}BREAK}"`head -1 conf-break`"}g \
-#	| sed s}SPLIT}"`head -1 conf-split`"}g \
-#	> qmail-upq
-#	chmod 755 qmail-upq
-
 qmail.o: compile qmail.c
 	./compile qmail.c
 
@@ -531,12 +473,6 @@ alloc.a substdio.a error.a str.a auto_qmail.o
 	./load qreceipt headerbody.o hfield.o quote.o token822.o \
 	qmail.o getln.a fd.a wait.a sig.a env.a stralloc.a alloc.a \
 	substdio.a error.a str.a auto_qmail.o 
-
-qsmhook: compile load qsmhook.c sig.a case.a fd.a wait.a getopt.a \
-env.a stralloc.a alloc.a substdio.a error.a str.a
-	./compile qsmhook.c
-	./load qsmhook sig.a case.a fd.a wait.a getopt.a env.a \
-	stralloc.a alloc.a substdio.a error.a str.a 
 
 qsutil.o: compile qsutil.c
 	./compile qsutil.c
@@ -562,9 +498,8 @@ substdio.a error.a str.a auto_qmail.o
 	./load sendmail env.a getopt.a alloc.a substdio.a \
 	error.a str.a auto_qmail.o 
 
-spawn.o: compile chkspawn spawn.c
-	./chkspawn
-	./compile spawn.c
+spawn.o:
+	$(COMPILE) spawn.c
 
 splogger: compile load splogger.c substdio.a error.a str.a fs.a
 	./compile splogger.c

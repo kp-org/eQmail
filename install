@@ -115,11 +115,18 @@ cd $QMAILDIR
 cd $OLDPWD
 
 # basic configuration
-. ./config
+. ./mkconfig
 
 # extend $PATH (experimental)
-if [ -d /etc/profile.d ] ; then
-   echo "export PATH=$PATH:$QMAILDIR/bin"        > /etc/profile.d/eqmail.sh
-   echo "export MANPATH=$MANPATH:$QMAILDIR/man" >> /etc/profile.d/eqmail.sh
-   . /etc/profile
-fi
+#if [ -d /etc/profile.d ] ; then
+#   echo "export PATH=$PATH:$QMAILDIR/bin"        > /etc/profile.d/eqmail.sh
+#   echo "export MANPATH=$MANPATH:$QMAILDIR/man" >> /etc/profile.d/eqmail.sh
+#   . /etc/profile
+#fi
+
+# some links could be helpful
+cd /usr/local/bin || exit 1
+readlink sendmail || ln -s $QMAILDIR/bin/sendmail sendmail
+
+# ....
+cd $OLDPWD

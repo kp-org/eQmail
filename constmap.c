@@ -31,7 +31,7 @@ int len;
     if (h == cm->hash[pos])
       if (len == cm->inputlen[pos])
         if (!case_diffb(cm->input[pos],len,s))
-	  return cm->input[pos] + cm->inputlen[pos] + 1;
+      return cm->input[pos] + cm->inputlen[pos] + 1;
     pos = cm->next[pos];
   }
   return 0;
@@ -48,14 +48,14 @@ int flagcolon;
   int k;
   int pos;
   constmap_hash h;
- 
+
   cm->num = 0;
   for (j = 0;j < len;++j) if (!s[j]) ++cm->num;
- 
+
   h = 64;
   while (h && (h < cm->num)) h += h;
   cm->mask = h - 1;
- 
+
   cm->first = (int *) alloc(sizeof(int) * h);
   if (cm->first) {
     cm->input = (char **) alloc(sizeof(char *) * cm->num);
@@ -64,22 +64,22 @@ int flagcolon;
       if (cm->inputlen) {
         cm->hash = (constmap_hash *) alloc(sizeof(constmap_hash) * cm->num);
         if (cm->hash) {
-	  cm->next = (int *) alloc(sizeof(int) * cm->num);
-	  if (cm->next) {
-	    for (h = 0;h <= cm->mask;++h)
-	      cm->first[h] = -1;
+      cm->next = (int *) alloc(sizeof(int) * cm->num);
+      if (cm->next) {
+        for (h = 0;h <= cm->mask;++h)
+          cm->first[h] = -1;
             pos = 0;
             i = 0;
             for (j = 0;j < len;++j)
               if (!s[j]) {
-	        k = j - i;
-	        if (flagcolon) {
-		  for (k = i;k < j;++k)
-		    if (s[k] == ':')
-		      break;
-		  if (k >= j) { i = j + 1; continue; }
-		  k -= i;
-		}
+            k = j - i;
+            if (flagcolon) {
+          for (k = i;k < j;++k)
+            if (s[k] == ':')
+              break;
+          if (k >= j) { i = j + 1; continue; }
+          k -= i;
+        }
                 cm->input[pos] = s + i;
                 cm->inputlen[pos] = k;
                 h = hash(s + i,k);
@@ -91,9 +91,9 @@ int flagcolon;
                 i = j + 1;
               }
             return 1;
-	  }
-	  alloc_free(cm->hash);
-	}
+      }
+      alloc_free(cm->hash);
+    }
         alloc_free(cm->inputlen);
       }
       alloc_free(cm->input);

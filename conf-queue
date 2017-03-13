@@ -1,0 +1,20 @@
+/var/spool/eqmail-queue
+
+This is the eQmail queue directory.  It must be  a directory at a local
+filesystem.  Usual '/var/spool'  is the common main  directory for such
+purposes in most cases. This is where eQmail queues  all mail messages.
+If the main directory differs from 'conf-home',  a link will be created
+during standard installation inside the eQmail home directory.
+
+The queue could be shared between  multiple installations of eQmail and
+perhaps derivatives (e.g. netqmail)  as long the same  queue-processing
+is used (e.g. 'big-todo'). Be warned about sharing.
+
+The queue  (except for bounce message contents) is  crashproof,  if the
+filesystem  guarantees  that  single-byte  writes are atomic  and  that
+directory operations  are synchronous.  These guarantees  are  provided
+by fixed-block filesystems like UFS and journaling filesystems.
+
+IMPORTANT:  On recent versions of OpenBSD it will not work if the queue
+is somewhere under '/var' by default. Reason is like '/var/' is mounted
+(mount options).

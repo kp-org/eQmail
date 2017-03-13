@@ -26,9 +26,7 @@ void closepipes() {
   close(pi5[0]); close(pi5[1]); close(pi6[0]); close(pi6[1]);
 }
 
-void main(argc,argv)
-int argc;
-char **argv;
+void main(int argc,char **argv)
 {
   if (chdir("/") == -1) die();
   umask(077);
@@ -49,7 +47,7 @@ char **argv;
     if (pipe(pi0) == -1) die();
     switch(fork()) {
       case -1:
-	die();
+        die();
       case 0:
         if (prot_gid(auto_gidn) == -1) die();
         if (prot_uid(auto_uidl) == -1) die();
@@ -57,19 +55,19 @@ char **argv;
         if (fd_move(0,pi0[0]) == -1) die();
         close23456();
         execvp(argv[1],argv + 1);
-	die();
+        die();
     }
     close(pi0[0]);
     if (fd_move(1,pi0[1]) == -1) die();
   }
- 
+
   if (pipe(pi1) == -1) die();
   if (pipe(pi2) == -1) die();
   if (pipe(pi3) == -1) die();
   if (pipe(pi4) == -1) die();
   if (pipe(pi5) == -1) die();
   if (pipe(pi6) == -1) die();
- 
+
   switch(fork()) {
     case -1: die();
     case 0:
@@ -80,7 +78,7 @@ char **argv;
       execvp(*qlargs,qlargs);
       die();
   }
- 
+
   switch(fork()) {
     case -1: die();
     case 0:
@@ -92,7 +90,7 @@ char **argv;
       execvp(*qrargs,qrargs);
       die();
   }
- 
+
   switch(fork()) {
     case -1: die();
     case 0:
@@ -104,7 +102,7 @@ char **argv;
       execvp(*qcargs,qcargs);
       die();
   }
- 
+
   if (prot_uid(auto_uids) == -1) die();
   if (fd_copy(0,1) == -1) die();
   if (fd_copy(1,pi1[1]) == -1) die();
