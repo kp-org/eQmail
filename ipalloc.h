@@ -34,7 +34,7 @@ struct ip_mx {
 
 #endif
 
-#include "gen_alloc.h"
+//#include "gen_alloc.h"
 
 GEN_ALLOC_typedef(ipalloc,struct ip_mx,ix,len,a)
 extern int ipalloc_readyplus();

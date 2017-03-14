@@ -10,8 +10,8 @@ echo -n "Checking architecture ... "
 ARCH=`uname -m` ; echo -n ":$ARCH" >> systype
 echo "build on "${ARCH}"!"
 
-# check for system tools (required)
-for f in nslookup bash hostname [ test make perl ip
+# check for system tools (required) !!!
+for f in nslookup bash hostname [ test make perl
 do
   echo -n "Checking for $f ... "
   which $f 2>/dev/null
@@ -19,7 +19,7 @@ do
 done
 
 # check for optional tools
-for f in svc start-stop-daemon tcpserver xinetd php awk
+for f in svc start-stop-daemon tcpserver xinetd php awk ip
 do
   echo -n "Checking for $f ... "
   which $f 2>/dev/null

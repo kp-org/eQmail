@@ -72,7 +72,7 @@ condredirect.o: compile condredirect.c
 
 mkconfig: \
 warn-auto.sh mkconfig.sh conf-home conf-break conf-split
-	cat warn-auto.sh config.sh \
+	cat warn-auto.sh mkconfig.sh \
 	| sed s}QMAIL}"`head -1 conf-home`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \

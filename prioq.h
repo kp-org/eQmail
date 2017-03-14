@@ -2,7 +2,8 @@
 #define PRIOQ_H
 
 #include "datetime.h"
-#include "gen_alloc.h"
+//#include "gen_alloc.h"
+#include "stralloc.h"
 
 struct prioq_elt { datetime_sec dt; unsigned long id; } ;
 

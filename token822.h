@@ -9,7 +9,8 @@ struct token822
  }
 ;
 
-#include "gen_alloc.h"
+//#include "gen_alloc.h"
+#include "stralloc.h"
 GEN_ALLOC_typedef(token822_alloc,struct token822,t,len,a)
 
 extern int token822_parse();
