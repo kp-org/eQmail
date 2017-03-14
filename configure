@@ -57,7 +57,7 @@ if [ $fd_spn -gt $fd_max ] ; then fd_spn=$fd_max ; fi
 echo "int auto_spawn = $fd_spn;" > auto_spawn.c
 
 #********************************************************************************
-# checking that users from conf-users are exists
+# checking that users from conf-users are exists (excluding 'alias')
 #  id -u $(head -1 conf-users) 2>&1 >/dev/null  #|| (echo "run mkusers" ; exit 1)
 #  if [ $? -ne 0 ] ; then echo "Create users first!" ; exit 1 ; fi
 for i in 2 3 4 5 6 7 8

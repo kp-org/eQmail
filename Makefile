@@ -495,11 +495,18 @@ received.o: compile received.c
 remoteinfo.o: compile remoteinfo.c
 	./compile remoteinfo.c
 
-sendmail: compile load sendmail.c env.a getopt.a alloc.a \
-substdio.a error.a str.a auto_qmail.o
-	./compile sendmail.c
-	./load sendmail env.a getopt.a alloc.a substdio.a \
-	error.a str.a auto_qmail.o 
+#sendmail: compile load sendmail.c env.a getopt.a alloc.a \
+#substdio.a error.a str.a auto_qmail.o
+#	./compile sendmail.c
+#	./load sendmail env.a getopt.a alloc.a substdio.a \
+#	error.a str.a auto_qmail.o 
+
+sendmail:
+# compile load sendmail.c env.a getopt.a alloc.a \
+#substdio.a error.a str.a auto_qmail.o
+	$(COMPILE) sendmail.c
+	$(LOAD) sendmail env.a getoptb.a alloc.a buffer.a \
+	error.a str.a auto_qmail.o
 
 spawn.o:
 	$(COMPILE) spawn.c
@@ -515,14 +522,23 @@ splogger: compile load splogger.c substdio.a error.a str.a fs.a
 #	&& echo -lgen || exit 0 ) > syslog.lib
 #	rm -f trysyslog.o trysyslog
 
+#tcp-env: compile load tcp-env.c dns.o remoteinfo.o timeoutread.o \
+#timeoutwrite.o timeoutconn.o ip.o ipalloc.o case.a ndelay.a sig.a \
+#env.a getopt.a stralloc.a alloc.a substdio.a error.a str.a fs.a dns.lib
+#	./compile tcp-env.c
+#	./load tcp-env dns.o remoteinfo.o timeoutread.o \
+#	timeoutwrite.o timeoutconn.o ip.o ipalloc.o case.a ndelay.a \
+#	sig.a env.a getopt.a stralloc.a alloc.a substdio.a error.a \
+#	str.a fs.a `cat dns.lib`
+
 tcp-env: compile load tcp-env.c dns.o remoteinfo.o timeoutread.o \
 timeoutwrite.o timeoutconn.o ip.o ipalloc.o case.a ndelay.a sig.a \
-env.a getopt.a stralloc.a alloc.a substdio.a error.a str.a fs.a dns.lib
+env.a stralloc.a alloc.a substdio.a error.a str.a fs.a dns.lib
 	./compile tcp-env.c
 	./load tcp-env dns.o remoteinfo.o timeoutread.o \
 	timeoutwrite.o timeoutconn.o ip.o ipalloc.o case.a ndelay.a \
-	sig.a env.a getopt.a stralloc.a alloc.a substdio.a error.a \
-	str.a fs.a `cat dns.lib`
+	sig.a env.a getoptb.a stralloc.a alloc.a substdio.a error.a \
+	str.a fs.a `cat dns.lib` buffer.a
 
 tcpto.o: compile tcpto.c
 	./compile tcpto.c
