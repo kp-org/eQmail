@@ -3,6 +3,7 @@
 #include "subfd.h"
 #include "substdio.h"
 #include "ip.h"
+//#include "ip2.h"
 #include "ipme.h"
 #include "exit.h"
 
@@ -20,7 +21,8 @@ void main()
   {
    switch(ipme.ix[j].af) {
    case AF_INET:
-      substdio_put(subfdout,temp,ip_fmt(temp,&ipme.ix[j].addr.ip));
+//      substdio_put(subfdout,temp,ip_fmt(temp,&ipme.ix[j].addr.ip));
+      substdio_put(subfdout,temp,ip4_fmt(temp,&ipme.ix[j].addr.ip));
       break;
 #ifdef INET6
    case AF_INET6:

@@ -15,8 +15,8 @@ default: conf libs it mans
 
 clean: TARGETS
 	rm -f *.o *.a *.tmp `cat TARGETS`
-	cd lib ; make clean
-	cd man ; make clean
+	@cd lib ; make --no-print-directory clean
+	@cd man ; make --no-print-directory clean
 
 conf: configure
 	./configure
@@ -28,7 +28,8 @@ setup:
 	@./install
 
 mans:
-	cd man/ ; make
+	@echo Creating man pages ...
+	@cd man/ ; make --no-print-directory
 
 libs:
 	cd lib ; make
@@ -162,10 +163,10 @@ ipalloc.o: compile ipalloc.c
 ipme.o: compile ipme.c hassalen.h
 	./compile ipme.c
 
-ipmeprint: compile load ipmeprint.c ipme.o ip.o ipalloc.o \
+ipmeprint: compile load ipmeprint.c ipme.o ip.a ipalloc.o \
 stralloc.a alloc.a substdio.a error.a str.a fs.a
 	./compile ipmeprint.c
-	./load ipmeprint ipme.o ip.o ipalloc.o stralloc.a alloc.a \
+	./load ipmeprint ipme.o ip.a ipalloc.o stralloc.a alloc.a \
 	substdio.a error.a str.a fs.a
 
 it: \
@@ -223,11 +224,13 @@ error.a str.a fs.a
 	./load predate datetime.a strerr.a sig.a fd.a wait.a \
 	substdio.a error.a str.a fs.a 
 
-preline: compile load preline.c strerr.a fd.a wait.a sig.a env.a \
-getopt.a substdio.a error.a str.a
-	./compile preline.c
-	./load preline strerr.a fd.a wait.a sig.a env.a getopt.a \
-	substdio.a error.a str.a alloc.a
+preline: compile load preline.c
+# strerr.a fd.a wait.a sig.a env.a \
+#getopt.a substdio.a error.a str.a
+	$(COMPILE) preline.c
+	$(LOAD) preline strerr_buf.a fd.a wait.a sig.a env.a getoptb.a \
+	buffer.a error.a str.a alloc.a
+#	substdio.a
 
 prioq.o: compile prioq.c
 	./compile prioq.c

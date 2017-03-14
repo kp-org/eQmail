@@ -5,15 +5,16 @@
 
 const unsigned char V4mappedprefix[12]={0,0,0,0,0,0,0,0,0,0,0xff,0xff};
 
-//unsigned int ip_fmt(char *s,char *ip)
-unsigned int ip_fmt(s,ip)
-char *s;
-struct ip_address *ip;
+unsigned int ip_fmt(char *s,char *ips)
+//unsigned int ip_fmt(s,ip)
+//char *s;
+//struct ip_address *ip;
 {
   unsigned int len;
   unsigned int i;
- 
+
   len = 0;
+/*
   i = fmt_ulong(s,(unsigned long) ip->d[0]); len += i; if (s) s += i;
   i = fmt_str(s,"."); len += i; if (s) s += i;
   i = fmt_ulong(s,(unsigned long) ip->d[1]); len += i; if (s) s += i;
@@ -21,6 +22,15 @@ struct ip_address *ip;
   i = fmt_ulong(s,(unsigned long) ip->d[2]); len += i; if (s) s += i;
   i = fmt_str(s,"."); len += i; if (s) s += i;
   i = fmt_ulong(s,(unsigned long) ip->d[3]); len += i; if (s) s += i;
+*/
+  i = fmt_ulong(s,(unsigned long) (unsigned char) ips[0]); len += i; if (s) s += i;
+  if (s) *s++ = '.'; ++len;
+  i = fmt_ulong(s,(unsigned long) (unsigned char) ips[1]); len += i; if (s) s += i;
+  if (s) *s++ = '.'; ++len;
+  i = fmt_ulong(s,(unsigned long) (unsigned char) ips[2]); len += i; if (s) s += i;
+  if (s) *s++ = '.'; ++len;
+  i = fmt_ulong(s,(unsigned long) (unsigned char) ips[3]); len += i; if (s) s += i;
+
   return len;
 }
 
@@ -75,7 +85,8 @@ struct ip6_address *ip6;
   for (j=0; j<16; j+=2) {
     if (j==12 && byte_equal(ip6->d,12,V4mappedprefix)) {
       byte_copy(ip4.d, 4, ip6->d+12);
-      temp=ip_fmt(s,ip4);
+//      temp=ip_fmt(s,ip4);
+      temp=ip_fmt(s,(char *) &ip4);
       len+=temp;
       s+=temp;
       break;

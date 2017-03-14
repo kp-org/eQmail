@@ -7,10 +7,6 @@
 #include "scan.h"
 #include "ip2.h"
 
-// Kai: temp., is in socket.c in the future
-//const unsigned char V4mappedprefix[12]={0,0,0,0,0,0,0,0,0,0,0xff,0xff};
-//#include "socket.h"
-
 /* file: 'ip6_fmt.c' ************************************************ */
 unsigned int ip6_fmt(char *s,char ip[16])
 {

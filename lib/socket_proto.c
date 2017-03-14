@@ -12,7 +12,9 @@
 #include "socket.h"
 #include "error.h"
 //#include "haveip6.h"
+#ifdef INET6
 #define LIBC_HAS_IP6 1
+#endif
 
 /* file: socket_tcp.c *********************************************** */
 //int socket_tcp(void)

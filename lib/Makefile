@@ -19,8 +19,9 @@ check:
 	[ -f $(COMPILE) ] && [ -f $(MAKELIB) ] || ( cd .. ; ./configure ; cd $($OLDPWD) ; )
 
 clean:
-	rm -f *.o *.a
-	cd dns ; make clean
+	@echo Cleaning up libs ...
+	@rm -f *.o *.a
+	@cd dns ; make -s clean
 
 libs: obj alloc.a buffer.a case.a cdb.a env.a error.a fd.a fs.a getln.a getoptb.a lock.a \
 ndelay.a open.a seek.a sig.a substdio.a str.a stralloc.a strerr.a time.a wait.a \

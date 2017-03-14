@@ -38,7 +38,9 @@ extern unsigned int ip4_fmt(char *,char *);
 extern unsigned int ip_scanbracket();	// --> deprecated(?)
 extern unsigned int ip46_scanbracket();  // new to replace ip_scanbracket
 
+#ifdef INET6
 #define LIBC_HAS_IP6 1		// Kai: temp. static --> make a "try"!
+#endif
 
 extern unsigned int ip6_scan(const char *,char *);
 extern unsigned int ip6_fmt(char *,char *);

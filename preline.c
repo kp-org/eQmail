@@ -1,9 +1,14 @@
+/*
+ *  Revision 20160712, Kai Peter
+ *  - switched to 'buffer'
+ *  Revision 20160504, Kai Peter
+ *  - changed return type of main to int
+ */
 #include "fd.h"
-#include "sgetopt.h"
-#include "readwrite.h"		/* the original definitions */
+#include <unistd.h>
 #include "strerr.h"
-#include "substdio.h"
-#include "exit.h"
+#include "buffer.h"
+#include "getoptb.h"
 #include "wait.h"
 #include "env.h"
 #include "sig.h"
@@ -20,26 +25,24 @@ int flagufline = 1; char *ufline;
 int flagrpline = 1; char *rpline;
 int flagdtline = 1; char *dtline;
 
-char outbuf[SUBSTDIO_OUTSIZE];
-char inbuf[SUBSTDIO_INSIZE];
-substdio ssout = SUBSTDIO_FDBUF(write,1,outbuf,sizeof outbuf);
-substdio ssin = SUBSTDIO_FDBUF(read,0,inbuf,sizeof inbuf);
+char outbuf[BUFFER_OUTSIZE];
+char inbuf[BUFFER_INSIZE];
+buffer ssout = BUFFER_INIT(write,1,outbuf,sizeof outbuf);
+buffer ssin = BUFFER_INIT(read,0,inbuf,sizeof inbuf);
 
-void main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
 {
   int opt;
   int pi[2];
   int pid;
   int wstat;
- 
+
   sig_pipeignore();
- 
+
   if (!(ufline = env_get("UFLINE"))) die_usage();
   if (!(rpline = env_get("RPLINE"))) die_usage();
   if (!(dtline = env_get("DTLINE"))) die_usage();
- 
+
   while ((opt = getopt(argc,argv,"frdFRD")) != opteof)
     switch(opt) {
       case 'f': flagufline = 0; break;
@@ -53,7 +56,7 @@ char **argv;
   argc -= optind;
   argv += optind;
   if (!*argv) die_usage();
- 
+
   if (pipe(pi) == -1)
     strerr_die2sys(111,FATAL,"unable to create pipe: ");
 
@@ -72,18 +75,19 @@ char **argv;
   close(pi[0]);
   if (fd_move(1,pi[1]) == -1)
     strerr_die2sys(111,FATAL,"unable to set up fds: ");
- 
-  if (flagufline) substdio_bputs(&ssout,ufline);
-  if (flagrpline) substdio_bputs(&ssout,rpline);
-  if (flagdtline) substdio_bputs(&ssout,dtline);
-  if (substdio_copy(&ssout,&ssin) != 0)
+
+  if (flagufline) buffer_puts(&ssout,ufline);
+  if (flagrpline) buffer_puts(&ssout,rpline);
+  if (flagdtline) buffer_puts(&ssout,dtline);
+  if (buffer_copy(&ssout,&ssin) != 0)
     strerr_die2sys(111,FATAL,"unable to copy input: ");
-  substdio_flush(&ssout);
+  buffer_flush(&ssout);
   close(1);
- 
+
   if (wait_pid(&wstat,pid) == -1)
     strerr_die2sys(111,FATAL,"wait failed: ");
   if (wait_crashed(wstat))
     strerr_die2x(111,FATAL,"child crashed");
   _exit(wait_exitcode(wstat));
+  return(0);  /* never reached */
 }
