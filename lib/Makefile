@@ -21,7 +21,6 @@ check:
 clean:
 	rm -f *.o *.a
 	cd dns ; make clean
-	cd socket ; make clean
 
 libs: obj alloc.a buffer.a case.a cdb.a env.a error.a fd.a fs.a getln.a getoptb.a lock.a \
 ndelay.a open.a seek.a sig.a substdio.a str.a stralloc.a strerr.a time.a wait.a \
@@ -56,8 +55,9 @@ cdb.a:
 # ../makelib cdbread.c cdbmake.c cdbhash.c
 	$(MAKELIB) ../cdb.a cdbread.o cdbmake.o cdbhash.o uint32p.o seek.o buffer.o
 
-env.a: ../compile ../makelib
-	../makelib ../env.a env.o
+env.a:
+# ../compile ../makelib
+	$(MAKELIB) ../env.a env.o
 #	 envread.o
 
 error.a: ../compile ../makelib error.c error_str.c error_temp.c
@@ -73,18 +73,17 @@ getln.a: ../compile ../makelib getln.o
 	../makelib ../getln.a getln.o
 
 getln_buf.a:
-# ../compile ../makelib getln.o
 	$(MAKELIB) ../getln_buf.a getln_buf.o
 
 getopt.a: ../makelib subgetopt.o sgetopt.o
 	../makelib ../getopt.a subgetopt.o sgetopt.o
 
 getoptb.a:
-# ../makelib getoptb.c
 	$(MAKELIB) ../getoptb.a getoptb.o
 
-lock.a: ../compile ../makelib lock.c
-	../makelib ../lock.a lock.o
+lock.a:
+# ../compile ../makelib lock.c
+	$(MAKELIB) ../lock.a lock.o
 
 ndelay.a:
 	$(MAKELIB) ../ndelay.a ndelay.o
@@ -127,16 +126,14 @@ time.a: iopause.o tai.o taia.o
 #********************************************
 # needed by qmail-tcpsrv - devel
 dns.a:
-	echo "DNS ..."
-	cd dns ; make ; mv dns.a ../../dns2.a
+	@echo "Building dns lib ..."
+	@cd dns ; make --no-print-directory
+	# ; cp dns.a ../../dns2.a
 
 socket.a:
 	echo "Building socket lib ..."
-	cd socket ; make ; mv socket.a ../../socket.a
+	$(MAKELIB) ../socket.a socket.o socket_accept.o socket_bind.o \
+	socket_connect.o socket_proto.o socket_local.o socket_remote.o ../ip.a
 
-ip.a: ../compile ../makelib ip4.c ip6.c socket/socket.o
-	../makelib ../ip.a ip4.o ip6.o socket/socket.o
-
-# test: put ip.a, socket.a and dns.{o,a} together
-#net.a:
-#        ../makelib net.a ip4.o ip6.o ../dns.o ../dns2.a ../socket.a
+ip.a:
+	$(MAKELIB) ../ip.a ip4.o ip6.o socket.o

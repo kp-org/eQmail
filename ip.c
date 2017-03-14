@@ -5,6 +5,7 @@
 
 const unsigned char V4mappedprefix[12]={0,0,0,0,0,0,0,0,0,0,0xff,0xff};
 
+//unsigned int ip_fmt(char *s,char *ip)
 unsigned int ip_fmt(s,ip)
 char *s;
 struct ip_address *ip;
@@ -23,6 +24,7 @@ struct ip_address *ip;
   return len;
 }
 
+//unsigned int ip_scan(char *s,char *ip)
 unsigned int ip_scan(s,ip)
 char *s;
 struct ip_address *ip;
@@ -30,7 +32,7 @@ struct ip_address *ip;
   unsigned int i;
   unsigned int len;
   unsigned long u;
- 
+
   len = 0;
   i = scan_ulong(s,&u); if (!i) return 0; ip->d[0] = u; s += i; len += i;
   if (*s != '.') return 0; ++s; ++len;
@@ -42,12 +44,13 @@ struct ip_address *ip;
   return len;
 }
 
+//unsigned int ip_scanbracket(char *s,char *ip)
 unsigned int ip_scanbracket(s,ip)
 char *s;
 struct ip_address *ip;
 {
   unsigned int len;
- 
+
   if (*s != '[') return 0;
   len = ip_scan(s + 1,ip);
   if (!len) return 0;
@@ -56,6 +59,7 @@ struct ip_address *ip;
 }
 
 #ifdef INET6
+//unsigned int ip6_fmt(char *s,char *ip6)
 unsigned int ip6_fmt(s,ip6)
 char *s;
 struct ip6_address *ip6;
