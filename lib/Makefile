@@ -23,9 +23,9 @@ clean:
 	@rm -f *.o *.a
 	@cd dns ; make -s clean
 
-libs: obj alloc.a buffer.a case.a cdb.a env.a error.a fd.a fs.a getln.a getoptb.a lock.a \
+libs: obj alloc.a buffer.a case.a cdb.a env.a error.a fd.a fs.a getln.a getopt.a lock.a \
 ndelay.a open.a seek.a sig.a substdio.a str.a stralloc.a strerr.a time.a wait.a \
-getopt.a strerr_buf.a getln_buf.a \
+strerr_buf.a getln_buf.a \
 dns.a ip.a socket.a
 	@echo -n Moving .o files ...
 	@mv base64.o byte.o fmt.o prot.o slurpclose.o \
@@ -76,11 +76,11 @@ getln.a: ../compile ../makelib getln.o
 getln_buf.a:
 	$(MAKELIB) ../getln_buf.a getln_buf.o
 
-getopt.a: ../makelib subgetopt.o sgetopt.o
-	../makelib ../getopt.a subgetopt.o sgetopt.o
+#getopt2.a: ../makelib subgetopt.o sgetopt.o
+#	../makelib ../getopt2.a subgetopt.o sgetopt.o
 
-getoptb.a:
-	$(MAKELIB) ../getoptb.a getoptb.o
+getopt.a:
+	$(MAKELIB) ../getopt.a getoptb.o
 
 lock.a:
 # ../compile ../makelib lock.c

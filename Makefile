@@ -121,26 +121,11 @@ wait.a sig.a env.a substdio.a error.a str.a fs.a auto_qmail.o
 gfrom.o: compile gfrom.c
 	./compile gfrom.c
 
-# needed by lock.o
-#hasflock.h: tryflock.c compile load
-#	( ( ./compile tryflock.c && ./load tryflock ) >/dev/null 2>&1 \
-#	&& echo \#define HASFLOCK 1 || exit 0 ) > hasflock.h
-#	rm -f tryflock.o tryflock
-
 hassalen.h: \
 trysalen.c compile
 	( ./compile trysalen.c >/dev/null 2>&1 \
 	&& echo \#define HASSALEN 1 || exit 0 ) > hassalen.h
 #	rm -f trysalen.o
-
-#hasshsgr.h: \
-#chkshsgr warn-shsgr tryshsgr.c compile load
-#	./chkshsgr || ( cat warn-shsgr; exit 1 )
-#	( ( ./compile tryshsgr.c \
-#	&& ./load tryshsgr && ./tryshsgr ) >/dev/null 2>&1 \
-#	&& echo \#define HASSHORTSETGROUPS 1 || exit 0 ) > \
-#	hasshsgr.h
-#	rm -f tryshsgr.o tryshsgr
 
 # needed by wait.o (wait_pid)
 #haswaitp.h: trywaitp.c compile load
@@ -182,10 +167,8 @@ maildir2mbox \
 qmail-before ipmeprint \
 mkrsadhkeys mksrvrcerts qmail-fixq qmail-shcfg
 
-#config-spp qmail-before config-bfrmt \
-
-maildir.o: compile maildir.c 
-	./compile maildir.c
+maildir.o:
+	$(COMPILE) maildir.c
 
 maildir2mbox: compile load maildir2mbox.c maildir.o prioq.o now.o \
 myctime.o gfrom.o lock.a getln.a env.a open.a strerr.a stralloc.a \
@@ -224,25 +207,13 @@ error.a str.a fs.a
 	./load predate datetime.a strerr.a sig.a fd.a wait.a \
 	substdio.a error.a str.a fs.a 
 
-preline: compile load preline.c
-# strerr.a fd.a wait.a sig.a env.a \
-#getopt.a substdio.a error.a str.a
+preline:
 	$(COMPILE) preline.c
-	$(LOAD) preline strerr_buf.a fd.a wait.a sig.a env.a getoptb.a \
-	buffer.a error.a str.a alloc.a
-#	substdio.a
+	$(LOAD) preline strerr_buf.a fd.a wait.a sig.a env.a \
+	getopt.a buffer.a error.a str.a alloc.a
 
 prioq.o: compile prioq.c
 	./compile prioq.c
-
-#prot.o: compile prot.c
-#	./compile prot.c
-
-#qbiff: compile load qbiff.c headerbody.o hfield.o getln.a env.a \
-#open.a stralloc.a alloc.a substdio.a error.a str.a
-#	./compile qbiff.c
-#	./load qbiff headerbody.o hfield.o getln.a env.a open.a \
-#	stralloc.a alloc.a substdio.a error.a str.a 
 
 qmail-before: qmail-before.sh
 	cat warn-auto.sh qmail-before.sh \
@@ -255,12 +226,6 @@ qmail-before: qmail-before.sh
 	| sed s}PROG}"qmail-remote"}g > qmail-bfrmt
 	chmod 754 qmail-bfque qmail-bfrmt
 	chgrp qmail qmail-bfque qmail-bfrmt
-
-#qmail-bfrmt: qmail-bfrmt.sh
-#	cat warn-auto.sh qmail-bfrmt.sh \
-#	| sed s}QMAIL}"`head -1 conf-qmail`"}g > qmail-bfrmt
-#	chmod 755 qmail-bfrmt && \
-#	chgrp qmail qmail-bfrmt
 
 qmail-clean: compile load qmail-clean.c fmtqfn.o now.o getln.a sig.a \
 stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_split.o
@@ -280,16 +245,6 @@ auto_usera.o
 qmail-getpw.o: compile qmail-getpw.c
 	./compile qmail-getpw.c
 
-#qmail-inject: compile load qmail-inject.c headerbody.o hfield.o \
-#newfield.o quote.o now.o control.o date822fmt.o constmap.o qmail.o \
-#case.a fd.a wait.a open.a getln.a sig.a getopt.a datetime.a token822.o \
-#env.a stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o
-#	./compile qmail-inject.c
-#	./load qmail-inject headerbody.o hfield.o newfield.o quote.o now.o \
-#	control.o date822fmt.o constmap.o qmail.o case.a fd.a wait.a open.a \
-#	getln.a sig.a getopt.a datetime.a token822.o env.a stralloc.a \
-#	alloc.a substdio.a error.a str.a fs.a auto_qmail.o 
-
 qmail-inject: compile load qmail-inject.c headerbody.o hfield.o \
 token822.o
 #newfield.o quote.o now.o control.o date822fmt.o constmap.o qmail.o \
@@ -298,20 +253,14 @@ token822.o
 	$(COMPILE) qmail-inject.c
 	./load qmail-inject headerbody.o hfield.o newfield.o quote.o now.o \
 	control.o date822fmt.o constmap.o qmail.o case.a fd.a wait.a open.a \
-	getln_buf.a sig.a getoptb.a datetime.a token822.o env.a stralloc.a \
+	getln_buf.a sig.a getopt.a datetime.a token822.o env.a stralloc.a \
 	alloc.a buffer.a error.a str.a fs.a auto_qmail.o strerr_buf.a substdio.a
-#	 lib/error_str.o
 
-# getopt.a --> getoptb
 qmail-local: compile load qmail-local.c qmail.o quote.o now.o gfrom.o \
 myctime.o slurpclose.o  datetime.a auto_qmail.o auto_patrn.o
-#case.a getln.a getoptb.a sig.a open.a seek.a \
-#lock.a fd.a wait.a env.a stralloc.a alloc.a strerr.a substdio.a \
-#error.a str.a fs.a
-#	./compile qmail-local.c
 	$(COMPILE) qmail-local.c
 	./load qmail-local qmail.o quote.o now.o gfrom.o myctime.o \
-	slurpclose.o case.a getln.a getoptb.a sig.a open.a seek.a lock.a \
+	slurpclose.o case.a getln.a getopt.a sig.a open.a seek.a lock.a \
 	buffer.a \
 	fd.a wait.a env.a stralloc.a alloc.a strerr.a \
 	error.a str.a fs.a datetime.a auto_qmail.o auto_patrn.o \
@@ -339,19 +288,10 @@ case.a stralloc.a alloc.a substdio.a error.a str.a auto_qmail.o
 	./load qmail-newu cdb.a getln.a open.a seek.a buffer.a \
 	case.a stralloc.a alloc.a substdio.a error.a str.a auto_qmail.o
 
-#qmail-pw2u: \
-#load qmail-pw2u.o constmap.o control.o open.a getln.a case.a getopt.a \
-#stralloc.a alloc.a substdio.a error.a str.a fs.a auto_usera.o \
-#auto_break.o auto_qmail.o
-#	./load qmail-pw2u constmap.o control.o open.a getln.a \
-#	case.a getopt.a stralloc.a alloc.a substdio.a error.a str.a \
-#	fs.a auto_usera.o auto_break.o auto_qmail.o 
-
 qmail-pw2u:
-# compile qmail-pw2u.c 
 	$(COMPILE) qmail-pw2u.c
 	./load qmail-pw2u constmap.o control.o open.a getln_buf.a \
-	case.a getoptb.a stralloc.a alloc.a buffer.a error.a str.a \
+	case.a getopt.a stralloc.a alloc.a buffer.a error.a str.a \
 	fs.a auto_usera.o auto_break.o auto_qmail.o substdio.a
 
 qmail-qmqpc: \
@@ -511,17 +451,9 @@ received.o: compile received.c
 remoteinfo.o: compile remoteinfo.c
 	./compile remoteinfo.c
 
-#sendmail: compile load sendmail.c env.a getopt.a alloc.a \
-#substdio.a error.a str.a auto_qmail.o
-#	./compile sendmail.c
-#	./load sendmail env.a getopt.a alloc.a substdio.a \
-#	error.a str.a auto_qmail.o 
-
 sendmail:
-# compile load sendmail.c env.a getopt.a alloc.a \
-#substdio.a error.a str.a auto_qmail.o
 	$(COMPILE) sendmail.c
-	$(LOAD) sendmail env.a getoptb.a alloc.a buffer.a \
+	$(LOAD) sendmail env.a getopt.a alloc.a buffer.a \
 	error.a str.a auto_qmail.o
 
 spawn.o:
@@ -531,29 +463,13 @@ splogger: compile load splogger.c substdio.a error.a str.a fs.a
 	./compile splogger.c
 	./load splogger substdio.a error.a str.a fs.a
 
-#syslog.lib: \
-#trysyslog.c compile load
-#	( ( ./compile trysyslog.c && \
-#	./load trysyslog -lgen ) >/dev/null 2>&1 \
-#	&& echo -lgen || exit 0 ) > syslog.lib
-#	rm -f trysyslog.o trysyslog
-
-#tcp-env: compile load tcp-env.c dns.o remoteinfo.o timeoutread.o \
-#timeoutwrite.o timeoutconn.o ip.o ipalloc.o case.a ndelay.a sig.a \
-#env.a getopt.a stralloc.a alloc.a substdio.a error.a str.a fs.a dns.lib
-#	./compile tcp-env.c
-#	./load tcp-env dns.o remoteinfo.o timeoutread.o \
-#	timeoutwrite.o timeoutconn.o ip.o ipalloc.o case.a ndelay.a \
-#	sig.a env.a getopt.a stralloc.a alloc.a substdio.a error.a \
-#	str.a fs.a `cat dns.lib`
-
 tcp-env: compile load tcp-env.c dns.o remoteinfo.o timeoutread.o \
 timeoutwrite.o timeoutconn.o ip.o ipalloc.o case.a ndelay.a sig.a \
 env.a stralloc.a alloc.a substdio.a error.a str.a fs.a dns.lib
 	./compile tcp-env.c
 	./load tcp-env dns.o remoteinfo.o timeoutread.o \
 	timeoutwrite.o timeoutconn.o ip.o ipalloc.o case.a ndelay.a \
-	sig.a env.a getoptb.a stralloc.a alloc.a substdio.a error.a \
+	sig.a env.a getopt.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a `cat dns.lib` buffer.a
 
 tcpto.o: compile tcpto.c
