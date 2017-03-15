@@ -280,15 +280,27 @@ auto_usera.o
 qmail-getpw.o: compile qmail-getpw.c
 	./compile qmail-getpw.c
 
+#qmail-inject: compile load qmail-inject.c headerbody.o hfield.o \
+#newfield.o quote.o now.o control.o date822fmt.o constmap.o qmail.o \
+#case.a fd.a wait.a open.a getln.a sig.a getopt.a datetime.a token822.o \
+#env.a stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o
+#	./compile qmail-inject.c
+#	./load qmail-inject headerbody.o hfield.o newfield.o quote.o now.o \
+#	control.o date822fmt.o constmap.o qmail.o case.a fd.a wait.a open.a \
+#	getln.a sig.a getopt.a datetime.a token822.o env.a stralloc.a \
+#	alloc.a substdio.a error.a str.a fs.a auto_qmail.o 
+
 qmail-inject: compile load qmail-inject.c headerbody.o hfield.o \
-newfield.o quote.o now.o control.o date822fmt.o constmap.o qmail.o \
-case.a fd.a wait.a open.a getln.a sig.a getopt.a datetime.a token822.o \
-env.a stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o
-	./compile qmail-inject.c
+token822.o
+#newfield.o quote.o now.o control.o date822fmt.o constmap.o qmail.o \
+#case.a fd.a wait.a open.a getln.a sig.a getopt.a datetime.a  \
+#env.a stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o
+	$(COMPILE) qmail-inject.c
 	./load qmail-inject headerbody.o hfield.o newfield.o quote.o now.o \
 	control.o date822fmt.o constmap.o qmail.o case.a fd.a wait.a open.a \
-	getln.a sig.a getopt.a datetime.a token822.o env.a stralloc.a \
-	alloc.a substdio.a error.a str.a fs.a auto_qmail.o 
+	getln_buf.a sig.a getoptb.a datetime.a token822.o env.a stralloc.a \
+	alloc.a buffer.a error.a str.a fs.a auto_qmail.o strerr_buf.a substdio.a
+#	 lib/error_str.o
 
 # getopt.a --> getoptb
 qmail-local: compile load qmail-local.c qmail.o quote.o now.o gfrom.o \
@@ -327,16 +339,20 @@ case.a stralloc.a alloc.a substdio.a error.a str.a auto_qmail.o
 	./load qmail-newu cdb.a getln.a open.a seek.a buffer.a \
 	case.a stralloc.a alloc.a substdio.a error.a str.a auto_qmail.o
 
-qmail-pw2u: \
-load qmail-pw2u.o constmap.o control.o open.a getln.a case.a getopt.a \
-stralloc.a alloc.a substdio.a error.a str.a fs.a auto_usera.o \
-auto_break.o auto_qmail.o
-	./load qmail-pw2u constmap.o control.o open.a getln.a \
-	case.a getopt.a stralloc.a alloc.a substdio.a error.a str.a \
-	fs.a auto_usera.o auto_break.o auto_qmail.o 
+#qmail-pw2u: \
+#load qmail-pw2u.o constmap.o control.o open.a getln.a case.a getopt.a \
+#stralloc.a alloc.a substdio.a error.a str.a fs.a auto_usera.o \
+#auto_break.o auto_qmail.o
+#	./load qmail-pw2u constmap.o control.o open.a getln.a \
+#	case.a getopt.a stralloc.a alloc.a substdio.a error.a str.a \
+#	fs.a auto_usera.o auto_break.o auto_qmail.o 
 
-qmail-pw2u.o: compile qmail-pw2u.c 
-	./compile qmail-pw2u.c
+qmail-pw2u:
+# compile qmail-pw2u.c 
+	$(COMPILE) qmail-pw2u.c
+	./load qmail-pw2u constmap.o control.o open.a getln_buf.a \
+	case.a getoptb.a stralloc.a alloc.a buffer.a error.a str.a \
+	fs.a auto_usera.o auto_break.o auto_qmail.o substdio.a
 
 qmail-qmqpc: \
 load qmail-qmqpc.o slurpclose.o timeoutread.o timeoutwrite.o \

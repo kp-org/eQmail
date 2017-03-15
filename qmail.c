@@ -1,7 +1,7 @@
 #include "substdio.h"
 #include "wait.h"
 #include "exit.h"
-#include <unistd.h>		/* replace "readwrite.h" "fork.h" */
+#include <unistd.h>
 #include "fd.h"
 #include "qmail.h"
 #include "auto_qmail.h"

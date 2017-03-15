@@ -1,12 +1,11 @@
-TMP="conf.tmp"
+#!/bin/sh
+#***********************************************************************
+# Save some values for later usage (e.g. in qmail-shcfg)               *
+#***********************************************************************
 
-# check for compiler options
-head -1 conf-cc | grep -e '-DTLS' conf-cc >/dev/null
-if [ $? -eq 0 ] ; then TLS="Yes" ; else TLS="No" ; fi
-head -1 conf-cc | grep -e '-DINET6' conf-cc >/dev/null
-if [ $? -eq 0 ] ; then IP6="Yes" ; else IP6="No" ; fi
+TMPFILE="conf.tmp"
 
-cat > $TMP << EOF
+cat > $TMPFILE << EOF
 
 # !!! WARNING !!! WARNING !!! WARNING !!! WARNING !!!
 # ******** Compiled-in values - DO NOT EDIT! ********

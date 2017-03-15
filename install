@@ -7,7 +7,7 @@
 #********************************************************************************
 QMAILDIR=`head -1 conf-qmail`
 SPLIT=`head -1 conf-split`
-. inc/getids.inc
+. cfg/getids.inc
 
 # man pages
 for i in 1 5 7 8 ; do
@@ -126,7 +126,7 @@ cd $OLDPWD
 
 # some links could be helpful
 cd /usr/local/bin || exit 1
-readlink sendmail || ln -s $QMAILDIR/bin/sendmail sendmail
+readlink sendmail > /dev/null || ln -s $QMAILDIR/bin/sendmail sendmail
 
 # ....
 cd $OLDPWD
