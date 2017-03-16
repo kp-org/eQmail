@@ -1,4 +1,4 @@
-#VERSION
+VERSION
 #systype
 #hasshsgr.h
 #hasnpbg1.h
@@ -11,7 +11,7 @@
 #haswaitp.h
 #hasmkffo.h
 #uint32.h
-#dns.lib
+dns.lib
 #socket.lib
 hassalen.h
 syslog.lib

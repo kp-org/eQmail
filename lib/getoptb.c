@@ -16,18 +16,10 @@ Documentation in sgetopt.3.
 */
 /* from file: sgetopt.c (outer layer) ******************************* */
 #include "buffer.h"
-//#define SGETOPTNOSHORT
-//#include "sgetopt.h"
-//#define SUBGETOPTNOSHORT
-//#include "subgetopt.h"
 #include "getoptb.h"
 
-
-//#define getopt sgetoptmine
 #define optind subgetoptind
-// #define opterr sgetopterr			// direct declared
 #define optproblem subgetoptproblem
-//#define optprogname sgetoptprogname	// unused
 
 int opterr = 1;
 char *optprogname = 0;
@@ -58,11 +50,8 @@ int getopt(int argc,char **argv,char *opts)
 }
 
 /* from file: subgetopt.c (inner layer) ***************************** */
-//#define sgopt subgetopt		// renamed function below
-//#define optind subgetoptind	// dup
 #define optpos subgetoptpos
 #define optarg subgetoptarg
-//#define optproblem subgetoptproblem  // dup
 #define optdone subgetoptdone
 
 int optind = 1;
@@ -71,7 +60,6 @@ char *optarg = 0;
 int optproblem = 0;
 int optdone = SUBGETOPTDONE;
 
-//int sgopt(int argc,char **argv,char *opts)
 int subgetopt(int argc,char **argv,char *opts)
 {
   int c;

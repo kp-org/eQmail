@@ -39,6 +39,11 @@ exitcode
 echo send with opensmtpd from sorlag
 ssh sorlag  "echo from sorlag | sendmail -f qmail-test@aldox.de kp1@gorre.aldox.de"
 exitcode
+# relay
+ssh sorlag  "echo from sorlag | sendmail -f qmail-test@aldox.de kp@xaero.aldox.de"
+exitcode
+ssh sorlag  "echo from sorlag | sendmail -f qmail-test@aldox.de kp@kp@dyndn.es"
+exitcode
 
 
 exit

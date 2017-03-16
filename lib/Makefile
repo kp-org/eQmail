@@ -32,20 +32,16 @@ dns.a ip.a socket.a
 	..
 	@echo done!
 
-obj: ../compile $(SRC)
+obj:
+# ../compile $(SRC)
 	@echo Making all in lib ...
-	../compile $(CFLAGS) $(SRC)
+	$(COMPILE) $(CFLAGS) $(SRC)
 
 alloc.a:
 # ../compile ../makelib alloc.c
 	$(MAKELIB) ../alloc.a alloc.o
 
-#buffer.a: ../compile ../makelib buffer.c buffer_0.c buffer_1.c buffer_2.c \
-#buffer_copy.c buffer_get.c buffer_put.c
-#	../makelib ../buffer.a buffer.o buffer_0.o buffer_1.o buffer_2.o \
-#	buffer_copy.o buffer_get.o buffer_put.o
-
-buffer.a: 
+buffer.a:
 	$(MAKELIB) ../buffer.a buffer.o buffer_0.o buffer_1.o buffer_2.o \
 	buffer_copy.o buffer_get.o buffer_put.o
 
@@ -53,13 +49,10 @@ case.a:
 	$(MAKELIB) ../case.a case.o
 
 cdb.a:
-# ../makelib cdbread.c cdbmake.c cdbhash.c
 	$(MAKELIB) ../cdb.a cdbread.o cdbmake.o cdbhash.o uint32p.o seek.o buffer.o
 
 env.a:
-# ../compile ../makelib
 	$(MAKELIB) ../env.a env.o
-#	 envread.o
 
 error.a: ../compile ../makelib error.c error_str.c error_temp.c
 	../makelib ../error.a error.o error_str.o error_temp.o
@@ -75,9 +68,6 @@ getln.a: ../compile ../makelib getln.o
 
 getln_buf.a:
 	$(MAKELIB) ../getln_buf.a getln_buf.o
-
-#getopt2.a: ../makelib subgetopt.o sgetopt.o
-#	../makelib ../getopt2.a subgetopt.o sgetopt.o
 
 getopt.a:
 	$(MAKELIB) ../getopt.a getoptb.o
@@ -129,7 +119,7 @@ time.a: iopause.o tai.o taia.o
 dns.a:
 	@echo "Building dns lib ..."
 	@cd dns ; make --no-print-directory
-	# ; cp dns.a ../../dns2.a
+	@cp dns/dns.a ../dns.a
 
 socket.a:
 	echo "Building socket lib ..."

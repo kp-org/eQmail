@@ -1,6 +1,6 @@
 /*
  *
- *  - consolidated 'socket_bind6.c' into 'socket_bind.c' (from ucspi-tcp-0.88
+ *  - consolidated 'socket_bind6.c' into 'socket_bind.c' (from ucspi-tcp-0.88)
 */
 
 #include <sys/types.h>

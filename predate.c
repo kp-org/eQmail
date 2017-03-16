@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <sys/types.h>
 #include <time.h>
 #include "datetime.h"
@@ -7,7 +8,6 @@
 #include "strerr.h"
 #include "substdio.h"
 #include "subfd.h"
-#include <unistd.h>		/* replace "readwrite.h" "fork.h" */
 #include "exit.h"
 
 #define FATAL "predate: fatal: "
@@ -48,7 +48,7 @@ char **argv;
     case 0:
       close(pi[1]);
       if (fd_move(0,pi[0]) == -1)
-	strerr_die2sys(111,FATAL,"unable to set up fds: ");
+    strerr_die2sys(111,FATAL,"unable to set up fds: ");
       sig_pipedefault();
       execvp(argv[1],argv + 1);
       strerr_die4sys(111,FATAL,"unable to run ",argv[1],": ");

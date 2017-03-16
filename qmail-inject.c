@@ -5,7 +5,6 @@
  *  Revision 20160509, Kai Peter
  *  - changed return type of main to int
  *  - added parentheses to outer if
-// *  - added 'chdir.h', 'getpid.h'
  */
 #include "sig.h"
 #include <unistd.h>
@@ -20,8 +19,6 @@
 #include "token822.h"
 #include "control.h"
 #include "env.h"
-//#include "gen_alloc.h"
-//#include "gen_allocdefs.h"
 #include "error.h"
 #include "qmail.h"
 #include "now.h"
@@ -30,7 +27,6 @@
 #include "auto_qmail.h"
 #include "newfield.h"
 #include "constmap.h"
-//#include "strerr.h"
 
 #define LINELEN 80
 
@@ -63,44 +59,30 @@ int flagqueue;
 struct qmail qqt;
 
 void put(char *s,int len) {
-//  if (flagqueue) qmail_put(&qqt,s,len); else substdio_put(subfdout,s,len); }
   if (flagqueue) qmail_put(&qqt,s,len); else buffer_put(buffer_1,s,len); }
-//void o_puts(s) char *s; { put(s,str_len(s)); }
 void out(char *s) { put(s,str_len(s)); }
 
 void perm() { _exit(100); }
 void temp() { _exit(111); }
 void die_nomem() {
-// substdio_putsflush(subfderr,"qmail-inject: fatal: out of memory\n"); temp(); }
   buffer_putsflush(buffer_2,"qmail-inject: fatal: out of memory\n"); temp(); }
-//  strerr_die1x(111,"qmail-inject: fatal: out of memory");
 
 void die_invalid(sa) stralloc *sa; {
-// substdio_putsflush(subfderr,"qmail-inject: fatal: invalid header field: ");
-// substdio_putflush(subfderr,sa->s,sa->len); perm(); }
   buffer_putsflush(buffer_2,"qmail-inject: fatal: invalid header field: ");
   buffer_putflush(buffer_2,sa->s,sa->len); perm();
 }
 void die_qqt() {
-// substdio_putsflush(subfderr,"qmail-inject: fatal: unable to run qmail-queue\n"); temp(); }
   buffer_putsflush(buffer_2,"qmail-inject: fatal: unable to run qmail-queue\n"); temp(); }
-//  strerr_die1x(111,"qmail-inject: fatal: unable to run qmail-queue\n");
 
 void die_chdir() {
-// substdio_putsflush(subfderr,"qmail-inject: fatal: internal bug\n"); temp(); }
   buffer_putsflush(buffer_2,"qmail-inject: fatal: internal bug\n"); temp(); }
-//  strerr_die1x(111,"qmail-inject: fatal: internal bug\n");
 
 void die_read() {
  if (errno == error_nomem) die_nomem();
-// substdio_putsflush(subfderr,"qmail-inject: fatal: read error\n"); temp(); }
   buffer_putsflush(buffer_2,"qmail-inject: fatal: read error\n"); temp(); }
-//  strerr_die1x(111,"qmail-inject: fatal: read error\n");
 
 void doordie(sa,r) stralloc *sa; int r; {
  if (r == 1) return; if (r == -1) die_nomem();
-// substdio_putsflush(subfderr,"qmail-inject: fatal: unable to parse this line:\n");
-// substdio_putflush(subfderr,sa->s,sa->len); perm(); }
   buffer_putsflush(buffer_2,"qmail-inject: fatal: unable to parse this line:\n");
   buffer_putflush(buffer_2,sa->s,sa->len); perm();
 }
@@ -121,7 +103,6 @@ void exitnicely()
 {
  char *qqx;
 
-// if (!flagqueue) substdio_flush(subfdout);
   if (!flagqueue) buffer_flush(buffer_1);
 
  if (flagqueue)
@@ -156,11 +137,6 @@ void exitnicely()
    if (*qqx)
    {
      if (*qqx == 'D') {
-//       substdio_puts(subfderr,"qmail-inject: fatal: ");
-//       substdio_puts(subfderr,qqx + 1);
-//       substdio_puts(subfderr,"\n");
-//       substdio_flush(subfderr);
-
        buffer_puts(buffer_2,"qmail-inject: fatal: ");
        buffer_puts(buffer_2,qqx + 1);
        buffer_puts(buffer_2,"\n");
@@ -169,11 +145,6 @@ void exitnicely()
        perm();
      }
      else {
-//       substdio_puts(subfderr,"qmail-inject: fatal: ");
-//       substdio_puts(subfderr,qqx + 1);
-//       substdio_puts(subfderr,"\n");
-//       substdio_flush(subfderr);
-
        buffer_puts(buffer_2,"qmail-inject: fatal: ");
        buffer_puts(buffer_2,qqx + 1);
        buffer_puts(buffer_2,"\n");
