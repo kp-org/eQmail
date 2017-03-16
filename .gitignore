@@ -19,7 +19,7 @@ newlibs
 dev
 tcpserver
 boot
-testing
+test-it
 lib/bck
 lib/dns
 lib/man

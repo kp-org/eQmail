@@ -1,4 +1,10 @@
-commit 5d9fb974fa147f29fe7d8fc438ffe9cfb70d803d
+commit 480666823af99a72c30613c432f2b350692eff49
+Author: Kai Peter <kp@openqmail.org>
+Date:   Thu Mar 16 09:49:12 2017 +0100
+
+    code clean up
+
+commit 11e83089fb144b7d47151c434573106faca9f026
 Author: Kai Peter <kp@openqmail.org>
 Date:   Wed Mar 15 16:09:15 2017 +0100
 

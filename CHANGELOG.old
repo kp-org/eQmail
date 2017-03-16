@@ -1,0 +1,170 @@
+
+!!! switched to use git log as change log !!! (see file CHANGELOG.git)
+
+20170302: --> rollback! *************************************************
+  - Checked out status of April 27, 2016 to new branch "rollback"
+  - added "install" script of date Feb. 24, 2017
+
+Commit 1.10p3:
+20160407: - Makefile cleanup
+          - removed dns{cname,ptr,ip,mxip,fq ...)
+          - rewrite of "config.sh"
+          - added man pages: preline.1, datemail.1
+          - added an example to maildir2mbox.1 (like pinq)
+          - moved slurpclose.{c,h} to {lib/,inc/}
+          - moved subdf*.c, substd*.c --> lib/
+          - moved base64.h --> inc/, base64.c --> lib/
+          - removed elq, pinq, qail
+20160406: - moved fmtqfn.c to lib/, fmtqfn.h to inc/
+          - consolidated datetime_un.c --> datetime.c
+          - removed "hostname.c", changed the call in "config.sh"
+          - consolidated cdbmake_*.c --> cdbmake.c 
+          - consolidated cdb_*.c --> cdb.c
+          - moved substdio.h, subfd.h, cdb.h to inc/
+          - moved sgetopt.c, subgetopt.c to lib/
+          - moved sgetopt.h, subgetopt.h to inc/
+          - moved getln.c to lib/, getln.h to inc/
+          - consolidated substdio_copy.c into substdio.c
+          - moved strerr.c to lib/, strerr.h to inc/
+          - removed config-fast
+          - added "file exists" check to config.sh
+20160405: - consolidated strerr_* into strerr.c
+          - removed 'socket.lib'
+          - moved libresolv check (dns.lib) to configure script, added trylib.c
+          - removed HASSIG* code (trysgprm.c, trysgact.c, sig.c)
+          - moved seek.c, sig.c, stralloc.c, wait.c --> lib/
+          - moved seek.h, sig.h, stralloc.h, wait.h --> inc/
+          - removed trysyslog.c
+          - removed obsoleted fifo.c, trymkffo.c
+          - removed trywaitp.c and HASWAITPID code (wait.c)
+          - removed idedit.c, BIN.Makefile
+          - removed check {get,set}groups code
+          - consolidated getln2.c into getln.c
+          - moved flock check to configure script
+20160404: - removed HASNAMEDPIPEBUG code (trigger.c, trynpbg1.c)
+
+Commit 1.10p2:
+20160326: - created new install script
+          - removed hier.c, install.c, install-big.c, instcheck.c
+20160324: - moved byte.h, case.h, coe.h, env.h, error.h, str.h, gen_alloc.h,
+            gen_allocdefs.h, fd.h, exit.h, fifo.h, fmt.h, lock.h, open.h,
+            scan.c, ndelay.h
+            to inc/
+          - moved alloc.c, byte.c, case.c, coe.c, env.c, envread.c, error.c,
+            error_{str,temp}.c, str.c, fd.c, fmt.c, open.c, scan.c, ndelay.c
+            to lib/
+          - created "Makefile" for libs
+          - make fs.a in lib/
+          - moved all man pages to subfolder man, created "Makefile" for man
+            pages
+20160323: - changed HELP response in qmail-smtpd.c to openqmail
+          - replaced "error_refused" by "error_connrefused"
+          - added -I./inc to conf-cc
+20160318: - consolidated wait_*.c --> wait.c
+          - appended "ndelay_off.c" to "ndelay.c"
+          - added mkusers script
+          - added user check to configure
+20160317: - moved compile, load, makelib to configure script
+          - obsoleted {compile,load,makelib}.sh, auto-ccld.sh
+          - removed trysysel, checking select.h in configure,
+            removed select.{h1,h2}
+
+Commit 1.10p1:
+20160316: - seperated man.3 pages
+20160315: - consolidated open_*.c --> open.c
+          - consolidated fd_*.c --> fd.c
+          - consolidated lock_*.c --> lock.c
+          - put conf-* to configure script
+20160304: - removed "cat" man pages
+          - renamed *.9 --> *.man
+          - put findtypes into configure script
+          - appended "alloc_re.c" to "alloc.c"
+20160303: - consolidated byte_*.c --> byte.c
+          - consolidated str_*.c --> str.c
+          - consolidated stralloc_*.c --> stralloc.c
+          - consolidated fmt_*.c --> fmt.c
+          - consolidated scan_*.c --> scan.c
+          - consolidated case_*.c --> case.c
+          - consolidated sig_*.c --> sig.c
+          - consolidated seek_*.c --> seek.c
+20160301: - started 'configure'
+          - obsoleted and removed 'auto-str.c', 'auto-int.c', 'auto-uid.c',
+            'auto-gid.c'
+            through 'configure' script (early stage)
+          - commented out "doc" in 'hier.c'
+20160301: - removed qmail-{popup,pop3d}
+
+*************************************************************************
+final version: eQmail-1.09
+  - do not overwrite files in 'control'
+  - added folder 'tps'
+  - updated some docs
+
+RC2:
+  - changed URL in file INSTALL
+  - added mkuser script (beta)
+  - removed unused error code dquot from error.h
+  - added error_refused to qmail-remote (IPv6)
+
+Patchlevel p8 - RC1:
+  - renamed *rexec --> *bfrmt
+  - remove out commented #include's
+  - remove temp. comments by me and backup code
+  - replaced qmail-rexec by qmail-bfrmt:
+    --> create config file beforemote and man page
+  - removed old "boot" stuff from hier.c (commented out)
+    --> effects the install routine only
+  - added folders "doc", "tps", README.tps
+  - more Makefile cleanup
+  - removed .o and .a files from TARGETS
+
+Patchlevel p7: eqmail-1.09-p7
+  - removed tryvfork, fork.{h1,h2}
+  - removed uint32.h from Makefile
+  - removed trydrent, direntry.{h1,h2}, static "inc/direntry.h"
+  - eliminated 'shar:' from Makefile
+
+Patchlevel p6: eqmail-1.09-p6
+  - qmail-bfrmt plugin to prepare DKIM signing
+  - created forks:
+    --> eqmail-bfrmt.patch
+    --> netqmail-1.06-before-remote.patch
+
+Patchlevel p5:
+  - compiler clean up (optimization for gcc)
+  - qmail-remote: code = smtpcode();
+  - alloc.c: include stdlib.h (_exit warning)
+  - replaced uint32.{h1,h2} logic by stdlib.h
+  - renamed puts(s) --> o_puts(s)
+  - renamed log2() --> o_log2() (not in popup and pop3d)
+  - replaced #include "readwrite.h" "exit.h" und "fork.h"
+    by '#include <unistd.h>' where possible
+    (removal/replacement of the 1.06-readwrite.patch)
+  - added (unused) return value to read() call in
+    timeoutconn.c (required by unistd.h)
+
+Patchlevel p4: eqmail-1.09-p4
+  - updated qmail-auth to 0.59 (new submission port feat.)
+  - added TLS required functionality
+    - for AUTH LOGIN/PLAIN only
+    - have explicitily set to enable (export TLSREQUIRED=1)
+
+Patchlevel p3: eqmail-1.09-p3
+  - update TLS to netqmail-1.06-tls-20151215.patch
+  - corrected man page qmail-smtpd.8
+  - added "#include <sys/stat.h>" and check that config
+    file of qmail-spp exists (in qmail-spp.c)
+
+Patchlevel p2: eqmail-1.09-p2
+  - created file config-qmail-spp (smtpplugins) and added
+    include to config.sh and config-fast.sh
+  - added "smtpplugins" to qmail-control.9
+  - removed install-auth.sh
+  - new man pages qmail-spp.8 and smtpplugins.5
+
+Patchlevel p1: eqmail-1.09-p1
+  - added IPv6 support for remote connections
+  - default delim for address extentions is '+' (plus, in conf-break)
+
+Initial: eqmail-1.08-p2 (=eqmail-1.09-p0)
+  --> w/o domainbindings
