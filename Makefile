@@ -106,7 +106,6 @@ dns.o: compile dns.c
 	./compile dns.c
 
 except:
-# compile load except.c strerr.a error.a substdio.a str.a wait.a
 	$(COMPILE) except.c
 	$(LOAD) except strerr_buf.a error.a buffer.a str.a wait.a
 
@@ -152,7 +151,7 @@ ipme.o: compile ipme.c hassalen.h
 ipmeprint: compile load ipmeprint.c ipme.o ip.a ipalloc.o \
 stralloc.a alloc.a substdio.a error.a str.a fs.a
 	./compile ipmeprint.c
-	./load ipmeprint ipme.o ip.a ipalloc.o stralloc.a alloc.a \
+	./load ipmeprint ipme.o ip.o ipalloc.o stralloc.a alloc.a \
 	substdio.a error.a str.a fs.a
 
 it: \
@@ -237,16 +236,10 @@ stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_split.o
 qmail-fixq: qmail-fixq.sh
 	sh ./qmail-fixq.sh
 
-qmail-getpw: \
-#load qmail-getpw.o case.a substdio.a error.a str.a fs.a auto_break.o \
-#auto_usera.o
+qmail-getpw: auto_break.o auto_usera.o
 	$(COMPILE) qmail-getpw.c
 	$(LOAD) qmail-getpw case.a buffer.a error.a str.a fs.a \
 	auto_break.o auto_usera.o
-#	./load qmail-getpw case.a substdio.a error.a str.a fs.a \
-
-#qmail-getpw.o: compile qmail-getpw.c
-#	./compile qmail-getpw.c
 
 qmail-inject: compile load qmail-inject.c headerbody.o hfield.o \
 token822.o
@@ -504,27 +497,6 @@ trigger.o: compile trigger.c
 
 triggerpull.o: compile triggerpull.c
 	./compile triggerpull.c
-
-#cert cert-req: Makefile-cert
-#	@$(MAKE) -sf $< $@
-
-#Makefile-cert: \
-#conf-qmail conf-users conf-groups Makefile-cert.mk
-#	@cat Makefile-cert.mk \
-#	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-#	> $@
-
-#update_tmprsadh: \
-#conf-qmail conf-users conf-groups update_tmprsadh.sh
-#	@cat update_tmprsadh.sh\
-#	| sed s}UGQMAILD}"`head -2 conf-users|tail -1`:`head -1 conf-groups`"}g \
-#	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-#	> $@
-#	chmod 755 update_tmprsadh 
-
-#tmprsadh: update_tmprsadh
-#	echo "Creating new temporary RSA and DH parameters"
-#	./update_tmprsadh
 
 mkrsadhkeys: \
 conf-qmail conf-users conf-groups mkrsadhkeys.sh warn-auto.sh

@@ -21,4 +21,7 @@ extern unsigned int ip6_scan();
 
 #define HOSTNAMELEN	1025
 
+// @temp:
+#define ip4_fmt ip_fmt
+
 #endif
