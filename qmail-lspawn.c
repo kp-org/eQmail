@@ -1,3 +1,8 @@
+/*
+ *  Revision 20170316, Kai Peter
+ *  - added <sys/types.h>, <unistd.h>, 'byte.h', 'open.h'
+ */
+#include <unistd.h>
 #include "fd.h"
 #include "wait.h"
 #include "prot.h"
@@ -6,17 +11,17 @@
 #include "scan.h"
 #include "exit.h"
 #include "error.h"
-//#include "cdb.h"
 #include "cdbread.h"
 #include "case.h"
 #include "slurpclose.h"
 #include "auto_qmail.h"
 #include "auto_uids.h"
 #include "qlx.h"
+#include "byte.h"
+#include "open.h"
 
 char *aliasempty;
 
-// switched to new cdb:
 static struct cdb c;
 
 void initialize(int argc,char **argv) {
@@ -26,16 +31,12 @@ void initialize(int argc,char **argv) {
 
 int truncreport = 3000;
 
-void report(ss,wstat,s,len)
-substdio *ss;
-int wstat;
-char *s;
-int len;
+void report(substdio *ss,int wstat,char *s,int len)
 {
- int i;
- if (wait_crashed(wstat))
+  int i;
+  if (wait_crashed(wstat))
   { substdio_puts(ss,"Zqmail-local crashed.\n"); return; }
- switch(wait_exitcode(wstat))
+  switch(wait_exitcode(wstat))
   {
    case QLX_CDB:
      substdio_puts(ss,"ZTrouble reading users/cdb in qmail-lspawn.\n"); return;
@@ -66,8 +67,8 @@ int len;
      substdio_put(ss,"D",1); break;
   }
 
- for (i = 0;i < len;++i) if (!s[i]) break;
- substdio_put(ss,s,i);
+  for (i = 0;i < len;++i) if (!s[i]) break;
+  substdio_put(ss,s,i);
 }
 
 stralloc lower = {0};
@@ -98,20 +99,14 @@ void nughde_get(char *local)
 
   if (fd != -1)
   {
-    uint32 dlen;
     unsigned int i;
 
-/* switch to new cdb lib */
-//   r = cdb_seek(fd,"",0,&dlen);
-cdb_init(&c,fd);
-r = cdb_find(&c,"",0);
-   if (r != 1) _exit(QLX_CDB);
-//   if (!stralloc_ready(&wildchars,(unsigned int) dlen)) _exit(QLX_NOMEM);
-if (!stralloc_ready(&wildchars,cdb_datalen(&c))) _exit(QLX_NOMEM);
-//   wildchars.len = dlen;
-wildchars.len = cdb_datalen(&c);
-//   if (cdb_bread(fd,wildchars.s,wildchars.len) == -1) _exit(QLX_CDB);
-if (cdb_read(&c,wildchars.s,wildchars.len,cdb_datapos(&c)) == -1) _exit(QLX_CDB);
+    cdb_init(&c,fd);
+    r = cdb_find(&c,"",0);
+    if (r != 1) _exit(QLX_CDB);
+      if (!stralloc_ready(&wildchars,cdb_datalen(&c))) _exit(QLX_NOMEM);
+        wildchars.len = cdb_datalen(&c);
+    if (cdb_read(&c,wildchars.s,wildchars.len,cdb_datapos(&c)) == -1) _exit(QLX_CDB);
 
     i = lower.len;
     flagwild = 0;
@@ -121,15 +116,10 @@ if (cdb_read(&c,wildchars.s,wildchars.len,cdb_datapos(&c)) == -1) _exit(QLX_CDB)
       /* i > 0 */
       if (!flagwild || (i == 1) || (byte_chr(wildchars.s,wildchars.len,lower.s[i - 1]) < wildchars.len))
       {
-//       r = cdb_seek(fd,lower.s,i,&dlen);
         r = cdb_find(&c,lower.s,i);
         if (r == -1) _exit(QLX_CDB);
         if (r == 1)
         {
-// switch to new cdb lib:
-//         if (!stralloc_ready(&nughde,(unsigned int) dlen)) _exit(QLX_NOMEM);
-//         nughde.len = dlen;
-//         if (cdb_bread(fd,nughde.s,nughde.len) == -1) _exit(QLX_CDB);
           if (!stralloc_ready(&nughde,cdb_datalen(&c))) _exit(QLX_NOMEM);
           nughde.len = cdb_datalen(&c);
           if (cdb_read(&c,nughde.s,nughde.len,cdb_datapos(&c)) == -1) _exit(QLX_CDB);
@@ -176,8 +166,6 @@ if (cdb_read(&c,wildchars.s,wildchars.len,cdb_datapos(&c)) == -1) _exit(QLX_CDB)
 }
 
 int spawn(int fdmess,int fdout,char *s,char *r,int at)
-//int fdmess; int fdout;
-//char *s; char *r; int at;
 {
   int f;
 
