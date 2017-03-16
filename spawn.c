@@ -1,5 +1,11 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added '#include unistd.h'
+ *  - changed return type of main to int
+ */
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include "sig.h"
 #include "wait.h"
 #include "substdio.h"
@@ -21,30 +27,28 @@ extern int spawn();
 extern void report();
 extern void initialize();
 
-struct delivery
- {
+struct delivery {
   int used;
   int fdin; /* pipe input */
   int pid; /* zero if child is dead */
   int wstat; /* if !pid: status of child */
   int fdout; /* pipe output, -1 if !pid; delays eof until after death */
   stralloc output;
- }
-;
+};
 
 struct delivery *d;
 
 void sigchld()
 {
- int wstat;
- int pid;
- int i;
- while ((pid = wait_nohang(&wstat)) > 0)
-   for (i = 0;i < auto_spawn;++i) if (d[i].used)
-     if (d[i].pid == pid)
+  int wstat;
+  int pid;
+  int i;
+  while ((pid = wait_nohang(&wstat)) > 0)
+    for (i = 0;i < auto_spawn;++i) if (d[i].used)
+      if (d[i].pid == pid)
       {
-       close(d[i].fdout); d[i].fdout = -1;
-       d[i].wstat = wstat; d[i].pid = 0;
+        close(d[i].fdout); d[i].fdout = -1;
+        d[i].wstat = wstat; d[i].pid = 0;
       }
 }
 
@@ -73,8 +77,8 @@ stralloc recip = {0};
 
 void err(s) char *s;
 {
- char ch; ch = delnum; substdio_put(&ssout,&ch,1);
- substdio_puts(&ssout,s); substdio_putflush(&ssout,"",1);
+  char ch; ch = delnum; substdio_put(&ssout,&ch,1);
+  substdio_puts(&ssout,s); substdio_putflush(&ssout,"",1);
 }
 
 void docmd()
@@ -135,126 +139,124 @@ char cmdbuf[1024];
 
 void getcmd()
 {
- int i;
- int r;
- char ch;
+  int i;
+  int r;
+  char ch;
 
- r = read(0,cmdbuf,sizeof(cmdbuf));
- if (r == 0)
+  r = read(0,cmdbuf,sizeof(cmdbuf));
+  if (r == 0)
   { flagreading = 0; return; }
- if (r == -1)
+  if (r == -1)
   {
-   if (errno != error_intr)
-     flagreading = 0;
-   return;
-  }
- 
- for (i = 0;i < r;++i)
+    if (errno != error_intr)
+      flagreading = 0;
+    return;
+   }
+
+  for (i = 0;i < r;++i)
   {
-   ch = cmdbuf[i];
-   switch(stage)
+    ch = cmdbuf[i];
+    switch(stage)
     {
-     case 0:
-       delnum = (unsigned int) (unsigned char) ch;
-       messid.len = 0; stage = 1; break;
-     case 1:
-       if (!stralloc_append(&messid,&ch)) flagabort = 1;
-       if (ch) break;
-       sender.len = 0; stage = 2; break;
-     case 2:
-       if (!stralloc_append(&sender,&ch)) flagabort = 1;
-       if (ch) break;
-       recip.len = 0; stage = 3; break;
-     case 3:
-       if (!stralloc_append(&recip,&ch)) flagabort = 1;
-       if (ch) break;
-       docmd();
-       flagabort = 0; stage = 0; break;
+      case 0:
+        delnum = (unsigned int) (unsigned char) ch;
+        messid.len = 0; stage = 1; break;
+      case 1:
+        if (!stralloc_append(&messid,&ch)) flagabort = 1;
+        if (ch) break;
+        sender.len = 0; stage = 2; break;
+      case 2:
+        if (!stralloc_append(&sender,&ch)) flagabort = 1;
+        if (ch) break;
+        recip.len = 0; stage = 3; break;
+      case 3:
+        if (!stralloc_append(&recip,&ch)) flagabort = 1;
+        if (ch) break;
+        docmd();
+        flagabort = 0; stage = 0; break;
     }
   }
 }
 
 char inbuf[128];
 
-void main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
 {
- char ch;
- int i;
- int r;
- fd_set rfds;
- int nfds;
+  char ch;
+  int i;
+  int r;
+  fd_set rfds;
+  int nfds;
 
- if (chdir(auto_qmail) == -1) _exit(111);
- if (chdir("queue/mess") == -1) _exit(111);
- if (!stralloc_copys(&messid,"")) _exit(111);
- if (!stralloc_copys(&sender,"")) _exit(111);
- if (!stralloc_copys(&recip,"")) _exit(111);
+  if (chdir(auto_qmail) == -1) _exit(111);
+  if (chdir("queue/mess") == -1) _exit(111);
+  if (!stralloc_copys(&messid,"")) _exit(111);
+  if (!stralloc_copys(&sender,"")) _exit(111);
+  if (!stralloc_copys(&recip,"")) _exit(111);
 
- d = (struct delivery *) alloc((auto_spawn + 10) * sizeof(struct delivery));
- if (!d) _exit(111);
+  d = (struct delivery *) alloc((auto_spawn + 10) * sizeof(struct delivery));
+  if (!d) _exit(111);
 
- substdio_fdbuf(&ssout,okwrite,1,outbuf,sizeof(outbuf));
+  substdio_fdbuf(&ssout,okwrite,1,outbuf,sizeof(outbuf));
 
- sig_pipeignore();
- sig_childcatch(sigchld);
+  sig_pipeignore();
+  sig_childcatch(sigchld);
 
- initialize(argc,argv);
+  initialize(argc,argv);
 
- ch = auto_spawn; substdio_putflush(&ssout,&ch,1);
+  ch = auto_spawn; substdio_putflush(&ssout,&ch,1);
 
- for (i = 0;i < auto_spawn;++i) { d[i].used = 0; d[i].output.s = 0; }
+  for (i = 0;i < auto_spawn;++i) { d[i].used = 0; d[i].output.s = 0; }
 
- for (;;)
+  for (;;)
   {
-   if (!flagreading)
+    if (!flagreading)
     {
-     for (i = 0;i < auto_spawn;++i) if (d[i].used) break;
-     if (i >= auto_spawn) _exit(0);
+      for (i = 0;i < auto_spawn;++i) if (d[i].used) break;
+      if (i >= auto_spawn) _exit(0);
     }
-   sig_childunblock();
+    sig_childunblock();
 
-   FD_ZERO(&rfds);
-   if (flagreading) FD_SET(0,&rfds);
-   nfds = 1;
-   for (i = 0;i < auto_spawn;++i) if (d[i].used)
-    { FD_SET(d[i].fdin,&rfds); if (d[i].fdin >= nfds) nfds = d[i].fdin + 1; }
+    FD_ZERO(&rfds);
+    if (flagreading) FD_SET(0,&rfds);
+    nfds = 1;
+    for (i = 0;i < auto_spawn;++i) if (d[i].used)
+      { FD_SET(d[i].fdin,&rfds); if (d[i].fdin >= nfds) nfds = d[i].fdin + 1; }
 
-   r = select(nfds,&rfds,(fd_set *) 0,(fd_set *) 0,(struct timeval *) 0);
-   sig_childblock();
+    r = select(nfds,&rfds,(fd_set *) 0,(fd_set *) 0,(struct timeval *) 0);
+    sig_childblock();
 
-   if (r != -1)
+    if (r != -1)
     {
-     if (flagreading)
-       if (FD_ISSET(0,&rfds))
-	 getcmd();
-     for (i = 0;i < auto_spawn;++i) if (d[i].used)
-       if (FD_ISSET(d[i].fdin,&rfds))
-	{
-	 r = read(d[i].fdin,inbuf,128);
-	 if (r == -1)
-	   continue; /* read error on a readable pipe? be serious */
-	 if (r == 0)
-	  {
-           ch = i; substdio_put(&ssout,&ch,1);
-	   report(&ssout,d[i].wstat,d[i].output.s,d[i].output.len);
-	   substdio_put(&ssout,"",1);
-	   substdio_flush(&ssout);
-	   close(d[i].fdin); d[i].used = 0;
-	   continue;
-	  }
-	 while (!stralloc_readyplus(&d[i].output,r)) sleep(10); /*XXX*/
-	 byte_copy(d[i].output.s + d[i].output.len,r,inbuf);
-	 d[i].output.len += r;
-	 if (truncreport > 100)
-	   if (d[i].output.len > truncreport)
-	    {
-	     char *truncmess = "\nError report too long, sorry.\n";
-	     d[i].output.len = truncreport - str_len(truncmess) - 3;
-	     stralloc_cats(&d[i].output,truncmess);
-	    }
-	}
+      if (flagreading)
+        if (FD_ISSET(0,&rfds))
+          getcmd();
+      for (i = 0;i < auto_spawn;++i) if (d[i].used)
+        if (FD_ISSET(d[i].fdin,&rfds))
+        {
+          r = read(d[i].fdin,inbuf,128);
+          if (r == -1)
+            continue; /* read error on a readable pipe? be serious */
+          if (r == 0)
+          {
+            ch = i; substdio_put(&ssout,&ch,1);
+            report(&ssout,d[i].wstat,d[i].output.s,d[i].output.len);
+            substdio_put(&ssout,"",1);
+            substdio_flush(&ssout);
+            close(d[i].fdin); d[i].used = 0;
+            continue;
+          }
+        while (!stralloc_readyplus(&d[i].output,r)) sleep(10); /*XXX*/
+          byte_copy(d[i].output.s + d[i].output.len,r,inbuf);
+        d[i].output.len += r;
+        if (truncreport > 100)
+          if (d[i].output.len > truncreport)
+          {
+            char *truncmess = "\nError report too long, sorry.\n";
+            d[i].output.len = truncreport - str_len(truncmess) - 3;
+            stralloc_cats(&d[i].output,truncmess);
+          }
+        }
     }
   }
 }
