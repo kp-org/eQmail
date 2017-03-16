@@ -1,8 +1,13 @@
+/*
+ *  Revision 20160316, Kai Peter
+ *  - changed parameter declarations
+ *  Revision 20160503, Kai Peter
+ *  - added parentheses to while condition (case_lowers)
+*/
 #include "case.h"
-/* Consolidate  the "case_*.c" functions into one source
-   file.  Original files were of date 19980615,  shipped
-   with  qmail-1.03,  except "case_startb.c" was shipped
-   with qmail-smtpd-auth-0.52 patch.
+/* Consolidate  the "case_*.c" functions into one source file. Original
+   files  were of date 19980615, shipped with  qmail-1.03,  except file
+   "case_startb.c" was shipped with qmail-smtpd-auth-0.52 patch.
    The "case" functions will be linked to "case.a" only!
    Included files:   Size (bytes)   Date:
      - case_diffb.c          423    19980615
@@ -10,13 +15,10 @@
      - case_lowerb.c         193    19980615
      - case_lowers.c         155    19980615
      - case_startb.c         397    20140914
-     - case_starts.c         340    19980615          */
+     - case_starts.c         340    19980615                         */
 
-/* file: case_diffb.c */
-int case_diffb(s,len,t)
-register char *s;
-unsigned int len;
-register char *t;
+/* file: case_diffb.c ********************************************** */
+int case_diffb(register char *s,unsigned int len,register char *t)
 {
   register unsigned char x;
   register unsigned char y;
@@ -33,10 +35,8 @@ register char *t;
   return 0;
 }
 
-/* file: case_diffs.c */
-int case_diffs(s,t)
-register char *s;
-register char *t;
+/* file: case_diffs.c ********************************************** */
+int case_diffs(register char *s,register char *t)
 {
   register unsigned char x;
   register unsigned char y;
@@ -52,10 +52,8 @@ register char *t;
   return ((int)(unsigned int) x) - ((int)(unsigned int) y);
 }
 
-/* file: case_lowerb.c */
-void case_lowerb(s,len)
-char *s;
-unsigned int len;
+/* file: case_lowerb.c ********************************************* */
+void case_lowerb(char *s,unsigned int len)
 {
   unsigned char x;
   while (len > 0) {
@@ -66,23 +64,19 @@ unsigned int len;
   }
 }
 
-/* file: case_lowers.c */
-void case_lowers(s)
-char *s;
+/* file: case_lowers.c ********************************************* */
+void case_lowers(char *s)
 {
   unsigned char x;
-  while (x = *s) {
+  while ((x = *s)) {
     x -= 'A';
     if (x <= 'Z' - 'A') *s = x + 'a';
     ++s;
   }
 }
 
-/* file: case_startb.c */
-int case_startb(s,len,t)
-register char *s;
-unsigned int len;
-register char *t;
+/* file: case_startb.c ********************************************* */
+int case_startb(register char *s,unsigned int len,register char *t)
 {
   register unsigned char x;
   register unsigned char y;
@@ -99,10 +93,8 @@ register char *t;
   }
 }
 
-/* file: case_starts.c */
-int case_starts(s,t)
-register char *s;
-register char *t;
+/* file: case_starts.c ********************************************* */
+int case_starts(register char *s,register char *t)
 {
   register unsigned char x;
   register unsigned char y;

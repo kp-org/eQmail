@@ -7,13 +7,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <errno.h>
-//#include "close.h"		/* better use unistd.h ? */
+#include "close.h"         /* better use unistd.h ? */
 #include "ndelay.h"
 #include "socket.h"
 #include "error.h"
-//#include "haveip6.h"
+
 #ifdef INET6
-#define LIBC_HAS_IP6 1
+#define LIBC_HAS_IP6 1     /* just another dup */
 #endif
 
 /* file: socket_tcp.c *********************************************** */
