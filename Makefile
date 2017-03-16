@@ -2,7 +2,7 @@
 
 SHELL=/bin/sh
 
-COMPILE=./compile
+COMPILE=./compile -Iinc
 LOAD=./load
 MAKELIB=.makelib
 
@@ -105,9 +105,10 @@ datetime.a: compile makelib datetime.c
 dns.o: compile dns.c
 	./compile dns.c
 
-except: compile load except.c strerr.a error.a substdio.a str.a wait.a
-	./compile except.c
-	./load except strerr.a error.a substdio.a str.a wait.a
+except:
+# compile load except.c strerr.a error.a substdio.a str.a wait.a
+	$(COMPILE) except.c
+	$(LOAD) except strerr_buf.a error.a buffer.a str.a wait.a
 
 fmtqfn.o: compile fmtqfn.c
 	./compile fmtqfn.c
@@ -237,13 +238,15 @@ qmail-fixq: qmail-fixq.sh
 	sh ./qmail-fixq.sh
 
 qmail-getpw: \
-load qmail-getpw.o case.a substdio.a error.a str.a fs.a auto_break.o \
-auto_usera.o
-	./load qmail-getpw case.a substdio.a error.a str.a fs.a \
-	auto_break.o auto_usera.o 
+#load qmail-getpw.o case.a substdio.a error.a str.a fs.a auto_break.o \
+#auto_usera.o
+	$(COMPILE) qmail-getpw.c
+	$(LOAD) qmail-getpw case.a buffer.a error.a str.a fs.a \
+	auto_break.o auto_usera.o
+#	./load qmail-getpw case.a substdio.a error.a str.a fs.a \
 
-qmail-getpw.o: compile qmail-getpw.c
-	./compile qmail-getpw.c
+#qmail-getpw.o: compile qmail-getpw.c
+#	./compile qmail-getpw.c
 
 qmail-inject: compile load qmail-inject.c headerbody.o hfield.o \
 token822.o

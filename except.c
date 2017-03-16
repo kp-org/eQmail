@@ -1,13 +1,18 @@
+/*
+ *  Revision 20160711, Kai Peter
+ *  - switched to 'buffer' (in 'strerr')
+ *  Revision 20160503, Kai Peter
+ *  - changed return type of main to int
+ *  - added 'unistd.h' to prevent compiler warnings, removed 'exit.h'
+ */
+#include <unistd.h>
 #include "strerr.h"
 #include "wait.h"
 #include "error.h"
-#include "exit.h"
 
 #define FATAL "except: fatal: "
 
-void main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
 {
   int pid;
   int wstat;
@@ -33,4 +38,5 @@ char **argv;
     case 111: strerr_die2x(111,FATAL,"temporary child error");
     default: _exit(0);
   }
+  return(0);  /* never reached */
 }
