@@ -1,14 +1,20 @@
-#include <unistd.h>
+/*
+ *  Revision 20160712, Kai Peter
+ *  - switched to 'buffer'
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added 'sig.h'
+ */
 #include <sys/types.h>
+#include <unistd.h>
 #include <time.h>
 #include "datetime.h"
 #include "wait.h"
 #include "fd.h"
 #include "fmt.h"
 #include "strerr.h"
-#include "substdio.h"
-#include "subfd.h"
-#include "exit.h"
+#include "buffer.h"
+#include "sig.h"
 
 #define FATAL "predate: fatal: "
 
@@ -19,9 +25,7 @@ static char *montab[12] = {
 char num[FMT_ULONG];
 char outbuf[1024];
 
-void main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
 {
   time_t now;
   struct tm *tm;
@@ -30,7 +34,7 @@ char **argv;
   datetime_sec local;
   int minutes;
   int pi[2];
-  substdio ss;
+  buffer ss;
   int wstat;
   int pid;
 
@@ -48,13 +52,13 @@ char **argv;
     case 0:
       close(pi[1]);
       if (fd_move(0,pi[0]) == -1)
-    strerr_die2sys(111,FATAL,"unable to set up fds: ");
+        strerr_die2sys(111,FATAL,"unable to set up fds: ");
       sig_pipedefault();
       execvp(argv[1],argv + 1);
       strerr_die4sys(111,FATAL,"unable to run ",argv[1],": ");
   }
   close(pi[0]);
-  substdio_fdbuf(&ss,write,pi[1],outbuf,sizeof(outbuf));
+  buffer_init(&ss,write,pi[1],outbuf,sizeof(outbuf));
 
   time(&now);
 
@@ -76,35 +80,36 @@ char **argv;
   dt.sec = tm->tm_sec;
   local = datetime_untai(&dt);
 
-  substdio_puts(&ss,"Date: ");
-  substdio_put(&ss,num,fmt_uint(num,dt.mday));
-  substdio_puts(&ss," ");
-  substdio_puts(&ss,montab[dt.mon]);
-  substdio_puts(&ss," ");
-  substdio_put(&ss,num,fmt_uint(num,dt.year + 1900));
-  substdio_puts(&ss," ");
-  substdio_put(&ss,num,fmt_uint0(num,dt.hour,2));
-  substdio_puts(&ss,":");
-  substdio_put(&ss,num,fmt_uint0(num,dt.min,2));
-  substdio_puts(&ss,":");
-  substdio_put(&ss,num,fmt_uint0(num,dt.sec,2));
+  buffer_puts(&ss,"Date: ");
+  buffer_put(&ss,num,fmt_uint(num,dt.mday));
+  buffer_puts(&ss," ");
+  buffer_puts(&ss,montab[dt.mon]);
+  buffer_puts(&ss," ");
+  buffer_put(&ss,num,fmt_uint(num,dt.year + 1900));
+  buffer_puts(&ss," ");
+  buffer_put(&ss,num,fmt_uint0(num,dt.hour,2));
+  buffer_puts(&ss,":");
+  buffer_put(&ss,num,fmt_uint0(num,dt.min,2));
+  buffer_puts(&ss,":");
+  buffer_put(&ss,num,fmt_uint0(num,dt.sec,2));
+
 
   if (local < utc) {
     minutes = (utc - local + 30) / 60;
-    substdio_puts(&ss," -");
-    substdio_put(&ss,num,fmt_uint0(num,minutes / 60,2));
-    substdio_put(&ss,num,fmt_uint0(num,minutes % 60,2));
+    buffer_puts(&ss," -");
+    buffer_put(&ss,num,fmt_uint0(num,minutes / 60,2));
+    buffer_put(&ss,num,fmt_uint0(num,minutes % 60,2));
   }
   else {
     minutes = (local - utc + 30) / 60;
-    substdio_puts(&ss," +");
-    substdio_put(&ss,num,fmt_uint0(num,minutes / 60,2));
-    substdio_put(&ss,num,fmt_uint0(num,minutes % 60,2));
+    buffer_puts(&ss," +");
+    buffer_put(&ss,num,fmt_uint0(num,minutes / 60,2));
+    buffer_put(&ss,num,fmt_uint0(num,minutes % 60,2));
   }
 
-  substdio_puts(&ss,"\n");
-  substdio_copy(&ss,subfdin);
-  substdio_flush(&ss);
+  buffer_puts(&ss,"\n");
+  buffer_copy(&ss,buffer_0);
+  buffer_flush(&ss);
   close(pi[1]);
 
   if (wait_pid(&wstat,pid) == -1)
@@ -112,4 +117,5 @@ char **argv;
   if (wait_crashed(wstat))
     strerr_die2x(111,FATAL,"child crashed");
   _exit(wait_exitcode(wstat));
+  return(0);  /* never reached */
 }

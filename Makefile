@@ -202,12 +202,10 @@ newfield.o: compile newfield.c
 now.o: compile now.c
 	./compile now.c
 
-predate: compile \
-load predate.c datetime.a strerr.a sig.a fd.a wait.a substdio.a \
-error.a str.a fs.a
-	./compile predate.c
-	./load predate datetime.a strerr.a sig.a fd.a wait.a \
-	substdio.a error.a str.a fs.a 
+predate:
+	$(COMPILE) predate.c
+	$(LOAD) predate datetime.a strerr_buf.a sig.a fd.a wait.a \
+	buffer.a error.a str.a fs.a
 
 preline:
 	$(COMPILE) preline.c
