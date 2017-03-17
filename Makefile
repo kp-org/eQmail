@@ -170,13 +170,14 @@ mkrsadhkeys mksrvrcerts qmail-fixq qmail-shcfg
 maildir.o:
 	$(COMPILE) maildir.c
 
-maildir2mbox: compile load maildir2mbox.c maildir.o prioq.o now.o \
-myctime.o gfrom.o lock.a getln.a env.a open.a strerr.a stralloc.a \
-alloc.a substdio.a error.a str.a fs.a datetime.a
-	./compile maildir2mbox.c
-	./load maildir2mbox maildir.o prioq.o now.o myctime.o \
-	gfrom.o lock.a getln.a env.a open.a strerr.a stralloc.a \
-	alloc.a substdio.a error.a str.a fs.a datetime.a 
+maildir2mbox:
+# compile load maildir2mbox.c maildir.o prioq.o now.o \
+#myctime.o gfrom.o lock.a getln.a env.a open.a strerr.a stralloc.a \
+#alloc.a substdio.a error.a str.a fs.a datetime.a
+	$(COMPILE) maildir2mbox.c
+	$(LOAD) maildir2mbox maildir.o prioq.o now.o myctime.o \
+	gfrom.o lock.a getln_buf.a env.a open.a strerr_buf.a stralloc.a \
+	alloc.a buffer.a error.a str.a fs.a datetime.a
 
 maildirmake: compile \
 load maildirmake.c strerr.a substdio.a error.a str.a
