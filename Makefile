@@ -272,33 +272,20 @@ substdio.a error.a str.a fs.a auto_qmail.o auto_uids.o auto_spawn.o
 	case.a cdb.a fd.a open.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a auto_qmail.o auto_uids.o auto_spawn.o
 
-#qmail-newmrh:
-# compile \
-#load qmail-newmrh.c cdb.a getln.a open.a seek.a case.a buffer.a \
-#stralloc.a alloc.a strerr.a substdio.a error.a str.a auto_qmail.o
-#	./compile qmail-newmrh.c
-#	./load qmail-newmrh cdb.a getln.a open.a buffer.a \
-#	seek.a case.a stralloc.a alloc.a strerr.a substdio.a \
-#	error.a str.a auto_qmail.o
-
 qmail-newmrh:
-# compile \
-#load qmail-newmrh.c cdb.a getln.a open.a seek.a case.a buffer.a \
-#stralloc.a alloc.a strerr.a substdio.a error.a str.a auto_qmail.o
-	./compile qmail-newmrh.c
-	./load qmail-newmrh cdb.a getln_buf.a open.a \
+	$(COMPILE) qmail-newmrh.c
+	$(LOAD) qmail-newmrh cdb.a getln_buf.a open.a \
 	seek.a case.a stralloc.a alloc.a strerr_buf.a buffer.a \
 	error.a str.a auto_qmail.o
 
-qmail-newu: compile load qmail-newu.c cdb.a getln.a open.a seek.a \
-case.a stralloc.a alloc.a substdio.a error.a str.a auto_qmail.o
-	./compile qmail-newu.c
-	./load qmail-newu cdb.a getln.a open.a seek.a buffer.a \
-	case.a stralloc.a alloc.a substdio.a error.a str.a auto_qmail.o
+qmail-newu:
+	$(COMPILE) qmail-newu.c
+	$(LOAD) qmail-newu cdb.a getln_buf.a open.a seek.a buffer.a \
+	case.a stralloc.a alloc.a error.a str.a auto_qmail.o
 
 qmail-pw2u:
 	$(COMPILE) qmail-pw2u.c
-	./load qmail-pw2u constmap.o control.o open.a getln_buf.a \
+	$(LOAD) qmail-pw2u constmap.o control.o open.a getln_buf.a \
 	case.a getopt.a stralloc.a alloc.a buffer.a error.a str.a \
 	fs.a auto_usera.o auto_break.o auto_qmail.o substdio.a
 
