@@ -10,6 +10,7 @@
 #include "timeoutread.h"
 #include "timeoutwrite.h"
 #include "remoteinfo.h"
+#include "close.h"
 
 static char line[999];
 static int t;
