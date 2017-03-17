@@ -11,7 +11,7 @@ MAKELIB=.makelib
 # link files
 # create man pages
 
-default: conf libs it mans
+default: conf libs obj it mans
 
 clean: TARGETS
 	rm -f *.o *.a *.tmp `cat TARGETS`
@@ -34,6 +34,10 @@ mans:
 libs:
 	cd lib ; make
 
+obj:
+	$(COMPILE) hfield.c
+	$(COMPILE) maildir.c
+
 auto_break.o:
 	$(COMPILE) auto_break.c
 
@@ -55,9 +59,14 @@ auto_uids.o:
 auto_usera.o:
 	$(COMPILE) auto_usera.c
 
-bouncesaying: load bouncesaying.c strerr.a error.a substdio.a str.a wait.a
-	./compile bouncesaying.c
-	./load bouncesaying strerr.a error.a substdio.a str.a wait.a
+#bouncesaying: load bouncesaying.c strerr.a error.a substdio.a str.a wait.a
+#	./compile bouncesaying.c
+#	./load bouncesaying strerr.a error.a substdio.a str.a wait.a
+
+bouncesaying:
+# load bouncesaying.c strerr.a error.a substdio.a str.a wait.a
+	$(COMPILE) bouncesaying.c
+	$(LOAD) bouncesaying strerr_buf.a error.a buffer.a str.a wait.a
 
 commands.o: compile commands.c
 	./compile commands.c
@@ -137,8 +146,8 @@ trysalen.c compile
 headerbody.o: compile headerbody.c
 	./compile headerbody.c
 
-hfield.o: compile hfield.c
-	./compile hfield.c
+#hfield.o: compile hfield.c
+#	./compile hfield.c
 
 ip.o: compile ip.c
 	./compile ip.c
@@ -168,8 +177,8 @@ maildir2mbox \
 qmail-before ipmeprint \
 mkrsadhkeys mksrvrcerts qmail-fixq qmail-shcfg
 
-maildir.o:
-	$(COMPILE) maildir.c
+#maildir.o:
+#	$(COMPILE) maildir.c
 
 maildir2mbox: maildir.o
 # compile load maildir2mbox.c maildir.o prioq.o now.o \

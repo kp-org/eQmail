@@ -1,14 +1,20 @@
+/*
+ *  Revision 20160712, Kai Peter
+ *  - switched to 'buffer' (strerr)
+ *  - changed parameter declarations
+ *  Revision 20160503, Kai Peter
+ *  - changed return type of main to int
+ *  - added 'unistd.h' to prevent compiler warnings, removed 'exit.h'
+ */
+#include <unistd.h>
 #include "strerr.h"
 #include "error.h"
 #include "wait.h"
 #include "sig.h"
-#include "exit.h"
 
 #define FATAL "bouncesaying: fatal: "
 
-void main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
 {
   int pid;
   int wstat;
@@ -37,4 +43,5 @@ char **argv;
   }
 
   strerr_die1x(100,argv[1]);
+  return(0);  /* never reached */
 }
