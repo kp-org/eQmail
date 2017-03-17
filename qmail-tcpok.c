@@ -13,7 +13,7 @@
 struct tcpto_buf buf[TCPTO_BUFSIZ];
 substdio ss;
 
-void main()
+int main()
 {
   int fd;
   int i;

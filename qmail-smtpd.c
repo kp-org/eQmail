@@ -1135,9 +1135,7 @@ struct commands smtpcommands[] = {
 , { 0, err_unrecog, flush }
 } ;
 
-void main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
 {
   childargs = argv + 1;
   sig_pipeignore();
@@ -1150,4 +1148,5 @@ char **argv;
   }
   if (commands(&ssin,&smtpcommands) == 0) die_read();
   die_nomem();
+  return(0);  /* never reached */
 }

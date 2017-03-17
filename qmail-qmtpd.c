@@ -74,7 +74,7 @@ stralloc failure = {0};
 char *relayclient;
 int relayclientlen;
 
-main()
+int main()
 {
   char ch;
   int i;
@@ -87,23 +87,23 @@ main()
   char *result;
   char *x;
   unsigned long u;
- 
+
   sig_pipeignore();
   sig_alarmcatch(resources);
   alarm(3600);
- 
+
   if (chdir(auto_qmail) == -1) resources();
- 
+
   if (control_init() == -1) resources();
   if (rcpthosts_init() == -1) resources();
   relayclient = env_get("RELAYCLIENT");
   relayclientlen = relayclient ? str_len(relayclient) : 0;
- 
+
   if (control_readint(&databytes,"control/databytes") == -1) resources();
   x = env_get("DATABYTES");
   if (x) { scan_ulong(x,&u); databytes = u; }
   if (!(databytes + 1)) --databytes;
- 
+
   remotehost = env_get("TCPREMOTEHOST");
   if (!remotehost) remotehost = "unknown";
   remoteinfo = env_get("TCPREMOTEINFO");
@@ -112,28 +112,28 @@ main()
   local = env_get("TCPLOCALHOST");
   if (!local) local = env_get("TCPLOCALIP");
   if (!local) local = "unknown";
- 
+
   for (;;) {
     if (!stralloc_copys(&failure,"")) resources();
     flagsenderok = 1;
- 
+
     len = getlen();
     if (len == 0) badproto();
- 
+
     if (databytes) bytestooverflow = databytes + 1;
     if (qmail_open(&qq) == -1) resources();
     qp = qmail_qp(&qq);
- 
+
     substdio_get(&ssin,&ch,1);
     --len;
     if (ch == 10) flagdos = 0;
     else if (ch == 13) flagdos = 1;
     else badproto();
- 
+
     received(&qq,"QMTP",local,remoteip,remotehost,remoteinfo,(char *) 0);
- 
+
     /* XXX: check for loops? only if len is big? */
- 
+
     if (flagdos)
       while (len > 0) {
         substdio_get(&ssin,&ch,1);
@@ -161,9 +161,9 @@ main()
       }
     }
     getcomma();
- 
+
     len = getlen();
- 
+
     if (len >= 1000) {
       buf[0] = 0;
       flagsenderok = 0;
@@ -182,11 +182,11 @@ main()
     flagbother = 0;
     qmail_from(&qq,buf);
     if (!flagsenderok) qmail_fail(&qq);
- 
+
     biglen = getlen();
     while (biglen > 0) {
       if (!stralloc_append(&failure,"")) resources();
- 
+
       len = 0;
       for (;;) {
         if (!biglen) badproto();
@@ -208,7 +208,7 @@ main()
           if (!buf[i]) failure.s[failure.len - 1] = 'N';
         }
         buf[len] = 0;
- 
+
         if (relayclient)
           str_copy(buf + len,relayclient);
         else
@@ -216,7 +216,7 @@ main()
             case -1: resources();
             case 0: failure.s[failure.len - 1] = 'D';
           }
- 
+
         if (!failure.s[failure.len - 1]) {
           qmail_to(&qq,buf);
           flagbother = 1;
@@ -226,12 +226,12 @@ main()
       biglen -= (len + 1);
     }
     getcomma();
- 
+
     if (!flagbother) qmail_fail(&qq);
     result = qmail_close(&qq);
     if (!flagsenderok) result = "Dunacceptable sender (#5.1.7)";
     if (databytes) if (!bytestooverflow) result = "Dsorry, that message size exceeds my databytes limit (#5.3.4)";
- 
+
     if (*result)
       len = str_len(result);
     else {
@@ -244,12 +244,12 @@ main()
       buf2[len] = 0;
       result = buf2;
     }
-      
+
     len = fmt_ulong(buf,len);
     buf[len++] = ':';
     len += fmt_str(buf + len,result);
     buf[len++] = ',';
- 
+
     for (i = 0;i < failure.len;++i)
       switch(failure.s[i]) {
         case 0:
@@ -262,7 +262,8 @@ main()
           substdio_puts(&ssout,"46:Dsorry, I can't handle that recipient (#5.1.3),");
           break;
       }
- 
+
     /* ssout will be flushed when we read from the network again */
   }
+  return(0);  /* never reached */
 }

@@ -745,15 +745,13 @@ int port;
 int timeout;
 {
 #ifdef INET6
-	if (ix->af == AF_INET6)
-		return timeoutconn6(fd, &ix->addr.ip6, port, timeout);
+  if (ix->af == AF_INET6)
+    return timeoutconn6(fd, &ix->addr.ip6, port, timeout);
 #endif
-	return timeoutconn(fd, &ix->addr.ip, port, timeout);
+  return timeoutconn(fd, &ix->addr.ip, port, timeout);
 }
 
-void main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
 {
   static ipalloc ip = {0};
   int i,j;
@@ -763,15 +761,14 @@ char **argv;
   int flagallaliases;
   int flagalias;
   char *relayhost;
- 
+
   sig_pipeignore();
   if (argc < 4) perm_usage();
   if (chdir(auto_qmail) == -1) temp_chdir();
   getcontrols();
- 
- 
+
   if (!stralloc_copys(&host,argv[1])) temp_nomem();
- 
+
   if (!stralloc_copys(&auth_smtp_user,"")) temp_nomem();
   if (!stralloc_copys(&auth_smtp_pass,"")) temp_nomem();
 
@@ -787,10 +784,10 @@ char **argv;
     if (relayhost[i]) {
       j = str_chr(relayhost + i + 1,' ');
       if (relayhost[j]) {
-	relayhost[i] = 0;
-	relayhost[i + j + 1] = 0;
-	if (!stralloc_copys(&auth_smtp_user,relayhost + i + 1)) temp_nomem();
-	if (!stralloc_copys(&auth_smtp_pass,relayhost + i + j + 2)) temp_nomem();
+    relayhost[i] = 0;
+    relayhost[i + j + 1] = 0;
+    if (!stralloc_copys(&auth_smtp_user,relayhost + i + 1)) temp_nomem();
+    if (!stralloc_copys(&auth_smtp_pass,relayhost + i + j + 2)) temp_nomem();
       }
     }
     i = str_chr(relayhost,':');
@@ -803,10 +800,10 @@ char **argv;
 
 
   addrmangle(&sender,argv[2],&flagalias,0);
- 
+
   if (!saa_readyplus(&reciplist,0)) temp_nomem();
   if (ipme_init() != 1) temp_oserr();
- 
+
   flagallaliases = 1;
   recips = argv + 3;
   while (*recips) {
@@ -818,7 +815,7 @@ char **argv;
     ++recips;
   }
 
- 
+
   random = now() + (getpid() << 16);
   switch (relayhost ? dns_ip(&ip,&host) : dns_mxip(&ip,&host,random)) {
     case DNS_MEM: temp_nomem();
@@ -827,9 +824,9 @@ char **argv;
     case 1:
       if (ip.len <= 0) temp_dns();
   }
- 
+
   if (ip.len <= 0) perm_nomx();
- 
+
   prefme = 100000;
   for (i = 0;i < ip.len;++i)
 #ifdef INET6
@@ -839,26 +836,26 @@ char **argv;
 #endif
       if (ip.ix[i].pref < prefme)
         prefme = ip.ix[i].pref;
- 
+
   if (relayhost) prefme = 300000;
   if (flagallaliases) prefme = 500000;
- 
+
   for (i = 0;i < ip.len;++i)
     if (ip.ix[i].pref < prefme)
       break;
- 
+
   if (i >= ip.len)
     perm_ambigmx();
- 
+
   for (i = 0;i < ip.len;++i) if (ip.ix[i].pref < prefme) {
     if (tcpto(&ip.ix[i])) continue;
- 
+
     smtpfd = socket(ip.ix[i].af,SOCK_STREAM,0);
     if (smtpfd == -1) temp_oserr();
- 
-	if (timeoutconn46(smtpfd,&ip.ix[i],(unsigned int) port,timeoutconnect) == 0) {
-	  tcpto_err(&ip.ix[i],0);
-	  partner = ip.ix[i];
+
+    if (timeoutconn46(smtpfd,&ip.ix[i],(unsigned int) port,timeoutconnect) == 0) {
+      tcpto_err(&ip.ix[i],0);
+      partner = ip.ix[i];
 #ifdef TLS
       partner_fqdn = ip.ix[i].fqdn;
 #endif
@@ -869,4 +866,5 @@ char **argv;
   }
 
   temp_noconn();
+  return(0);  /* never reached */
 }

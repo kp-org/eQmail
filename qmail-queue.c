@@ -1,6 +1,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>		/* replace "readwrite.h" "exit.h" */
+#include <unistd.h>
 #include "sig.h"
 #include "open.h"
 #include "seek.h"
@@ -10,7 +10,6 @@
 #include "datetime.h"
 #include "now.h"
 #include "triggerpull.h"
-//#include "extra.h"
 #include "auto_qmail.h"
 #include "auto_uids.h"
 #include "date822fmt.h"
@@ -67,8 +66,7 @@ unsigned int receivedlen;
 char *received;
 /* "Received: (qmail-queue invoked by alias); 26 Sep 1995 04:46:54 -0000\n" */
 
-static unsigned int receivedfmt(s)
-char *s;
+static unsigned int receivedfmt(char *s)
 {
  unsigned int i;
  unsigned int len;
@@ -100,35 +98,35 @@ void received_setup()
  receivedfmt(received);
 }
 
-unsigned int pidfmt(s,seq)
-char *s;
-unsigned long seq;
+unsigned int pidfmt(char *s,unsigned long seq)
+//char *s;
+//unsigned long seq;
 {
- unsigned int i;
- unsigned int len;
+  unsigned int i;
+  unsigned int len;
 
- len = 0;
- i = fmt_str(s,"pid/"); len += i; if (s) s += i;
- i = fmt_ulong(s,mypid); len += i; if (s) s += i;
- i = fmt_str(s,"."); len += i; if (s) s += i;
- i = fmt_ulong(s,starttime); len += i; if (s) s += i;
- i = fmt_str(s,"."); len += i; if (s) s += i;
- i = fmt_ulong(s,seq); len += i; if (s) s += i;
- ++len; if (s) *s++ = 0;
+  len = 0;
+  i = fmt_str(s,"pid/"); len += i; if (s) s += i;
+  i = fmt_ulong(s,mypid); len += i; if (s) s += i;
+  i = fmt_str(s,"."); len += i; if (s) s += i;
+  i = fmt_ulong(s,starttime); len += i; if (s) s += i;
+  i = fmt_str(s,"."); len += i; if (s) s += i;
+  i = fmt_ulong(s,seq); len += i; if (s) s += i;
+  ++len; if (s) *s++ = 0;
 
- return len;
+  return len;
 }
 
-char *fnnum(dirslash,flagsplit)
-char *dirslash;
-int flagsplit;
+char *fnnum(char *dirslash,int flagsplit)
+//char *dirslash;
+//int flagsplit;
 {
- char *s;
+  char *s;
 
- s = alloc(fmtqfn((char *) 0,dirslash,messnum,flagsplit));
- if (!s) die(51);
- fmtqfn(s,dirslash,messnum,flagsplit);
- return s;
+  s = alloc(fmtqfn((char *) 0,dirslash,messnum,flagsplit));
+  if (!s) die(51);
+  fmtqfn(s,dirslash,messnum,flagsplit);
+  return s;
 }
 
 void pidopen()
@@ -154,104 +152,105 @@ void pidopen()
 
 char tmp[FMT_ULONG];
 
-void main()
+int main()
 {
- unsigned int len;
- char ch;
+  unsigned int len;
+  char ch;
 
- sig_blocknone();
- umask(033);
- if (chdir(auto_qmail) == -1) die(61);
- if (chdir("queue") == -1) die(62);
+  sig_blocknone();
+  umask(033);
+  if (chdir(auto_qmail) == -1) die(61);
+  if (chdir("queue") == -1) die(62);
 
- mypid = getpid();
- uid = getuid();
- starttime = now();
- datetime_tai(&dt,starttime);
+  mypid = getpid();
+  uid = getuid();
+  starttime = now();
+  datetime_tai(&dt,starttime);
 
- received_setup();
+  received_setup();
 
- sig_pipeignore();
- sig_miscignore();
- sig_alarmcatch(sigalrm);
- sig_bugcatch(sigbug);
+  sig_pipeignore();
+  sig_miscignore();
+  sig_alarmcatch(sigalrm);
+  sig_bugcatch(sigbug);
 
- alarm(DEATH);
+  alarm(DEATH);
 
- pidopen();
- if (fstat(messfd,&pidst) == -1) die(63);
+  pidopen();
+  if (fstat(messfd,&pidst) == -1) die(63);
 
- messnum = pidst.st_ino;
- messfn = fnnum("mess/",1);
- todofn = fnnum("todo/",1);
- intdfn = fnnum("intd/",1);
+  messnum = pidst.st_ino;
+  messfn = fnnum("mess/",1);
+  todofn = fnnum("todo/",1);
+  intdfn = fnnum("intd/",1);
 
- if (link(pidfn,messfn) == -1) die(64);
- if (unlink(pidfn) == -1) die(63);
- flagmademess = 1;
+  if (link(pidfn,messfn) == -1) die(64);
+  if (unlink(pidfn) == -1) die(63);
+  flagmademess = 1;
 
- substdio_fdbuf(&ssout,write,messfd,outbuf,sizeof(outbuf));
- substdio_fdbuf(&ssin,read,0,inbuf,sizeof(inbuf));
+  substdio_fdbuf(&ssout,write,messfd,outbuf,sizeof(outbuf));
+  substdio_fdbuf(&ssin,read,0,inbuf,sizeof(inbuf));
 
- if (substdio_bput(&ssout,received,receivedlen) == -1) die_write();
+  if (substdio_bput(&ssout,received,receivedlen) == -1) die_write();
 
- switch(substdio_copy(&ssout,&ssin))
+  switch(substdio_copy(&ssout,&ssin))
   {
-   case -2: die_read();
-   case -3: die_write();
+    case -2: die_read();
+    case -3: die_write();
   }
 
- if (substdio_flush(&ssout) == -1) die_write();
- if (fsync(messfd) == -1) die_write();
+  if (substdio_flush(&ssout) == -1) die_write();
+  if (fsync(messfd) == -1) die_write();
 
- intdfd = open_excl(intdfn);
- if (intdfd == -1) die(65);
- flagmadeintd = 1;
+  intdfd = open_excl(intdfn);
+  if (intdfd == -1) die(65);
+  flagmadeintd = 1;
 
- substdio_fdbuf(&ssout,write,intdfd,outbuf,sizeof(outbuf));
- substdio_fdbuf(&ssin,read,1,inbuf,sizeof(inbuf));
+  substdio_fdbuf(&ssout,write,intdfd,outbuf,sizeof(outbuf));
+  substdio_fdbuf(&ssin,read,1,inbuf,sizeof(inbuf));
 
- if (substdio_bput(&ssout,"u",1) == -1) die_write();
- if (substdio_bput(&ssout,tmp,fmt_ulong(tmp,uid)) == -1) die_write();
- if (substdio_bput(&ssout,"",1) == -1) die_write();
+  if (substdio_bput(&ssout,"u",1) == -1) die_write();
+  if (substdio_bput(&ssout,tmp,fmt_ulong(tmp,uid)) == -1) die_write();
+  if (substdio_bput(&ssout,"",1) == -1) die_write();
 
- if (substdio_bput(&ssout,"p",1) == -1) die_write();
- if (substdio_bput(&ssout,tmp,fmt_ulong(tmp,mypid)) == -1) die_write();
- if (substdio_bput(&ssout,"",1) == -1) die_write();
+  if (substdio_bput(&ssout,"p",1) == -1) die_write();
+  if (substdio_bput(&ssout,tmp,fmt_ulong(tmp,mypid)) == -1) die_write();
+  if (substdio_bput(&ssout,"",1) == -1) die_write();
 
- if (substdio_get(&ssin,&ch,1) < 1) die_read();
- if (ch != 'F') die(91);
- if (substdio_bput(&ssout,&ch,1) == -1) die_write();
- for (len = 0;len < ADDR;++len)
+  if (substdio_get(&ssin,&ch,1) < 1) die_read();
+  if (ch != 'F') die(91);
+  if (substdio_bput(&ssout,&ch,1) == -1) die_write();
+  for (len = 0;len < ADDR;++len)
   {
-   if (substdio_get(&ssin,&ch,1) < 1) die_read();
-   if (substdio_put(&ssout,&ch,1) == -1) die_write();
-   if (!ch) break;
+    if (substdio_get(&ssin,&ch,1) < 1) die_read();
+    if (substdio_put(&ssout,&ch,1) == -1) die_write();
+    if (!ch) break;
   }
- if (len >= ADDR) die(11);
+  if (len >= ADDR) die(11);
 
- if (substdio_bput(&ssout,QUEUE_EXTRA,QUEUE_EXTRALEN) == -1) die_write();
+  if (substdio_bput(&ssout,QUEUE_EXTRA,QUEUE_EXTRALEN) == -1) die_write();
 
- for (;;)
+  for (;;)
   {
-   if (substdio_get(&ssin,&ch,1) < 1) die_read();
-   if (!ch) break;
-   if (ch != 'T') die(91);
-   if (substdio_bput(&ssout,&ch,1) == -1) die_write();
-   for (len = 0;len < ADDR;++len)
+    if (substdio_get(&ssin,&ch,1) < 1) die_read();
+    if (!ch) break;
+    if (ch != 'T') die(91);
+    if (substdio_bput(&ssout,&ch,1) == -1) die_write();
+    for (len = 0;len < ADDR;++len)
     {
-     if (substdio_get(&ssin,&ch,1) < 1) die_read();
-     if (substdio_bput(&ssout,&ch,1) == -1) die_write();
-     if (!ch) break;
+      if (substdio_get(&ssin,&ch,1) < 1) die_read();
+      if (substdio_bput(&ssout,&ch,1) == -1) die_write();
+      if (!ch) break;
     }
-   if (len >= ADDR) die(11);
+    if (len >= ADDR) die(11);
   }
 
- if (substdio_flush(&ssout) == -1) die_write();
- if (fsync(intdfd) == -1) die_write();
+  if (substdio_flush(&ssout) == -1) die_write();
+  if (fsync(intdfd) == -1) die_write();
 
- if (link(intdfn,todofn) == -1) die(66);
+  if (link(intdfn,todofn) == -1) die(66);
 
- triggerpull();
- die(0);
+  triggerpull();
+  die(0);
+  return(0);  /* never reached */
 }

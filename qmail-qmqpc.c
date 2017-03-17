@@ -98,8 +98,7 @@ void getmess()
   }
 }
 
-void doit(server)
-char *server;
+void doit(char *server)
 {
   struct ip_address ip;
   char ch;
@@ -135,7 +134,7 @@ char *server;
 
 stralloc servers = {0};
 
-main()
+int main()
 {
   int i;
   int j;

@@ -1,10 +1,8 @@
 /*
  *  Revision 20160912, Kai Peter
  *  - added cast '(char *) in function call ip6_fmt()
- *
  *  Revision 20160715, Kai Peter
  *  - updated getopt functions to use outer layer (insted subgetopt)
- *
  *  Revision 20160504, Kai Peter
  *  - changed return type of main to int
  *  - added '<unistd.h>' to prevent compiler warnings
@@ -31,6 +29,8 @@
 #include "hassalen.h"
 
 #define ip4_fmt ip_fmt     /* backwards compatibility */
+#define dns_ptr6 dns_ptr   /* backwards compatibility */
+
 void die() { _exit(111); }
 
 union sockunion {

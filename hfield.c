@@ -40,9 +40,6 @@ static char *(hname[]) = {
 };
 
 static int hmatch(char *s,int len,char *t)
-//char *s;
-//int len;
-//char *t;
 {
   int i;
   char ch;
@@ -67,8 +64,6 @@ static int hmatch(char *s,int len,char *t)
 }
 
 int hfield_known(char *s,int len)
-//char *s;
-//int len;
 {
   int i;
   char *t;
@@ -80,8 +75,6 @@ int hfield_known(char *s,int len)
 }
 
 int hfield_valid(char *s,int len)
-//char *s;
-//int len;
 {
   int i;
   int j;
@@ -110,8 +103,6 @@ int hfield_valid(char *s,int len)
 }
 
 unsigned int hfield_skipname(char *s,int len)
-//char *s;
-//int len;
 {
   int i;
   char ch;

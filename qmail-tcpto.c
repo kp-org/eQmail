@@ -15,16 +15,16 @@
 #include "ipalloc.h"
 #include "tcpto.h"
 
-void die(n) int n; { substdio_flush(subfdout); _exit(n); }
+void die(int n) { substdio_flush(subfdout); _exit(n); }
 
-void warn(s) char *s;
+void warn(char *s)
 {
- char *x;
- x = error_str(errno);
- substdio_puts(subfdout,s);
- substdio_puts(subfdout,": ");
- substdio_puts(subfdout,x);
- substdio_puts(subfdout,"\n");
+  char *x;
+  x = error_str(errno);
+  substdio_puts(subfdout,s);
+  substdio_puts(subfdout,": ");
+  substdio_puts(subfdout,x);
+  substdio_puts(subfdout,"\n");
 }
 
 void die_chdir() { warn("fatal: unable to chdir"); die(111); }
@@ -36,55 +36,56 @@ struct tcpto_buf tcpto_buf[TCPTO_BUFSIZ];
 
 char tmp[FMT_ULONG + IPFMT];
 
-void main()
+int main()
 {
- int fdlock;
- int fd;
- int r;
- int i;
- int af;
- datetime_sec when;
- datetime_sec start;
+  int fdlock;
+  int fd;
+  int r;
+  int i;
+  int af;
+  datetime_sec when;
+  datetime_sec start;
 
- if (chdir(auto_qmail) == -1) die_chdir();
- if (chdir("queue/lock") == -1) die_chdir();
+  if (chdir(auto_qmail) == -1) die_chdir();
+  if (chdir("queue/lock") == -1) die_chdir();
 
- fdlock = open_write("tcpto");
- if (fdlock == -1) die_open();
- fd = open_read("tcpto");
- if (fd == -1) die_open();
- if (lock_ex(fdlock) == -1) die_lock();
- r = read(fd,tcpto_buf,sizeof(tcpto_buf));
- close(fd);
- close(fdlock);
+  fdlock = open_write("tcpto");
+  if (fdlock == -1) die_open();
+  fd = open_read("tcpto");
+  if (fd == -1) die_open();
+  if (lock_ex(fdlock) == -1) die_lock();
+  r = read(fd,tcpto_buf,sizeof(tcpto_buf));
+  close(fd);
+  close(fdlock);
 
- if (r == -1) die_read();
- r /= sizeof(tcpto_buf[0]);
+  if (r == -1) die_read();
+  r /= sizeof(tcpto_buf[0]);
 
- start = now();
+  start = now();
 
- for (i = 0;i < r;++i)
+  for (i = 0;i < r;++i)
   {
-   if (tcpto_buf[i].flag >= 1)
+    if (tcpto_buf[i].flag >= 1)
     {
-     af = tcpto_buf[i].af;
-     when = tcpto_buf[i].when;
+      af = tcpto_buf[i].af;
+      when = tcpto_buf[i].when;
 
 #ifdef INET6
-     if (af == AF_INET)
-       substdio_put(subfdout,tmp,ip_fmt(tmp,&tcpto_buf[i].addr.ip));
-     else
-       substdio_put(subfdout,tmp,ip6_fmt(tmp,&tcpto_buf[i].addr.ip6));
+      if (af == AF_INET)
+        substdio_put(subfdout,tmp,ip_fmt(tmp,&tcpto_buf[i].addr.ip));
+      else
+        substdio_put(subfdout,tmp,ip6_fmt(tmp,&tcpto_buf[i].addr.ip6));
 #else
-     substdio_put(subfdout,tmp,ip_fmt(tmp,&tcpto_buf[i].addr.ip));
+      substdio_put(subfdout,tmp,ip_fmt(tmp,&tcpto_buf[i].addr.ip));
 #endif
-     substdio_puts(subfdout," timed out ");
-     substdio_put(subfdout,tmp,fmt_ulong(tmp,(unsigned long) (start - when)));
-     substdio_puts(subfdout," seconds ago; # recent timeouts: ");
-     substdio_put(subfdout,tmp,fmt_ulong(tmp,tcpto_buf[i].flag));
-     substdio_puts(subfdout,"\n");
+      substdio_puts(subfdout," timed out ");
+      substdio_put(subfdout,tmp,fmt_ulong(tmp,(unsigned long) (start - when)));
+      substdio_puts(subfdout," seconds ago; # recent timeouts: ");
+      substdio_put(subfdout,tmp,fmt_ulong(tmp,tcpto_buf[i].flag));
+      substdio_puts(subfdout,"\n");
     }
   }
 
- die(0);
+  die(0);
+  return(0);  /* never reached */
 }
