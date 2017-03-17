@@ -1,21 +1,13 @@
-#auto-ccld.sh
 systype
 load
 compile
 makelib
-#hassgprm.h
-#hassgact.h
-#hasflock.h
-#haswaitp.h
 auto_qmail.c
 auto-int8
 auto_patrn.c
-#socket.lib
 qmail-local
 auto_spawn.c
 chkspawn
-#chkshsgr
-#hasshsgr.h
 auto_uids.c
 qmail-lspawn
 auto_break.c
@@ -36,7 +28,6 @@ qmail-inject
 predate
 datemail
 mailsubj
-#qmail-upq
 qmail-showctl
 qmail-newu
 qmail-pw2u
@@ -52,17 +43,8 @@ sendmail
 tcp-env
 qmail-newmrh
 mkconfig
-#config-fast
-#dnscname
-#dnsptr
-#dnsip
-#dnsmxip
-#dnsfq
-#hostname
 ipmeprint
 qreceipt
-qsmhook
-#qbiff
 forward
 preline
 condredirect
@@ -72,7 +54,6 @@ maildirmake
 maildir2mbox
 qmail-bfque
 qmail-bfrmt
-#config-bfrmt
 trylib
 
 qmail-fixq

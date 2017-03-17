@@ -1,3 +1,45 @@
+commit 336c1a77809a9a80557de14557999d69c8c21c3a
+Author: Kai Peter <kp@openqmail.org>
+Date:   Thu Mar 16 18:40:31 2017 +0100
+
+    clean up of Makefile and 'build system'
+
+commit 89985a6e3ad7b243bf1844aab9e1c42a615797be
+Author: Kai Peter <kp@openqmail.org>
+Date:   Thu Mar 16 18:12:02 2017 +0100
+
+    expect: switched to 'buffer'
+
+commit f6937a08d04ea45dbdde25ba109ed0c915d27ffe
+Author: Kai Peter <kp@openqmail.org>
+Date:   Thu Mar 16 17:24:29 2017 +0100
+
+    qmail-getpw: switched to 'buffer'
+
+commit 36628fef697c4964fc5e0dffa264beb793562126
+Author: Kai Peter <kp@openqmail.org>
+Date:   Thu Mar 16 17:11:50 2017 +0100
+
+    qmail-lspawn: Revision 20170316
+
+commit 4bdc5536db15303868c9595d24a50a7feb9a0140
+Author: Kai Peter <kp@openqmail.org>
+Date:   Thu Mar 16 16:49:38 2017 +0100
+
+    spawn.c: Revision 20160509
+
+commit ecfe20bf6c9662c6b13e7f3739790f539e46ff93
+Author: Kai Peter <kp@openqmail.org>
+Date:   Thu Mar 16 16:34:48 2017 +0100
+
+    libs: removed compiler warnings
+
+commit 1279e5b14d3bc9c5c2a951e00826cf12006d20d6
+Author: Kai Peter <kp@openqmail.org>
+Date:   Thu Mar 16 15:57:45 2017 +0100
+
+    merged dev branch into master
+
 commit 480666823af99a72c30613c432f2b350692eff49
 Author: Kai Peter <kp@openqmail.org>
 Date:   Thu Mar 16 09:49:12 2017 +0100
