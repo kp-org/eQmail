@@ -1,11 +1,18 @@
+/*
+ *  Revision 20160712, Kai Peter
+ *  - changed parameter declarations
+ *  Revision 20160503, Kai Peter
+ *  - changed return type of main to int
+ *  - added 'unistd.h', 'sys/stat.h' to prevent compiler warnings,
+ *    removed '#include "exit.h"
+ */
 #include "strerr.h"
-#include "exit.h"
+#include <sys/stat.h>
+#include <unistd.h>
 
 #define FATAL "maildirmake: fatal: "
 
-void main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
 {
   umask(077);
   if (!argv[1])
@@ -20,5 +27,5 @@ char **argv;
     strerr_die4sys(111,FATAL,"unable to mkdir ",argv[1],"/new: ");
   if (mkdir("cur",0700) == -1)
     strerr_die4sys(111,FATAL,"unable to mkdir ",argv[1],"/cur: ");
-  _exit(0);
+  return(0);
 }
