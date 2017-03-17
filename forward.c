@@ -1,10 +1,14 @@
+/*
+ *  Revistion 20170317, Kai Peter
+ *  - switched to 'buffer'
+ *  - changed return type of main to int
+ */
 #include "sig.h"
-#include "readwrite.h"		/* the original definitions */
-#include "exit.h"
+#include <unistd.h>
 #include "env.h"
 #include "qmail.h"
 #include "strerr.h"
-#include "substdio.h"
+#include "buffer.h"
 #include "fmt.h"
 
 #define FATAL "forward: fatal: "
@@ -13,22 +17,20 @@ void die_nomem() { strerr_die2x(111,FATAL,"out of memory"); }
 
 struct qmail qqt;
 
-int mywrite(fd,buf,len) int fd; char *buf; int len;
+ssize_t mywrite(int fd,char *buf,int len)
 {
   qmail_put(&qqt,buf,len);
   return len;
 }
 
-char inbuf[SUBSTDIO_INSIZE];
+char inbuf[BUFFER_INSIZE];
 char outbuf[1];
-substdio ssin = SUBSTDIO_FDBUF(read,0,inbuf,sizeof inbuf);
-substdio ssout = SUBSTDIO_FDBUF(mywrite,-1,outbuf,sizeof outbuf);
+buffer ssin = BUFFER_INIT(read,0,inbuf,sizeof inbuf);
+buffer ssout = BUFFER_INIT(mywrite,-1,outbuf,sizeof outbuf);
 
 char num[FMT_ULONG];
 
-void main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
 {
   char *sender;
   char *dtline;
@@ -46,9 +48,9 @@ char **argv;
   if (qmail_open(&qqt) == -1)
     strerr_die2sys(111,FATAL,"unable to fork: ");
   qmail_puts(&qqt,dtline);
-  if (substdio_copy(&ssout,&ssin) != 0)
+  if (buffer_copy(&ssout,&ssin) != 0)
     strerr_die2sys(111,FATAL,"unable to read message: ");
-  substdio_flush(&ssout);
+  buffer_flush(&ssout);
 
   num[fmt_ulong(num,qmail_qp(&qqt))] = 0;
 
@@ -57,4 +59,5 @@ char **argv;
   qqx = qmail_close(&qqt);
   if (*qqx) strerr_die2x(*qqx == 'D' ? 100 : 111,FATAL,qqx + 1);
   strerr_die2x(0,"forward: qp ",num);
+  return(0);  /* never reached */
 }

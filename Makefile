@@ -2,7 +2,7 @@
 
 SHELL=/bin/sh
 
-COMPILE=./compile -Iinc
+COMPILE=./compile
 LOAD=./load
 MAKELIB=.makelib
 
@@ -112,11 +112,13 @@ except:
 fmtqfn.o: compile fmtqfn.c
 	./compile fmtqfn.c
 
-forward: compile load forward.c qmail.o strerr.a alloc.a fd.a \
-wait.a sig.a env.a substdio.a error.a str.a fs.a auto_qmail.o
-	./compile forward.c
-	./load forward qmail.o strerr.a alloc.a fd.a wait.a sig.a \
-	env.a substdio.a error.a str.a fs.a auto_qmail.o alloc.a
+forward:
+# compile load forward.c qmail.o strerr.a alloc.a fd.a \
+#wait.a sig.a env.a substdio.a error.a str.a fs.a auto_qmail.o
+	$(COMPILE) forward.c
+	$(LOAD) forward qmail.o strerr_buf.a alloc.a fd.a wait.a sig.a \
+	env.a buffer.a error.a str.a fs.a auto_qmail.o
+#	 alloc.a
 
 gfrom.o: compile gfrom.c
 	./compile gfrom.c
