@@ -116,9 +116,8 @@ forward:
 # compile load forward.c qmail.o strerr.a alloc.a fd.a \
 #wait.a sig.a env.a substdio.a error.a str.a fs.a auto_qmail.o
 	$(COMPILE) forward.c
-	$(LOAD) forward qmail.o strerr_buf.a alloc.a fd.a wait.a sig.a \
-	env.a buffer.a error.a str.a fs.a auto_qmail.o
-#	 alloc.a
+	$(LOAD) forward qmail.o strerr_buf.a fd.a wait.a sig.a \
+	env.a buffer.a error.a str.a fs.a auto_qmail.o alloc.a substdio.a
 
 gfrom.o: compile gfrom.c
 	./compile gfrom.c
@@ -273,12 +272,22 @@ substdio.a error.a str.a fs.a auto_qmail.o auto_uids.o auto_spawn.o
 	case.a cdb.a fd.a open.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a auto_qmail.o auto_uids.o auto_spawn.o
 
-qmail-newmrh: compile \
-load qmail-newmrh.c cdb.a getln.a open.a seek.a case.a buffer.a \
-stralloc.a alloc.a strerr.a substdio.a error.a str.a auto_qmail.o
+#qmail-newmrh:
+# compile \
+#load qmail-newmrh.c cdb.a getln.a open.a seek.a case.a buffer.a \
+#stralloc.a alloc.a strerr.a substdio.a error.a str.a auto_qmail.o
+#	./compile qmail-newmrh.c
+#	./load qmail-newmrh cdb.a getln.a open.a buffer.a \
+#	seek.a case.a stralloc.a alloc.a strerr.a substdio.a \
+#	error.a str.a auto_qmail.o
+
+qmail-newmrh:
+# compile \
+#load qmail-newmrh.c cdb.a getln.a open.a seek.a case.a buffer.a \
+#stralloc.a alloc.a strerr.a substdio.a error.a str.a auto_qmail.o
 	./compile qmail-newmrh.c
-	./load qmail-newmrh cdb.a getln.a open.a buffer.a \
-	seek.a case.a stralloc.a alloc.a strerr.a substdio.a \
+	./load qmail-newmrh cdb.a getln_buf.a open.a \
+	seek.a case.a stralloc.a alloc.a strerr_buf.a buffer.a \
 	error.a str.a auto_qmail.o
 
 qmail-newu: compile load qmail-newu.c cdb.a getln.a open.a seek.a \
