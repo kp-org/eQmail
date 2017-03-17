@@ -1,45 +1,48 @@
+/*
+ *  Revision 20160711, Kai Peter
+ *  - switched to 'buffer', <unistd.h>
+ *  Revision 20160503, Kai Peter
+ *  - changed return type of main to int
+ */
+#include <unistd.h>
 #include "sig.h"
-#include "readwrite.h"	/* the original definitions */
-#include "exit.h"
 #include "env.h"
 #include "error.h"
 #include "wait.h"
 #include "seek.h"
 #include "qmail.h"
 #include "strerr.h"
-#include "substdio.h"
+#include "buffer.h"
 #include "fmt.h"
 
 #define FATAL "condredirect: fatal: "
 
 struct qmail qqt;
 
-int mywrite(fd,buf,len) int fd; char *buf; int len;
+ssize_t mywrite(int fd,char *buf,int len)
 {
   qmail_put(&qqt,buf,len);
   return len;
 }
 
-char inbuf[SUBSTDIO_INSIZE];
+char inbuf[BUFFER_INSIZE];
 char outbuf[1];
-substdio ssin = SUBSTDIO_FDBUF(read,0,inbuf,sizeof inbuf);
-substdio ssout = SUBSTDIO_FDBUF(mywrite,-1,outbuf,sizeof outbuf);
+buffer ssin = BUFFER_INIT(read,0,inbuf,sizeof inbuf);
+buffer ssout = BUFFER_INIT(mywrite,-1,outbuf,sizeof outbuf);
 
 char num[FMT_ULONG];
 
-void main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
 {
   char *sender;
   char *dtline;
   int pid;
   int wstat;
   char *qqx;
- 
+
   if (!argv[1] || !argv[2])
     strerr_die1x(100,"condredirect: usage: condredirect newaddress program [ arg ... ]");
- 
+
   pid = fork();
   if (pid == -1)
     strerr_die2sys(111,FATAL,"unable to fork: ");
@@ -61,19 +64,19 @@ char **argv;
   if (seek_begin(0) == -1)
     strerr_die2sys(111,FATAL,"unable to rewind: ");
   sig_pipeignore();
- 
+
   sender = env_get("SENDER");
   if (!sender) strerr_die2x(100,FATAL,"SENDER not set");
   dtline = env_get("DTLINE");
   if (!dtline) strerr_die2x(100,FATAL,"DTLINE not set");
- 
+
   if (qmail_open(&qqt) == -1)
     strerr_die2sys(111,FATAL,"unable to fork: ");
   qmail_puts(&qqt,dtline);
-  if (substdio_copy(&ssout,&ssin) != 0)
+  if (buffer_copy(&ssout,&ssin) != 0)
     strerr_die2sys(111,FATAL,"unable to read message: ");
-  substdio_flush(&ssout);
- 
+  buffer_flush(&ssout);
+
   num[fmt_ulong(num,qmail_qp(&qqt))] = 0;
 
   qmail_from(&qqt,sender);
@@ -81,4 +84,5 @@ char **argv;
   qqx = qmail_close(&qqt);
   if (*qqx) strerr_die2x(*qqx == 'D' ? 100 : 111,FATAL,qqx + 1);
   strerr_die2x(99,"condredirect: qp ",num);
+  return(0);  /* never reached */
 }

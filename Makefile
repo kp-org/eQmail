@@ -59,26 +59,17 @@ auto_uids.o:
 auto_usera.o:
 	$(COMPILE) auto_usera.c
 
-#bouncesaying: load bouncesaying.c strerr.a error.a substdio.a str.a wait.a
-#	./compile bouncesaying.c
-#	./load bouncesaying strerr.a error.a substdio.a str.a wait.a
-
 bouncesaying:
-# load bouncesaying.c strerr.a error.a substdio.a str.a wait.a
 	$(COMPILE) bouncesaying.c
 	$(LOAD) bouncesaying strerr_buf.a error.a buffer.a str.a wait.a
 
 commands.o: compile commands.c
 	./compile commands.c
 
-condredirect: \
-load condredirect.o qmail.o strerr.a fd.a sig.a wait.a seek.a env.a \
-substdio.a error.a str.a fs.a auto_qmail.o
-	./load condredirect qmail.o strerr.a fd.a sig.a wait.a \
-	seek.a env.a substdio.a error.a str.a fs.a auto_qmail.o alloc.a
-
-condredirect.o: compile condredirect.c
-	./compile condredirect.c
+condredirect:
+	$(COMPILE) condredirect.c
+	$(LOAD) condredirect qmail.o strerr_buf.a fd.a sig.a wait.a \
+	seek.a env.a buffer.a error.a str.a fs.a auto_qmail.o alloc.a substdio.a
 
 mkconfig: \
 warn-auto.sh mkconfig.sh conf-home conf-break conf-split
