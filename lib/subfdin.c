@@ -1,6 +1,8 @@
 #include "substdio.h"
 #include "subfd.h"
 
+int read();
+
 int subfd_read(fd,buf,len) int fd; char *buf; int len;
 {
   if (substdio_flush(subfdout) == -1) return -1;

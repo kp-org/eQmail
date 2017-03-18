@@ -28,14 +28,15 @@ ndelay.a open.a seek.a sig.a substdio.a str.a stralloc.a strerr.a time.a wait.a 
 strerr_buf.a getln_buf.a \
 dns.a ip.a socket.a
 	@echo -n Moving .o files ...
-	@mv base64.o byte.o fmt.o prot.o slurpclose.o \
+	@mv base64.o byte.o fmt.o prot.o slurpclose.o readclose.o \
 	..
 	@echo done!
 
 obj:
-# ../compile $(SRC)
+# the link is temp for backwards compat
 	@echo Making all in lib ...
 	$(COMPILE) $(CFLAGS) $(SRC)
+	cp readclose.o slurpclose.o
 
 alloc.a:
 # ../compile ../makelib alloc.c
