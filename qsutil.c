@@ -3,6 +3,8 @@
 #include "substdio.h"
 #include "qsutil.h"
 
+void sleep(int seconds);   /* temp */
+
 static stralloc foo = {0};
 
 static char errbuf[1];

@@ -1,3 +1,8 @@
+/*
+ *  Revision 20160509, Kai Peter
+ *  - added <unistd.h>
+ */
+#include <unistd.h>
 #include "fmt.h"
 #include "datetime.h"
 #include "stralloc.h"

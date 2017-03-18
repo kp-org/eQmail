@@ -7,6 +7,7 @@
 #include "exit.h"
 #include "ipalloc.h"
 #include "tcpto.h"
+#include "chdir.h"   /* temp */
 
 #define FATAL "qmail-tcpok: fatal: "
 

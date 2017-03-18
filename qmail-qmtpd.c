@@ -1,4 +1,4 @@
-#include <unistd.h>		/* replace "exit.h" */
+#include <unistd.h>
 #include "stralloc.h"
 #include "substdio.h"
 #include "qmail.h"
@@ -11,6 +11,7 @@
 #include "auto_qmail.h"
 #include "control.h"
 #include "received.h"
+#include "scan.h"
 
 void badproto() { _exit(100); }
 void resources() { _exit(111); }

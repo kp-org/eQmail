@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "auto_qmail.h"
 #include "qmail.h"
 #include "received.h"
@@ -7,6 +8,8 @@
 #include "now.h"
 #include "fmt.h"
 #include "env.h"
+#include "byte.h"
+#include "str.h"
 
 void resources() { _exit(111); }
 
@@ -104,7 +107,7 @@ int getbuf()
 
 int flagok = 1;
 
-main()
+int main()
 {
   char *result;
   unsigned long qp;

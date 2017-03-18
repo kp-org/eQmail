@@ -2,6 +2,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <unistd.h>
 #include "substdio.h"
 #include "subfd.h"
 #include "auto_qmail.h"
@@ -14,6 +15,7 @@
 #include "now.h"
 #include "ipalloc.h"
 #include "tcpto.h"
+#include "open.h"
 
 void die(int n) { substdio_flush(subfdout); _exit(n); }
 

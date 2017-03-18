@@ -17,6 +17,7 @@
 #include "auto_qmail.h"
 #include "control.h"
 #include "fmt.h"
+#include "chdir.h"   /* temp */
 
 #define PORT_QMQP 628
 
