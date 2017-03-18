@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "timeoutwrite.h"
 #include "select.h"
 #include "error.h"

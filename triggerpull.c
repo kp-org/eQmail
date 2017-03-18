@@ -1,6 +1,10 @@
+/* used by qmail-queue only */
 #include "ndelay.h"
 #include "open.h"
 #include "triggerpull.h"
+#include "close.h"
+
+void write();   /* compiler warning (temp?) */
 
 void triggerpull()
 {

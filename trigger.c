@@ -1,3 +1,4 @@
+/* used by qmail-send only */
 #include "select.h"
 #include "open.h"
 #include "trigger.h"
