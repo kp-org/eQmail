@@ -25,7 +25,20 @@
 #include "commands.h"
 #include "wait.h"
 #include "qmail-spp.h"
+#include "fd.h"
 
+/* temp:  */
+extern int chdir(const char *_path);
+extern int execvp(const char *, char * const *);
+extern int fork();
+extern int getpid(void);
+extern int pipe();
+extern unsigned int sleep(unsigned int _seconds);
+#include "close.h"
+#include "base64.h"
+/* end temp */
+
+extern void spp_rcpt_accepted();
 int spp_val;
 
 #define CRAM_MD5
@@ -154,7 +167,7 @@ void setup()
 {
   char *x;
   unsigned long u;
- 
+
   if (control_init() == -1) die_control();
   if (control_rldef(&greeting,"control/smtpgreeting",1,(char *) 0) != 1)
     die_control();
@@ -227,7 +240,7 @@ char *arg;
   if (!stralloc_copys(&addr,"")) die_nomem();
   flagesc = 0;
   flagquoted = 0;
-  for (i = 0;ch = arg[i];++i) { /* copy arg to addr, stripping quotes */
+  for (i = 0;(ch = arg[i]);++i) { /* copy arg to addr, stripping quotes */
     if (flagesc) {
       if (!stralloc_append(&addr,&ch)) die_nomem();
       flagesc = 0;
@@ -270,7 +283,7 @@ int bmfcheck()
     if (constmap(&mapbmf,addr.s + j,addr.len - j - 1)) return 1;
     for (j++; j < addr.len; j++)
       if (addr.s[j] == '.') {
-	if(constmap(&mapbmf,addr.s + j,addr.len - j - 1)) return 1;
+    if(constmap(&mapbmf,addr.s + j,addr.len - j - 1)) return 1;
       }
   }
   return 0;
@@ -355,7 +368,7 @@ const char* reason;
 
 int mailfrom_size(arg) char *arg;
 {
-  long r;
+  unsigned long r;
   unsigned long sizebytes = 0;
 
   scan_ulong(arg,&r);
@@ -394,7 +407,7 @@ void mailfrom_parms(arg) char *arg;
   int len;
 
     len = str_len(arg);
-    if (!stralloc_copys(&mfparms,"")) die_nomem;
+    if (!stralloc_copys(&mfparms,"")) die_nomem();
     i = byte_chr(arg,len,'>');
     if (i > 4 && i < len) {
       while (len) {
@@ -402,10 +415,10 @@ void mailfrom_parms(arg) char *arg;
         if (*arg == ' ' || *arg == '\0' ) {
            if (case_starts(mfparms.s,"SIZE=")) if (mailfrom_size(mfparms.s+5)) { flagsize = 1; return; }
            if (case_starts(mfparms.s,"AUTH=")) mailfrom_auth(mfparms.s+5,mfparms.len-5);  
-           if (!stralloc_copys(&mfparms,"")) die_nomem;
+           if (!stralloc_copys(&mfparms,"")) die_nomem();
         }
         else
-          if (!stralloc_catb(&mfparms,arg,1)) die_nomem; 
+          if (!stralloc_catb(&mfparms,arg,1)) die_nomem();
       }
     }
 }
@@ -528,7 +541,7 @@ int *hops;
   int flagmaybex; /* 1 if this line might match RECEIVED, if fih */
   int flagmaybey; /* 1 if this line might match \r\n, if fih */
   int flagmaybez; /* 1 if this line might match DELIVERED, if fih */
- 
+
   state = 1;
   *hops = 0;
   flaginheader = 1;
@@ -544,7 +557,7 @@ int *hops;
         if (flagmaybex) if (pos == 7) ++*hops;
         if (pos < 2) if (ch != "\r\n"[pos]) flagmaybey = 0;
         if (flagmaybey) if (pos == 1) flaginheader = 0;
-	++pos;
+    ++pos;
       }
       if (ch == '\n') { pos = 0; flagmaybex = flagmaybey = flagmaybez = 1; }
     }
@@ -597,7 +610,7 @@ void smtp_data(arg) char *arg; {
   int hops;
   unsigned long qp;
   char *qqx;
- 
+
   if (!seenmail) { err_wantmail(); return; }
   if (!rcptto.len) { err_wantrcpt(); return; }
   if (!spp_data()) return;
@@ -606,7 +619,7 @@ void smtp_data(arg) char *arg; {
   if (qmail_open(&qqt) == -1) { err_qqt(); return; }
   qp = qmail_qp(&qqt);
   out("354 go ahead\r\n");
- 
+
   received(&qqt,protocol,local,remoteip,remotehost,remoteinfo,fakehelo);
   qmail_put(&qqt,sppheaders.s,sppheaders.len); /* set in qmail-spp.c */
   spp_rset();
@@ -615,7 +628,7 @@ void smtp_data(arg) char *arg; {
   if (hops) qmail_fail(&qqt);
   qmail_from(&qqt,mailfrom.s);
   qmail_put(&qqt,rcptto.s,rcptto.len);
- 
+
   qqx = qmail_close(&qqt);
 
   if (!*qqx) { acceptmessage(qp); logit("message accepted"); return; }
@@ -726,20 +739,20 @@ int auth_login(arg) char *arg;
   int r;
 
   if (*arg) {
-    if (r = b64decode(arg,str_len(arg),&user) == 1) return err_input();
+    if ((r = b64decode(arg,str_len(arg),&user)) == 1) return err_input();
   }
   else {
 //  out("334 VXNlcm5hbWU6\r\n"); flush();       /* Username: */
     out("334 Username:\r\n"); flush();       	/* Username: */
     if (authgetl() < 0) return -1;
-    if (r = b64decode(authin.s,authin.len,&user) == 1) return err_input();
+    if ((r = b64decode(authin.s,authin.len,&user)) == 1) return err_input();
   }
   if (r == -1) die_nomem();
 //  out("334 UGFzc3dvcmQ6\r\n"); flush();         /* Password: */
     out("334 Password:\r\n"); flush();         	/* Password: */
 
   if (authgetl() < 0) return -1;
-  if (r = b64decode(authin.s,authin.len,&pass) == 1) return err_input();
+  if ((r = b64decode(authin.s,authin.len,&pass)) == 1) return err_input();
   if (r == -1) die_nomem();
 
   if (!user.len || !pass.len) return err_input();
@@ -751,12 +764,12 @@ int auth_plain(arg) char *arg;
   int r, id = 0;
 
   if (*arg) {
-    if (r = b64decode(arg,str_len(arg),&resp) == 1) return err_input();
+    if ((r = b64decode(arg,str_len(arg),&resp)) == 1) return err_input();
   }
   else {
     out("334 \r\n"); flush();
     if (authgetl() < 0) return -1;
-    if (r = b64decode(authin.s,authin.len,&resp) == 1) return err_input();
+    if ((r = b64decode(authin.s,authin.len,&resp)) == 1) return err_input();
   }
   if (r == -1 || !stralloc_0(&resp)) die_nomem();
   while (resp.s[id]) id++;                       /* "authorize-id\0userid\0passwd\0" */
@@ -795,7 +808,7 @@ int auth_cram()
   flush();
 
   if (authgetl() < 0) return -1;                        /* got response */
-  if (r = b64decode(authin.s,authin.len,&resp) == 1) return err_input();
+  if ((r = b64decode(authin.s,authin.len,&resp)) == 1) return err_input();
   if (r == -1 || !stralloc_0(&resp)) die_nomem();
 
   i = str_chr(resp.s,' ');
@@ -831,15 +844,15 @@ char *arg;
 /* tls required patch */
 #ifdef TLS
   if (strcmp(arg,"cram-md5") != 0) {
-	char *tlsrequired = env_get("TLSREQUIRED");
-	if (tlsrequired && (strcmp(tlsrequired, "1")) == 0) {
-  	  if (!ssl) { 
-  		out("538 AUTH PLAIN/LOGIN not available without TLS (#5.3.3)\r\n");
-    	flush(); /*die_read();*/ return;	/* don't die */
+    char *tlsrequired = env_get("TLSREQUIRED");
+    if (tlsrequired && (strcmp(tlsrequired, "1")) == 0) {
+      if (!ssl) { 
+        out("538 AUTH PLAIN/LOGIN not available without TLS (#5.3.3)\r\n");
+        flush(); /*die_read();*/ return;   /* don't die */
       }
-	}
+    }
   }
-#endif		/* END tls required patch */
+#endif   /* END tls required patch */
 
   if (!*childargs) { out("503 auth not available (#5.3.3)\r\n"); return; }
   if (flagauth) { err_authd(); return; }
@@ -920,7 +933,7 @@ DH *tmp_dh_cb(SSL *ssl, int export, int keylen)
     }
   }
   return DH_generate_parameters(keylen, DH_GENERATOR_2, NULL, NULL);
-} 
+}
 
 /* don't want to fail handshake if cert isn't verifiable */
 int verify_cb(int preverify_ok, X509_STORE_CTX *ctx) { return 1; }
@@ -994,7 +1007,7 @@ int tls_verify()
     n = X509_NAME_get_index_by_NID(subj, NID_pkcs9_emailAddress, -1);
     if (n >= 0) {
       const ASN1_STRING *s = X509_NAME_get_entry(subj, n)->value;
-      if (s) { email.len = s->length; email.s = s->data; }
+      if (s) { email.len = s->length; email.s = (char *)s->data; }
     }
 
     if (email.len <= 0)
