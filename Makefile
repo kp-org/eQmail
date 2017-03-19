@@ -227,7 +227,7 @@ qmail-before: qmail-before.sh
 	chmod 754 qmail-bfque qmail-bfrmt
 	chgrp qmail qmail-bfque qmail-bfrmt
 
-qmail-clean:
+qmail-clean: auto_split.o fmtqfn.o
 	$(COMPILE) qmail-clean.c
 	$(LOAD) qmail-clean fmtqfn.o now.o getln_buf.a sig.a stralloc.a \
 	alloc.a buffer.a error.a str.a fs.a auto_qmail.o auto_split.o
@@ -365,16 +365,29 @@ str.a auto_qmail.o auto_uids.o auto_spawn.o
 	sig.a open.a seek.a lock.a wait.a fd.a stralloc.a alloc.a \
 	substdio.a error.a str.a auto_qmail.o auto_uids.o auto_spawn.o
 
-qmail-send: compile load qmail-send.c qsutil.o control.o constmap.o newfield.o \
-prioq.o trigger.o fmtqfn.o quote.o now.o readsubdir.o qmail.o date822fmt.o \
-datetime.a case.a ndelay.a getln.a wait.a seek.a fd.a sig.a open.a lock.a \
-stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_split.o env.a
+#qmail-send: compile load qmail-send.c qsutil.o control.o constmap.o newfield.o \
+#prioq.o trigger.o fmtqfn.o quote.o now.o readsubdir.o qmail.o date822fmt.o \
+#datetime.a case.a ndelay.a getln.a wait.a seek.a fd.a sig.a open.a lock.a \
+#stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_split.o env.a
+#	./compile qmail-send.c
+#	./load qmail-send qsutil.o control.o constmap.o newfield.o \
+#	prioq.o trigger.o fmtqfn.o quote.o now.o readsubdir.o \
+#	qmail.o date822fmt.o datetime.a case.a ndelay.a getln.a \
+#	wait.a seek.a fd.a sig.a open.a lock.a stralloc.a alloc.a \
+#	substdio.a error.a str.a fs.a auto_qmail.o auto_split.o env.a
+
+qmail-send: auto_split.o date822fmt.o newfield.o prioq.o qsutil.o readsubdir.o trigger.o
+# compile load qmail-send.c control.o constmap.o \
+# fmtqfn.o quote.o now.o qmail.o date822fmt.o \
+#datetime.a case.a ndelay.a getln.a wait.a seek.a fd.a sig.a open.a lock.a \
+#stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o env.a
 	./compile qmail-send.c
 	./load qmail-send qsutil.o control.o constmap.o newfield.o \
 	prioq.o trigger.o fmtqfn.o quote.o now.o readsubdir.o \
-	qmail.o date822fmt.o datetime.a case.a ndelay.a getln.a \
+	qmail.o date822fmt.o datetime.a case.a ndelay.a getln_buf.a \
 	wait.a seek.a fd.a sig.a open.a lock.a stralloc.a alloc.a \
-	substdio.a error.a str.a fs.a auto_qmail.o auto_split.o env.a
+	buffer.a error.a str.a fs.a auto_qmail.o auto_split.o env.a \
+	substdio.a
 
 qmail-shcfg: conf.tmp qmail-shcfg.sh warn-auto.sh
 	@echo build $@
