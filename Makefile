@@ -227,11 +227,10 @@ qmail-before: qmail-before.sh
 	chmod 754 qmail-bfque qmail-bfrmt
 	chgrp qmail qmail-bfque qmail-bfrmt
 
-qmail-clean: compile load qmail-clean.c fmtqfn.o now.o getln.a sig.a \
-stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_split.o
-	./compile qmail-clean.c
-	./load qmail-clean fmtqfn.o now.o getln.a sig.a stralloc.a \
-	alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_split.o
+qmail-clean:
+	$(COMPILE) qmail-clean.c
+	$(LOAD) qmail-clean fmtqfn.o now.o getln_buf.a sig.a stralloc.a \
+	alloc.a buffer.a error.a str.a fs.a auto_qmail.o auto_split.o
 
 qmail-fixq: qmail-fixq.sh
 	sh ./qmail-fixq.sh

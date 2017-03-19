@@ -1,18 +1,25 @@
+/*
+ *  Revision 20160712, Kai Peter
+ *  - switched to 'buffer'
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added <unistd.h>
+ *  - added parentheses to while condition
+ */
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include "sig.h"
 #include "now.h"
 #include "str.h"
 #include "direntry.h"
 #include "getln.h"
 #include "stralloc.h"
-#include "substdio.h"
-#include "subfd.h"
+#include "buffer.h"
 #include "byte.h"
 #include "scan.h"
 #include "fmt.h"
 #include "error.h"
-#include "exit.h"
 #include "fmtqfn.h"
 #include "auto_qmail.h"
 
@@ -30,7 +37,7 @@ void cleanuppid()
  time = now();
  dir = opendir("pid");
  if (!dir) return;
- while (d = readdir(dir))
+ while ((d = readdir(dir)))
   {
    if (str_equal(d->d_name,".")) continue;
    if (str_equal(d->d_name,"..")) continue;
@@ -46,7 +53,7 @@ void cleanuppid()
 
 char fnbuf[FMTQFN];
 
-void respond(s) char *s; { if (substdio_putflush(subfdoutsmall,s,1) == -1) _exit(100); }
+void respond(char *s) { if (buffer_putflush(buffer_1,s,1) == -1) _exit(100); }
 
 int main()
 {
@@ -67,7 +74,7 @@ int main()
  for (;;)
   {
    if (cleanuploop) --cleanuploop; else { cleanuppid(); cleanuploop = 30; }
-   if (getln(subfdinsmall,&line,&match,'\0') == -1) break;
+   if (getln(buffer_0,&line,&match,'\0') == -1) break;
    if (!match) break;
    if (line.len < 7) { respond("x"); continue; }
    if (line.len > 100) { respond("x"); continue; }
@@ -82,7 +89,7 @@ int main()
      if (!scan_ulong(line.s + i + 1,&id)) { respond("x"); continue; }
    if (byte_equal(line.s,5,"foop/"))
     {
-#define U(prefix,flag) fmtqfn(fnbuf,prefix,id,flag); \
+#define U(prefix,flag) fmt_qfn(fnbuf,prefix,id,flag); \
 if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
      U("intd/",1)
      U("mess/",1)
@@ -98,4 +105,5 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
      respond("x");
   }
  _exit(0);
+ return(0);  /* never reached */
 }
