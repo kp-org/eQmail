@@ -7,6 +7,7 @@ extras
 *.o
 *.a
 *.0
+*.diff
 compile
 load
 makelib

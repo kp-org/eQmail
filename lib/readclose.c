@@ -1,8 +1,11 @@
 /*
+ *  Revision 20170322, Kai Peter
+ *  - includes 'openreadclose.c'
  *  - replaced 'readwrite.h' by 'unistd.h'
 */
 //#include "readwrite.h"
 #include <unistd.h>
+#include "open.h"
 #include "error.h"
 #include "readclose.h"
 
@@ -28,4 +31,18 @@ int readclose(int fd,stralloc *sa,unsigned int bufsize)
 {
   if (!stralloc_copys(sa,"")) { close(fd); return -1; }
   return readclose_append(fd,sa,bufsize);
+}
+
+/* file: openceadclose.c ******************************************* */
+/* Extended 'open_read()' from file 'open.c'. */
+int openreadclose(const char *fn,stralloc *sa,unsigned int bufsize)
+{
+  int fd;
+  fd = open_read(fn);
+  if (fd == -1) {
+    if (errno == error_noent) return 0;
+    return -1;
+  }
+  if (readclose(fd,sa,bufsize) == -1) return -1;
+  return 1;
 }

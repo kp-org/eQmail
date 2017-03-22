@@ -9,4 +9,6 @@ extern int readclose(int,stralloc *,unsigned int);
 
 #define slurpclose readclose /* backwards compatibility */
 
+extern int openreadclose(const char *,stralloc *,unsigned int);
+
 #endif
