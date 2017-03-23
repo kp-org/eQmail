@@ -1,3 +1,141 @@
+commit ddb4a0987fec1570f72fdb52b508638900637619
+Author: Kai Peter <kp@openqmail.org>
+Date:   Sun Mar 19 10:51:42 2017 +0100
+
+    timeoutconn.c: removed compiler warnings
+
+commit 43c487eabe847100ca26eee05a09d3e026169eb2
+Author: Kai Peter <kp@openqmail.org>
+Date:   Sun Mar 19 10:02:39 2017 +0100
+
+    qmail-send: Revision 20160712, switched to 'buffer'
+
+commit 28ad5c991be519226d66f9f0774aad7a63cd4d1f
+Author: Kai Peter <kp@openqmail.org>
+Date:   Sun Mar 19 09:18:09 2017 +0100
+
+    qmail-clean: Revision 20160712, switched to 'buffer'
+
+commit 26910b7c613228d17995e283db32031be922311e
+Author: Kai Peter <kp@openqmail.org>
+Date:   Sun Mar 19 08:51:31 2017 +0100
+
+    qmail-smtpd: code clean-up (compiler warnings)
+
+commit d8e246268ed658347d25e37e673e66ee929f4337
+Author: Kai Peter <kp@openqmail.org>
+Date:   Sat Mar 18 11:49:57 2017 +0100
+
+    ++ headers/declarations
+
+commit 9ff499abbe84a843f38e0016f0a86713f29b9b83
+Author: Kai Peter <kp@openqmail.org>
+Date:   Sat Mar 18 11:15:16 2017 +0100
+
+    added missing headers/declarations
+
+commit ee9d6041680f3f95c46afc03c111bf688b0c5dc4
+Author: Kai Peter <kp@openqmail.org>
+Date:   Sat Mar 18 10:26:55 2017 +0100
+
+    replaced 'slurpclose' by 'readclose'
+
+commit 7d1cba10e4ad302addbd9dd0bf1398dafdac87a8
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 12:50:57 2017 +0100
+
+    received.c: parentheses, declarations
+
+commit 08172d71a7b3a75f3888e56987c2105658afb40c
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 11:44:01 2017 +0100
+
+    qmail-start: Revision 20160906
+
+commit e96ba4e57ac611f8646967be15a30c49e7062066
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 11:35:15 2017 +0100
+
+    predate: switched to 'buffer'
+
+commit 8483b4e367e869e3c651d5344749fbe66096bea0
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 11:27:50 2017 +0100
+
+    changed return type of main() to 'int'
+
+commit 71b64df51622031b3a6e18d98ce6bd7d959c2613
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 11:04:55 2017 +0100
+
+    added temp. include close.h
+
+commit 10a7808c029b6c8eee5ff566faf87e1b5fda0080
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 10:21:47 2017 +0100
+
+    qmail-newu: switched to 'buffer'
+
+commit 7a7ee6b174fc93d854cac6feb92dd0e3ef71c7c0
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 10:13:02 2017 +0100
+
+    qreceipt: Revision 20170317
+
+commit 0e37edb0fc67dec8e7f87785154bbb9d9a9a0f38
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 09:58:09 2017 +0100
+
+    condredirect: switched to 'buffer'
+
+commit e58c8febd0392416450c0014e2c85c6ef5a20de1
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 09:38:36 2017 +0100
+
+    bouncesaying: Revision 20160712
+
+commit ae6709b5bbf26d1c6a28c960d88f81d0451a7a9b
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 09:23:53 2017 +0100
+
+    hfield.c: Revision 20170317
+
+commit 7a86f47298710ec96c9b050f54d01b7e495e4933
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 09:01:07 2017 +0100
+
+    qmail-qread: Revision 20160907
+
+commit e8f34cf85c5fa34ca0f7318cc10015c53a7370ca
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 08:47:22 2017 +0100
+
+    qmail-newmrh: switched to 'buffer'
+
+commit 7152af47cce6bf33cdf2a11a5dd7f1b3e62580a1
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 08:20:53 2017 +0100
+
+    forward: switched to 'buffer'
+
+commit ff887261372d97ad17e22904e9e1c835ce18b88b
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 08:13:39 2017 +0100
+
+    maildirmake: Revision 20160712
+
+commit 00973d01a7e716c3df2e19756e75eb78e15bb086
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 08:11:00 2017 +0100
+
+    maildir.c: Revision 20170317
+
+commit d5a4a0c147aedc79e812590c7330bee70e758327
+Author: Kai Peter <kp@openqmail.org>
+Date:   Fri Mar 17 08:00:22 2017 +0100
+
+    maildir2mbox: switched to 'buffer'
+
 commit 336c1a77809a9a80557de14557999d69c8c21c3a
 Author: Kai Peter <kp@openqmail.org>
 Date:   Thu Mar 16 18:40:31 2017 +0100

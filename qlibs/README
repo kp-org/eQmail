@@ -1,0 +1,44 @@
+qlibs - C library and headers based on 'djblib' and libowfat.
+
+Initially these libs were excluded from *qmail and forseen to use with eQmail. As
+the packages of djb (D.J. Bernstein) uses these libs in different versions, there
+comes up the need to have a consistent state. As time was going on there was also
+a need to include additional functionality and up-to-date best practices. Short -
+this was the point where some parts from libowfat were included.
+
+In theorie - these libs can be used with any djb software.
+
+Usage
+
+There are 2  files to configure qlibs:
+  - conf-qlibs: configure compiler flags
+  - conf-inst:  configure installation options
+
+See inside these files to get further information.
+
+qlibs could be used local AND global. Here are a configuration example each:
+
+Ex.1: local usage
+
+  - copy the 'qlibs' folder into a subfolder of your package
+  - edit conf-inst to your needs, e.g.
+     LIBDIR=..
+     HDRDIR=
+  - add additional object files (*.o) to FILES (will be installed in $LIBDIR)
+
+Ex. 2: global usage
+  - extract (copy) 'qlibs' whereever you want
+  - edit conf-inst, like, e.g.
+      LIBDIR=/usr/local/lib
+      HDRDIR=/usr/include/qlibs
+
+for both examples:
+  - add additional object files (*.o) to FILES (will be installed in $LIBDIR)
+  - run './configure - make - make install'
+
+
+CAVEATS:
+- the man pages are simply taken from libowfat (in most cases)
+- 'substdio' is still included for backwards compatibility of code
+
+Updated: 20170319, Kai Peter

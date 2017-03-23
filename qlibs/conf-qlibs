@@ -1,0 +1,3 @@
+CFLAGS=-O2 -Ihdrs -DINET6
+
+compiler flags - usually this shouldn't be changed

@@ -1,7 +1,7 @@
 #!/bin/sh
 #********************************************************************************
 # IMPORTANT: check for OpenSSL and its header files (needed with '-DTLS' only)
-CCOPTS=" -I ./inc"
+CCOPTS=""  #" -I ./inc"
 
 searchHeaders() {
   # search for headers given by the '-I' option in conf-cc

@@ -1,0 +1,14 @@
+#!/bin/sh
+
+. ./conf-inst
+
+install_libs() { cp *.a $FILES "$LIBDIR" ; }
+install_hdrs() { cp hdrs/*.h "$HDRDIR" ; }
+
+echo -n "Installing qlibs ..."
+mkdir -p "$LIBDIR" "$HDRDIR" 2>/dev/null
+
+[ "$LIBDIR" ] && install_libs
+[ "$HDRDIR" ] && install_hdrs
+
+echo " done!"

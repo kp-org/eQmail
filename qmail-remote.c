@@ -28,6 +28,13 @@
 #include "timeoutconn.h"
 #include "timeoutread.h"
 #include "timeoutwrite.h"
+#include "base64.h"
+
+/* temp */
+#include "close.h"
+int chdir(const char *_path);
+int getpid(void);
+/* end temp */
 
 #define HUGESMTPTEXT 5000
 #define TCPTO_REFUSED
@@ -513,7 +520,7 @@ int tls_init()
       i = X509_NAME_get_index_by_NID(subj, NID_commonName, -1);
       if (i >= 0) {
         const ASN1_STRING *s = X509_NAME_get_entry(subj, i)->value;
-        if (s) { peer.len = s->length; peer.s = s->data; }
+        if (s) { (peer.len = s->length); (peer.s = s->data); }
       }
       if (peer.len <= 0) {
         out("ZTLS unable to verify server ");
@@ -563,9 +570,11 @@ void smtp()
   code = smtpcode();
   if (code >= 500 && code < 600) quit("DConnected to "," but greeting failed");
   /* RFC2821: On error code 4xx through 499 try the next MX */
+//  code = smtpcode();  /* compiler warning */
   if (code >= 400 && code < 500) return;
+//  code = smtpcode();  /* compiler warning */
   if (code != 220) quit("ZConnected to "," but greeting failed");
- 
+
 #ifdef EHLO
 # ifdef TLS
   if (!smtps)
@@ -775,10 +784,10 @@ int main(int argc,char **argv)
   relayhost = 0;
   for (i = 0;i <= host.len;++i)
     if ((i == 0) || (i == host.len) || (host.s[i] == '.'))
-      if (relayhost = constmap(&maproutes,host.s + i,host.len - i))
+      if ((relayhost = constmap(&maproutes,(host.s + i),host.len - i)))
         break;
   if (relayhost && !*relayhost) relayhost = 0;
- 
+
   if (relayhost) {
     i = str_chr(relayhost,' ');
     if (relayhost[i]) {

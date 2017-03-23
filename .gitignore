@@ -1,13 +1,15 @@
 obsolete
 extras
-*.bck
-*.orig
-*.rej
-*.tmp
 *.o
 *.a
 *.0
+*.bck.c
+*.bck.h
+*.bck
 *.diff
+*.orig
+*.rej
+*.tmp
 compile
 load
 makelib
@@ -15,7 +17,6 @@ _*
 tmp
 trylib
 rts
-inc/bck
 newlibs
 dev
 tcpserver
@@ -24,6 +25,4 @@ test-it
 lib/bck
 lib/dns
 lib/man
-*.bck.c
-*.bck.h
 CHANGELOG-1.10
