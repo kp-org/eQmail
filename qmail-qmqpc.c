@@ -104,7 +104,7 @@ void doit(char *server)
   struct ip_address ip;
   char ch;
 
-  if (!ip_scan(server,&ip)) return;
+  if (!ip_scan(server,(char *)&ip)) return;
 
   qmqpfd = socket(AF_INET,SOCK_STREAM,0);
   if (qmqpfd == -1) die_socket();

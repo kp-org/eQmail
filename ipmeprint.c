@@ -22,11 +22,11 @@ int main()
     switch(ipme.ix[j].af) {
     case AF_INET:
 //      substdio_put(subfdout,temp,ip_fmt(temp,&ipme.ix[j].addr.ip));
-      substdio_put(subfdout,temp,ip4_fmt(temp,&ipme.ix[j].addr.ip));
+      substdio_put(subfdout,temp,ip4_fmt(temp,(char *)&ipme.ix[j].addr.ip));
       break;
 #ifdef INET6
     case AF_INET6:
-      substdio_put(subfdout,temp,ip6_fmt(temp,&ipme.ix[j].addr.ip6));
+      substdio_put(subfdout,temp,ip6_fmt(temp,(char *)&ipme.ix[j].addr.ip6));
       break;
 #endif
     default:

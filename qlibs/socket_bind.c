@@ -9,9 +9,7 @@
 #include <netinet/in.h>
 #include "byte.h"
 #include "socket.h"
-//#include "ip6.h"
-#include "ip2.h"
-//#include "haveip6.h"
+#include "ip.h"
 #include "error.h"
 
 /* file: socket_bind.c ***************************************************** */

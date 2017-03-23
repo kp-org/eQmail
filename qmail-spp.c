@@ -140,7 +140,7 @@ int spp(plugins, addrenv) stralloc *plugins; char *addrenv;
     close(pipes[1]);
     substdio_fdbuf(&ssdown, read, pipes[0], downbuf, sizeof(downbuf));
     do {
-      if (getln(&ssdown, &data, &match, '\n') == -1) die_nomem();
+      if (getln((struct buffer *)&ssdown, &data, &match, '\n') == -1) die_nomem();
       if (data.len > 1) {
         data.s[data.len - 1] = 0;
         switch (data.s[0]) {

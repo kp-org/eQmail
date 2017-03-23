@@ -10,12 +10,7 @@
 #include <errno.h>
 #include "byte.h"
 #include "socket.h"
-//#include "haveip6.h"
-//#include "uint_t.h"
-#include "ip2.h"
-
-// Kai: temp., missing reference by linker
-//const unsigned char V4loopback[4] = {127,0,0,1};
+#include "ip.h"
 
 /* file: socket_conn6.c ************************************************ */
 int socket_connect6(int s,const char ip[16],uint16 port,uint32 scope_id)
@@ -28,7 +23,6 @@ int socket_connect6(int s,const char ip[16],uint16 port,uint32 scope_id)
     if (ip6_isv4mapped(ip))
       return socket_connect4(s,(unsigned char *)ip+12,port);
     if (byte_equal(ip,16,V6loopback))
-//      return socket_connect4(s,ip4loopback,port);
       return socket_connect4(s,V4loopback,port);
 #ifdef LIBC_HAS_IP6
   }

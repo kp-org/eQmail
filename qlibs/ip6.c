@@ -5,7 +5,8 @@
 #include "fmt.h"
 #include "byte.h"
 #include "scan.h"
-#include "ip2.h"
+//#include "ip2.h"
+#include "ip.h"
 
 /* file: 'ip6_fmt.c' ************************************************ */
 unsigned int ip6_fmt(char *s,char ip[16])

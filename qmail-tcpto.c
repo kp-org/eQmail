@@ -74,9 +74,9 @@ int main()
 
 #ifdef INET6
       if (af == AF_INET)
-        substdio_put(subfdout,tmp,ip_fmt(tmp,&tcpto_buf[i].addr.ip));
+        substdio_put(subfdout,tmp,ip_fmt(tmp,(char *)&tcpto_buf[i].addr.ip));
       else
-        substdio_put(subfdout,tmp,ip6_fmt(tmp,&tcpto_buf[i].addr.ip6));
+        substdio_put(subfdout,tmp,ip6_fmt(tmp,(char *)&tcpto_buf[i].addr.ip6));
 #else
       substdio_put(subfdout,tmp,ip_fmt(tmp,&tcpto_buf[i].addr.ip));
 #endif

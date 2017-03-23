@@ -33,7 +33,7 @@ static struct ip_address ip;
 #ifdef INET6
 static struct ip6_address ip6;
 #endif
-static stralloc txt = {0};
+//static stralloc txt = {0};
 unsigned short pref;
 
 static stralloc glue = {0};
@@ -326,7 +326,7 @@ static int iaafmt6(s,ip)
 char *s;
 struct ip6_address *ip;
 {
-  unsigned int i;
+//  unsigned int i;
   int j;
   unsigned int len;
   static char data[] = "0123456789abcdef";
@@ -479,7 +479,7 @@ unsigned long random;
  if (!stralloc_0(&glue)) return DNS_MEM;
  if (glue.s[0]) {
     ix.pref = 0;
-	if (!glue.s[ip_scan(glue.s,&ix.addr.ip)] || !glue.s[ip_scanbracket(glue.s,&ix.addr.ip)])
+	if (!glue.s[ip_scan(glue.s,(char *)&ix.addr.ip)] || !glue.s[ip_scanbracket(glue.s,&ix.addr.ip)])
     {
 #ifdef TLS
   	  ix.fqdn = NULL;
@@ -552,4 +552,5 @@ unsigned long random;
 
  alloc_free(mx);
  return flagsoft;
+  return(0);   /* never reached */
 }

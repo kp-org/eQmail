@@ -32,7 +32,7 @@ mans:
 	@cd man/ ; make --no-print-directory
 
 libs:
-	cd qlibs ; make
+	cd qlibs ; make --no-print-directory
 
 obj:
 	$(COMPILE) hfield.c
@@ -140,8 +140,8 @@ headerbody.o: compile headerbody.c
 #hfield.o: compile hfield.c
 #	./compile hfield.c
 
-ip.o: compile ip.c
-	./compile ip.c
+#ip.o: compile ip.c
+#	./compile ip.c
 
 ipalloc.o: compile ipalloc.c
 	./compile ipalloc.c
@@ -152,7 +152,7 @@ ipme.o: compile ipme.c hassalen.h
 ipmeprint: compile load ipmeprint.c ipme.o ip.a ipalloc.o \
 stralloc.a alloc.a substdio.a error.a str.a fs.a
 	./compile ipmeprint.c
-	./load ipmeprint ipme.o ip.o ipalloc.o stralloc.a alloc.a \
+	./load ipmeprint ipme.o ip.a ipalloc.o stralloc.a alloc.a \
 	substdio.a error.a str.a fs.a
 
 it: \
@@ -288,10 +288,10 @@ qmail-pw2u:
 
 qmail-qmqpc: \
 load qmail-qmqpc.o slurpclose.o timeoutread.o timeoutwrite.o \
-timeoutconn.o ip.o control.o auto_qmail.o sig.a ndelay.a open.a \
+timeoutconn.o ip.a control.o auto_qmail.o sig.a ndelay.a open.a \
 getln.a substdio.a stralloc.a alloc.a error.a str.a fs.a
 	./load qmail-qmqpc slurpclose.o timeoutread.o \
-	timeoutwrite.o timeoutconn.o ip.o control.o auto_qmail.o \
+	timeoutwrite.o timeoutconn.o ip.a control.o auto_qmail.o \
 	sig.a ndelay.a open.a getln.a substdio.a stralloc.a alloc.a \
 	error.a str.a fs.a buffer.a
 
@@ -346,12 +346,12 @@ error.a str.a fs.a auto_qmail.o auto_split.o auto_uids.o
 	error.a str.a fs.a auto_qmail.o auto_split.o auto_uids.o 
 
 qmail-remote: compile load qmail-remote.c control.o constmap.o timeoutread.o \
-timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ip.o ipalloc.o ipme.o quote.o \
+timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ip.a ipalloc.o ipme.o quote.o \
 ndelay.a case.a sig.a open.a lock.a seek.a getln.a stralloc.a alloc.a substdio.a \
 error.a str.a fs.a auto_qmail.o base64.o dns.lib tls.o ssl_timeoutio.o
 	./compile qmail-remote.c
 	./load qmail-remote control.o constmap.o timeoutread.o \
-	timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ip.o \
+	timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ip.a \
 	tls.o ssl_timeoutio.o -L/usr/local/ssl/lib -lssl -lcrypto \
 	ipalloc.o ipme.o quote.o ndelay.a case.a sig.a open.a \
 	lock.a seek.a getln.a stralloc.a alloc.a substdio.a error.a \
@@ -399,14 +399,14 @@ qmail-spp.o: compile qmail-spp.c
 	./compile qmail-spp.c
 
 qmail-smtpd: compile load qmail-smtpd.c rcpthosts.o commands.o \
-timeoutread.o timeoutwrite.o ip.o ipme.o ipalloc.o control.o constmap.o \
+timeoutread.o timeoutwrite.o ip.a ipme.o ipalloc.o control.o constmap.o \
 received.o date822fmt.o now.o qmail.o cdb.a fd.a wait.a datetime.a \
 getln.a open.a sig.a case.a env.a stralloc.a alloc.a substdio.a \
 error.a str.a fs.a auto_qmail.o base64.o qmail-spp.o \
 tls.o ssl_timeoutio.o ndelay.a
 	./compile qmail-smtpd.c
 	./load qmail-smtpd rcpthosts.o commands.o timeoutread.o \
-	timeoutwrite.o ip.o ipme.o ipalloc.o control.o constmap.o \
+	timeoutwrite.o ip.a ipme.o ipalloc.o control.o constmap.o \
 	tls.o ssl_timeoutio.o ndelay.a -L/usr/local/ssl/lib -lssl -lcrypto \
 	received.o date822fmt.o now.o qmail.o cdb.a fd.a wait.a \
 	datetime.a getln.a open.a sig.a case.a qmail-spp.o env.a stralloc.a \
@@ -422,10 +422,10 @@ substdio.a error.a str.a auto_qmail.o
 	./load qmail-tcpok open.a lock.a strerr.a substdio.a \
 	error.a str.a auto_qmail.o buffer.a
 
-qmail-tcpto: compile load qmail-tcpto.c ip.o now.o open.a lock.a \
+qmail-tcpto: compile load qmail-tcpto.c ip.a now.o open.a lock.a \
 substdio.a error.a str.a fs.a auto_qmail.o
 	./compile qmail-tcpto.c
-	./load qmail-tcpto ip.o now.o open.a lock.a substdio.a \
+	./load qmail-tcpto ip.a now.o open.a lock.a substdio.a \
 	error.a str.a fs.a auto_qmail.o 
 
 qmail.o: compile qmail.c
@@ -470,11 +470,11 @@ splogger: compile load splogger.c substdio.a error.a str.a fs.a
 	./load splogger substdio.a error.a str.a fs.a
 
 tcp-env: compile load tcp-env.c dns.o remoteinfo.o timeoutread.o \
-timeoutwrite.o timeoutconn.o ip.o ipalloc.o case.a ndelay.a sig.a \
+timeoutwrite.o timeoutconn.o ip.a ipalloc.o case.a ndelay.a sig.a \
 env.a stralloc.a alloc.a substdio.a error.a str.a fs.a dns.lib
 	./compile tcp-env.c
 	./load tcp-env dns.o remoteinfo.o timeoutread.o \
-	timeoutwrite.o timeoutconn.o ip.o ipalloc.o case.a ndelay.a \
+	timeoutwrite.o timeoutconn.o ip.a ipalloc.o case.a ndelay.a \
 	sig.a env.a getopt.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a `cat dns.lib` buffer.a
 

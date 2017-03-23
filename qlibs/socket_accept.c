@@ -9,7 +9,8 @@
 #include "byte.h"
 #include "socket.h"
 //#include "ip6.h"
-#include "ip2.h"
+//#include "ip2.h"
+#include "ip.h"
 //#include "haveip6.h"
 #include "error.h"
 
