@@ -74,7 +74,7 @@ void getmess()
   if (!stralloc_cats(&beforemessage,":")) nomem();
   if (!stralloc_copys(&aftermessage,",")) nomem();
 
-  if (getln(&envelope,&line,&match,'\0') == -1) die_read();
+  if (getln((struct buffer *)&envelope,&line,&match,'\0') == -1) die_read();
   if (!match) die_format();
   if (line.len < 2) die_format();
   if (line.s[0] != 'F') die_format();
@@ -86,7 +86,7 @@ void getmess()
   if (!stralloc_cats(&aftermessage,",")) nomem();
 
   for (;;) {
-    if (getln(&envelope,&line,&match,'\0') == -1) die_read();
+    if (getln((struct buffer *)&envelope,&line,&match,'\0') == -1) die_read();
     if (!match) die_format();
     if (line.len < 2) break;
     if (line.s[0] != 'T') die_format();

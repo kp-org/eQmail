@@ -10,7 +10,7 @@ stralloc *sa;
 int *match;
 {
  if (!*match) return 0;
- if (getln(ss,sa,match,'\n') == -1) return -1;
+ if (getln((struct buffer *)ss,sa,match,'\n') == -1) return -1;
  if (*match) return 1;
  if (!sa->len) return 0;
  if (!stralloc_append(sa,"\n")) return -1;

@@ -138,7 +138,7 @@ int main()
       fd = open_read(fninfo);
       if (fd == -1) { err(id); continue; }
       substdio_fdbuf(&ss,read,fd,inbuf,sizeof(inbuf));
-      if (getln(&ss,&sender,&match,0) == -1) die_nomem();
+      if (getln((struct buffer *)&ss,&sender,&match,0) == -1) die_nomem();
       if (fstat(fd,&st) == -1) { close(fd); err(id); continue; }
       close(fd);
       qtime = st.st_mtime;
@@ -157,7 +157,7 @@ int main()
         {
           for (;;)
           {
-          if (getln(&ss,&line,&match,0) == -1) die_nomem();
+          if (getln((struct buffer *)&ss,&line,&match,0) == -1) die_nomem();
           if (!match) break;
           switch(line.s[0])
             {
