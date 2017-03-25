@@ -20,8 +20,6 @@
 
 /* file: stralloc_arts.c ******************************* */
 int stralloc_starts(stralloc *sa,const char *s)
-//stralloc *sa;
-//char *s;
 {
   int len;
   len = str_len(s);
@@ -29,16 +27,11 @@ int stralloc_starts(stralloc *sa,const char *s)
 }
 /* file: stralloc_cat.c ******************************** */
 int stralloc_cat(stralloc *sato,stralloc *safrom)
-//stralloc *sato;
-//stralloc *safrom;
 {
   return stralloc_catb(sato,safrom->s,safrom->len);
 }
 /* file: stralloc_catb.c ******************************* */
 int stralloc_catb(stralloc *sa,const char *s,unsigned int n)
-//stralloc *sa;
-//char *s;
-//unsigned int n;
 {
   if (!sa->s) return stralloc_copyb(sa,s,n);
   if (!stralloc_readyplus(sa,n + 1)) return 0;
@@ -49,15 +42,11 @@ int stralloc_catb(stralloc *sa,const char *s,unsigned int n)
 }
 /* file: stralloc_cats.c ******************************* */
 int stralloc_cats(stralloc *sa,const char *s)
-//stralloc *sa;
-//char *s;
 {
   return stralloc_catb(sa,s,str_len(s));
 }
 /* file: stralloc_copy.c ******************************* */
 int stralloc_copy(stralloc *sato,stralloc *safrom)
-//stralloc *sato;
-//stralloc *safrom;
 {
   return stralloc_copyb(sato,safrom->s,safrom->len);
 }
@@ -68,9 +57,6 @@ GEN_ALLOC_readyplus(stralloc,char,s,len,a,i,n,x,30,stralloc_readyplus)
 
 /* file: stralloc_opyb.c ******************************* */
 int stralloc_copyb(stralloc *sa,const char *s,unsigned int n)
-//stralloc *sa;
-//char *s;
-//unsigned int n;
 {
   if (!stralloc_ready(sa,n + 1)) return 0;
   byte_copy(sa->s,n,s);
@@ -80,8 +66,6 @@ int stralloc_copyb(stralloc *sa,const char *s,unsigned int n)
 }
 /* *** file: stralloc_opys.c *************************** */
 int stralloc_copys(stralloc *sa,const char *s)
-//stralloc *sa;
-//const char *s;
 {
   return stralloc_copyb(sa,s,str_len(s));
 }

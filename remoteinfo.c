@@ -59,7 +59,7 @@ int timeout;
     byte_copy(&sa.sa4.sin_addr, 4, &salocal->sa4.sin_addr);
     sa.sa4.sin_port = 0;
     if (bind(s,(struct sockaddr *) &sa.sa,sizeof(sa.sa4)) == -1) { close(s); return 0; }
-    if (timeoutconn(s,&saremote->sa4.sin_addr,113,timeout) == -1) { close(s); return 0; }
+    if (timeoutconn4(s,&saremote->sa4.sin_addr,113,timeout) == -1) { close(s); return 0; }
     break;
 #ifdef INET6
   case AF_INET6:

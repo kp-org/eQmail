@@ -5,7 +5,6 @@
 #include "fmt.h"
 #include "byte.h"
 #include "scan.h"
-//#include "ip2.h"
 #include "ip.h"
 
 /* file: 'ip6_fmt.c' ************************************************ */
@@ -79,7 +78,6 @@ unsigned int ip6_fmt_flat(char *s,char ip[16])
  *   3. The last two words may be written as IPv4 address
  */
 
-//unsigned int scan_ip6(const char *s,char ip[16])
 unsigned int ip6_scan(const char *s,char ip[16])
 {
   unsigned int i;

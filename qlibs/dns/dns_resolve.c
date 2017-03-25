@@ -5,7 +5,6 @@
 #include "taia.h"
 #include "byte.h"
 #include "dns.h"
-//#include "ip6.h"
 #include "ip.h"
 
 struct dns_transmit dns_resolve_tx = {0};

@@ -1,10 +1,7 @@
 #include "stralloc.h"
-//#include "uint16.h"
 #include "uint_t.h"
 #include "byte.h"
 #include "dns.h"
-//#include "ip4.h"
-//#include "ip6.h"
 #include "ip.h"
 
 static int dns_ip6_packet_add(stralloc *out,const char *buf,unsigned int len)
@@ -26,16 +23,16 @@ static int dns_ip6_packet_add(stralloc *out,const char *buf,unsigned int len)
     if (byte_equal(header,2,DNS_T_AAAA)) {
       if (byte_equal(header + 2,2,DNS_C_IN))
         if (datalen == 16) {
-	  if (!dns_packet_copy(buf,len,pos,header,16)) return -1;
-	  if (!stralloc_catb(out,header,16)) return -1;
-	}
+      if (!dns_packet_copy(buf,len,pos,header,16)) return -1;
+      if (!stralloc_catb(out,header,16)) return -1;
+    }
     } else if (byte_equal(header,2,DNS_T_A))
       if (byte_equal(header + 2,2,DNS_C_IN))
         if (datalen == 4) {
-	  byte_copy(header,12,V4mappedprefix);
-	  if (!dns_packet_copy(buf,len,pos,header+12,4)) return -1;
-	  if (!stralloc_catb(out,header,16)) return -1;
-	}
+      byte_copy(header,12,V4mappedprefix);
+      if (!dns_packet_copy(buf,len,pos,header+12,4)) return -1;
+      if (!stralloc_catb(out,header,16)) return -1;
+    }
     pos += datalen;
   }
 
@@ -89,14 +86,14 @@ int dns_ip6(stralloc *out,stralloc *fqdn)
     if (!stralloc_copys(out,"")) return -1;
     if (dns_resolve(q,DNS_T_AAAA) != -1)
       if (dns_ip6_packet_add(out,dns_resolve_tx.packet,dns_resolve_tx.packetlen) != -1) {
-	dns_transmit_free(&dns_resolve_tx);
-	dns_domain_free(&q);
+    dns_transmit_free(&dns_resolve_tx);
+    dns_domain_free(&q);
       }
     if (!dns_domain_fromdot(&q,fqdn->s,fqdn->len)) return -1;
     if (dns_resolve(q,DNS_T_A) != -1)
       if (dns_ip6_packet_add(out,dns_resolve_tx.packet,dns_resolve_tx.packetlen) != -1) {
-	dns_transmit_free(&dns_resolve_tx);
-	dns_domain_free(&q);
+    dns_transmit_free(&dns_resolve_tx);
+    dns_domain_free(&q);
       }
     return out->a>0?0:-1;
   }

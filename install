@@ -82,6 +82,7 @@ cp qmail-bfque qmail-bfrmt qmail-clean qmail-fixq qmail-getpw qmail-inject \
    qmail-queue qmail-remote qmail-rspawn qmail-send qmail-shcfg \
    qmail-smtpd qmail-start qmail-tcpok qmail-tcpto              $QMAILDIR/bin
 cp qreceipt sendmail splogger tcp-env                           $QMAILDIR/bin
+cp qmail-tcpsrv tcprules                                        $QMAILDIR/bin
 
 chown $UIDO:$GIDQ  $QMAILDIR/bin/*
 chmod 0755         $QMAILDIR/bin/*
@@ -116,13 +117,6 @@ cd $OLDPWD
 
 # basic configuration
 . ./mkconfig
-
-# extend $PATH (experimental)
-#if [ -d /etc/profile.d ] ; then
-#   echo "export PATH=$PATH:$QMAILDIR/bin"        > /etc/profile.d/eqmail.sh
-#   echo "export MANPATH=$MANPATH:$QMAILDIR/man" >> /etc/profile.d/eqmail.sh
-#   . /etc/profile
-#fi
 
 # some links could be helpful
 cd /usr/local/bin || exit 1

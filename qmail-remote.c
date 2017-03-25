@@ -757,7 +757,8 @@ int timeout;
   if (ix->af == AF_INET6)
     return timeoutconn6(fd, &ix->addr.ip6, port, timeout);
 #endif
-  return timeoutconn(fd, &ix->addr.ip, port, timeout);
+//  return timeoutconn(fd, &ix->addr.ip, port, timeout);
+  return timeoutconn4(fd, &ix->addr.ip, port, timeout);
 }
 
 int main(int argc,char **argv)

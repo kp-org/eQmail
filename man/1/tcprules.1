@@ -1,0 +1,221 @@
+.TH tcprules 1
+.SH NAME
+tcprules \- compile rules for tcpserver
+.SH SYNOPSIS
+.B tcprules
+.I rules.cdb
+.I rules.tmp
+.SH OVERVIEW
+.B tcpserver
+optionally follows rules to decide whether a TCP connection is acceptable.
+For example, a rule of
+
+.EX
+   18.23.0.32:deny
+.EE
+
+prohibits connections from IP address 18.23.0.32.
+
+.B tcprules
+reads rules from its standard input
+and writes them into
+.I rules.cdb
+in a binary format suited
+for quick access by
+.BR tcpserver .
+
+.B tcprules
+can be used while
+.B tcpserver
+is running:
+it ensures that
+.I rules.cdb
+is updated atomically.
+It does this by first writing the rules to
+.I rules.tmp
+and then moving
+.I rules.tmp
+on top of
+.IR rules.cdb .
+If
+.I rules.tmp
+already exists, it is destroyed.
+The directories containing
+.I rules.cdb
+and
+.I rules.tmp
+must be writable to
+.BR tcprules ;
+they must also be on the same filesystem.
+
+If there is a problem with the input,
+.B tcprules
+complains and leaves
+.I rules.cdb
+alone.
+
+The binary
+.I rules.cdb
+format is portable across machines.
+.SH "RULE FORMAT"
+A rule takes up one line.
+A file containing rules
+may also contain comments: lines beginning with # are ignored.
+
+Each rule contains an
+.BR address ,
+a colon,
+and a list of
+.BR instructions ,
+with no extra spaces.
+When
+.B tcpserver
+receives a connection from that address,
+it follows the instructions.
+.SH "ADDRESSES"
+.B tcpserver
+starts by looking for a rule with address
+.IR TCPREMOTEINFO\fB@\fITCPREMOTEIP .
+If it doesn't find one, or if
+.I TCPREMOTEINFO
+is not set, it tries the address
+.IR TCPREMOTEIP .
+If that doesn't work, it tries shorter and shorter prefixes of
+.I TCPREMOTEIP
+ending with a dot.
+If none of them work, it tries the empty string.
+
+For example, here are some rules:
+
+.EX
+   joe@127.0.0.1:first
+.br
+   18.23.0.32:second
+.br
+   127.:third
+.br
+   :fourth
+.br
+   ::1:fifth
+.EE
+
+If
+.I TCPREMOTEIP
+is
+.BR 10.119.75.38 ,
+.B tcpserver
+will follow the
+.B fourth
+instructions.
+
+If
+.I TCPREMOTEIP
+is
+.BR ::1 ,
+.B tcpserver
+will follow the
+.B fifth
+instructions.  Note that you cannot detect IPv4 mapped addresses by
+matching "::ffff", as those addresses will be converted to IPv4 before
+looking at the rules.
+
+If
+.I TCPREMOTEIP
+is
+.BR 18.23.0.32 ,
+.B tcpserver
+will follow the
+.B second
+instructions.
+
+If
+.I TCPREMOTEINFO
+is
+.B bill
+and
+.I TCPREMOTEIP
+is
+.BR 127.0.0.1 ,
+.B tcpserver
+will follow the
+.B third
+instructions.
+
+If
+.I TCPREMOTEINFO
+is
+.B joe
+and
+.I TCPREMOTEIP
+is
+.BR 127.0.0.1 ,
+.B tcpserver
+will follow the
+.B first
+instructions.
+.SH "ADDRESS RANGES"
+.B tcprules
+treats
+.B 1.2.3.37-53:ins
+as an abbreviation
+for the rules
+.BR 1.2.3.37:ins ,
+.BR 1.2.3.38:ins ,
+and so on up through
+.BR 1.2.3.53:ins .
+Similarly,
+.BR 10.2-3.:ins
+is an abbreviation for
+.B 10.2.:ins
+and
+.BR 10.3.:ins .
+.SH "INSTRUCTIONS"
+The instructions in a rule must begin with either
+.B allow
+or
+.BR deny .
+.B deny
+tells
+.B tcpserver
+to drop the connection without running anything.
+For example, the rule
+
+.EX
+   :deny
+.EE
+
+tells
+.B tcpserver
+to drop all connections that aren't handled by more specific rules.
+
+The instructions may continue with some environment variables,
+in the format
+.IR ,VAR="VALUE" .
+.B tcpserver
+adds
+.I VAR=VALUE
+to the current environment.
+For example,
+
+.EX
+   10.0.:allow,RELAYCLIENT="@fix.me"
+.EE
+
+adds
+.B RELAYCLIENT=@fix.me
+to the environment.
+The quotes here may be replaced by any repeated character:
+
+.EX
+   10.0.:allow,RELAYCLIENT=/@fix.me/
+.EE
+
+Any number of variables may be listed:
+
+.EX
+   127.0.0.1:allow,RELAYCLIENT="",TCPLOCALHOST="movie.edu"
+.EE
+.SH "SEE ALSO"
+tcprulescheck(1),
+tcpserver(1),
+tcp-environ(5)

@@ -109,7 +109,7 @@ void doit(char *server)
   qmqpfd = socket(AF_INET,SOCK_STREAM,0);
   if (qmqpfd == -1) die_socket();
 
-  if (timeoutconn(qmqpfd,&ip,PORT_QMQP,10) != 0) {
+  if (timeoutconn4(qmqpfd,&ip,PORT_QMQP,10) != 0) {
     lasterror = 73;
     if (errno == error_timeout) lasterror = 72;
     close(qmqpfd);

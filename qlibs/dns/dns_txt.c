@@ -1,5 +1,4 @@
 #include "stralloc.h"
-//#include "uint16.h"
 #include "uint_t.h"
 #include "byte.h"
 #include "dns.h"
@@ -27,19 +26,19 @@ int dns_txt_packet(stralloc *out,const char *buf,unsigned int len)
     uint16_unpack_big(header + 8,&datalen);
     if (byte_equal(header,2,DNS_T_TXT))
       if (byte_equal(header + 2,2,DNS_C_IN)) {
-	if (pos + datalen > len) return -1;
-	txtlen = 0;
-	for (i = 0;i < datalen;++i) {
-	  ch = buf[pos + i];
-	  if (!txtlen)
-	    txtlen = (unsigned char) ch;
-	  else {
-	    --txtlen;
-	    if (ch < 32) ch = '?';
-	    if (ch > 126) ch = '?';
-	    if (!stralloc_append(out,&ch)) return -1;
-	  }
-	}
+    if (pos + datalen > len) return -1;
+    txtlen = 0;
+    for (i = 0;i < datalen;++i) {
+      ch = buf[pos + i];
+      if (!txtlen)
+        txtlen = (unsigned char) ch;
+      else {
+        --txtlen;
+        if (ch < 32) ch = '?';
+        if (ch > 126) ch = '?';
+        if (!stralloc_append(out,&ch)) return -1;
+      }
+    }
       }
     pos += datalen;
   }

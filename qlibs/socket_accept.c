@@ -1,4 +1,4 @@
-/* socket_accept: 
+/* socket_accept:
  *
  *  - renamed to 'socket_accept.c'
 */
@@ -8,10 +8,7 @@
 #include <netinet/in.h>
 #include "byte.h"
 #include "socket.h"
-//#include "ip6.h"
-//#include "ip2.h"
 #include "ip.h"
-//#include "haveip6.h"
 #include "error.h"
 
 /* Part of lib 'socket.a':

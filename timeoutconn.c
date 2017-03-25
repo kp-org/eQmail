@@ -13,11 +13,7 @@
 
 void read();   /* temp */
 
-int timeoutconn(int s,struct ip_address *ip,unsigned int port,int timeout)
-//int s;
-//struct ip_address *ip;
-//unsigned int port;
-//int timeout;
+int timeoutconn4(int s,struct ip_address *ip,unsigned int port,int timeout)
 {
   char ch;
   struct sockaddr_in sin;

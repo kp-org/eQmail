@@ -64,11 +64,11 @@ extern unsigned int ip6_fmt_flat(char *,char *);
    hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
  */
 
-extern const char V4loopback[4]; /*= {127,0,0,1}; */
-#define ip4loopback V4loopback       /* backwards compatibility */
-extern const char V4mappedprefix[12]; /*={0,0,0,0,0,0,0,0,0,0,0xff,0xff}; */
-extern const char V6loopback[16]; /*={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1}; */
-extern const char V6any[16]; /*={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; */
+extern const unsigned char V4loopback[4];      /*= {127,0,0,1}; */
+#define ip4loopback V4loopback                 /* backwards compatibility */
+extern const unsigned char V4mappedprefix[12]; /*={0,0,0,0,0,0,0,0,0,0,0xff,0xff}; */
+extern const unsigned char V6loopback[16];     /*={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1}; */
+extern const unsigned char V6any[16];          /*={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; */
 
 #define ip6_isv4mapped(ip) (byte_equal(ip,12,V4mappedprefix))
 

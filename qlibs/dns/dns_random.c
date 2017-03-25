@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include "dns.h"
 #include "taia.h"
-//#include "uint32.h"
 #include "uint_t.h"
 
 static uint32 seed[32];

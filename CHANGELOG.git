@@ -1,3 +1,45 @@
+commit f46aed5c315392c843443b0608a4eebc8df5f6a6
+Author: Kai Peter <kp@openqmail.org>
+Date:   Thu Mar 23 16:10:07 2017 +0100
+
+    switched to new 'ip.a'
+
+commit c2f39396a0aa9d16e6f11acc9797171a22e50b9f
+Author: Kai Peter <kp@openqmail.org>
+Date:   Thu Mar 23 15:12:39 2017 +0100
+
+    cast of some pointers substdio -> buffer (temp)
+
+commit bdf092f22e92e2ed2abde87dfc5f400015ebb0f4
+Author: Kai Peter <kp@openqmail.org>
+Date:   Thu Mar 23 11:09:06 2017 +0100
+
+    control.c: switched to 'buffer'
+
+commit c124b7e17d130cb12cdc8a74396395fafa733f6c
+Author: Kai Peter <kp@openqmail.org>
+Date:   Thu Mar 23 09:53:59 2017 +0100
+
+    switched to 'qlibs'
+
+commit 8e3cc67306ef74dc0614ec23b7775d70c14087b9
+Author: Kai Peter <kp@openqmail.org>
+Date:   Wed Mar 22 10:33:15 2017 +0100
+
+    added 'uint16p.c' (qmail-tcpsrv)
+
+commit 1ac91ac4f7e34a615e18f72634fdaeb9cd74c458
+Author: Kai Peter <kp@openqmail.org>
+Date:   Wed Mar 22 10:28:28 2017 +0100
+
+    added 'pathexec' to libs'
+
+commit deb79c391849830c5eea70b2a7a8a37f8c66162e
+Author: Kai Peter <kp@openqmail.org>
+Date:   Wed Mar 22 10:11:08 2017 +0100
+
+    consolidated 'openreadclose' into 'readclose'
+
 commit ddb4a0987fec1570f72fdb52b508638900637619
 Author: Kai Peter <kp@openqmail.org>
 Date:   Sun Mar 19 10:51:42 2017 +0100

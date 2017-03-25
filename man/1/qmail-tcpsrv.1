@@ -1,0 +1,269 @@
+.TH qmail-tcpsrv 1
+.SH NAME
+qmail-tcpsrv \- accept incoming TCP connections
+.SH SYNOPSIS
+.B qmail-tcpsrv
+[
+.B \-146jpPhHrRoOdDqQv
+]
+[
+.B \-c\fIlimit
+]
+[
+.B \-x\fIrules.cdb
+]
+[
+.B \-B\fIbanner
+]
+[
+.B \-g\fIgid
+]
+[
+.B \-u\fIuid
+]
+[
+.B \-b\fIbacklog
+]
+[
+.B \-l\fIlocalname
+]
+[
+.B \-t\fItimeout
+]
+[
+.B \-I\fIinterface
+]
+.I host
+.I port
+.I program
+[
+.I arg ...
+]
+.SH DESCRIPTION
+.B qmail-tcpsrv
+is a copy of tcpserver from ucspi-tcp-0.88 (including IPv6). It was integrated in eQmail as a usual requirement.
+
+.B qmail-tcpsrv
+waits for connections from TCP clients.
+For each connection, it runs
+.I program
+with the given arguments,
+with descriptor 0 reading from the network
+and descriptor 1 writing to the network.
+
+The server's address is given by
+.I host
+and
+.IR port .
+.I host
+can be 0, allowing connections from any host;
+or a particular IP address,
+allowing connections only to that address;
+or a host name, allowing connections to the first IP address
+for that host.
+.I port
+may be a numeric port number
+or a port name.
+If
+.I port
+is 0,
+.B qmail-tcpsrv
+will choose a free port.
+
+.B qmail-tcpsrv
+sets up several environment variables,
+as described in
+.B tcp-environ(5).
+
+.B qmail-tcpsrv
+exits when it receives SIGTERM.
+.SH "OPTIONS"
+.TP
+.B \-c\fIlimit
+Do not handle more than
+.I limit
+simultaneous connections.
+If there are
+.I limit
+simultaneous copies of
+.I program
+running, defer acceptance of a new connection
+until one copy finishes.
+.I limit
+must be a positive integer.
+Default: 40.
+.TP
+.B \-x\fIrules.cdb
+Follow the rules compiled into
+.I rules.cdb
+by
+.BR tcprules .
+These rules may specify setting environment variables
+or rejecting connections from bad sources.
+
+.B qmail-tcpsrv
+does not read
+.I rules.cdb
+into memory;
+you can rerun
+.B tcprules
+to change
+.BR qmail-tcpsrv 's
+behavior on the fly.
+.TP
+.B \-B\fIbanner
+Write
+.I banner
+to the network immediately after each connection is made.
+.B qmail-tcpsrv
+writes
+.I banner
+before looking up
+.BR TCPREMOTEHOST ,
+before looking up
+.BR TCPREMOTEINFO ,
+and before checking
+.IR rules.cdb .
+
+This feature can be used to reduce latency in protocols
+where the client waits for a greeting from the server.
+.TP
+.B \-g\fIgid
+Switch group ID to
+.I gid
+after preparing to receive connections.
+.I gid
+must be a positive integer.
+.TP
+.B \-u\fIuid
+Switch user ID to 
+.I uid
+after preparing to receive connections.
+.I uid
+must be a positive integer.
+.TP
+.B \-1
+After preparing to receive connections,
+print the local port number to standard output.
+.TP
+.B \-4
+Fall back to IPv4 sockets.  This is necessary for terminally broken
+systems like OpenBSD which will not let IPv6 sockets connect to
+V4-mapped IPv6 addresses.  Please note that this also applies to DNS
+lookups, so you will have to use an DNS resolver with an IPv6 address to
+accept IPv6 connections.  Use \fBDNSCACHEIP\fR to set the DNS resolver
+IP dynamically.
+.TP
+.B \-6
+Force IPv6 mode in UCSPI environment variables, even for
+IPv4 connections.  This will set \fB$PROTO\fR to \fBTCP6\fR and put
+IPv4-mapped IPv6 addresses in \fBTCPLOCALIP\fR and \fBTCPREMOTEIP\fR.
+.TP
+.B \-I\fIinterface
+Bind to the network interface
+.I interface
+("eth0" on Linux, for example).  This is only defined and needed for
+IPv6 link-local addresses.
+.TP
+.B \-b\fIbacklog
+Allow up to
+.I backlog
+simultaneous SYN_RECEIVEDs.
+Default: 20.
+On some systems,
+.I backlog
+is silently limited to 5.
+See
+.BR listen (2)
+for more details.
+.TP
+.B \-o
+Leave IP options alone.
+If the client is sending packets along an IP source route,
+send packets back along the same route.
+.TP
+.B \-O
+(Default.)
+Kill IP options.
+A client can still use source routing to connect and to send data,
+but packets will be sent back along the default route.
+.TP
+.B \-d
+(Default.)
+Delay sending data for a fraction of a second whenever the
+remote host is responding slowly,
+to make better use of the network.
+.TP
+.B \-D
+Never delay sending data;
+enable TCP_NODELAY.
+This is appropriate for interactive connections.
+.TP
+.B \-q
+Quiet.
+Do not print any messages.
+.TP
+.B \-Q
+(Default.)
+Print error messages.
+.TP
+.B \-v
+Verbose.
+Print all available messages.
+.SH "DATA-GATHERING OPTIONS"
+.TP
+.B \-p
+Paranoid.
+After looking up the remote host name,
+look up the IP addresses for that name,
+and make sure one of them matches
+.BR TCPREMOTEIP .
+If none of them do,
+unset
+.BR TCPREMOTEHOST .
+.TP
+.B \-P
+(Default.)
+Not paranoid.
+.TP
+.B \-h
+(Default.)
+Look up the remote host name and set
+.BR TCPREMOTEHOST .
+.TP
+.B \-H
+Do not look up the remote host name.
+.TP
+.B \-l\fIlocalname
+Do not look up the local host name;
+use
+.I localname
+for
+.BR TCPLOCALHOST .
+.TP
+.B \-r
+(Default.)
+Attempt to obtain
+.B TCPREMOTEINFO
+from the remote host.
+.TP
+.B \-R
+Do not attempt to obtain
+.B TCPREMOTEINFO
+from the remote host.
+.TP
+.B \-t\fItimeout
+Give up on the 
+.B TCPREMOTEINFO
+connection attempt
+after
+.I timeout
+seconds. Default: 26.
+.SH "SEE ALSO"
+argv0(1),
+fixcr(1),
+recordio(1),
+tcpclient(1),
+tcprules(1),
+listen(2),
+tcp-environ(5)

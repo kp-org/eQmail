@@ -162,6 +162,7 @@ predate datemail mailsubj qmail-newu \
 qmail-pw2u qmail-qread qmail-qstat qmail-tcpto qmail-tcpok \
 qmail-qmqpc qmail-qmqpd qmail-qmtpd \
 qmail-smtpd sendmail tcp-env qmail-newmrh mkconfig \
+qmail-tcpsrv tcprules \
 qreceipt \
 forward preline condredirect bouncesaying except maildirmake \
 maildir2mbox \
@@ -527,3 +528,36 @@ mksrvrcerts: mksrvrcerts.sh conf-users conf-groups warn-auto.sh
 	> $@
 	@echo creating $@
 	@chmod 755 $@
+
+#*****************************************************************
+# qmail-tcpsrv
+
+remoteinfo6.o:
+	$(COMPILE) remoteinfo6.c
+
+#socket_ip4loopback.o:
+#	$(COMPILE) socket_ip4loopback.c
+
+timeoutconn6.o:
+	$(COMPILE) timeoutconn6.c
+
+rules.o:
+	$(COMPILE) rules.c
+
+tcprules: rules.o
+	$(COMPILE) tcprules.c
+	$(LOAD) tcprules rules.o fmt.o strerr.a qlibs/scan.o \
+	alloc.a buffer.a case.a cdb.a error.a getln.a open.a \
+	str.a stralloc.a \
+	buffer.a
+
+qmail-tcpsrv: rules.o remoteinfo6.o timeoutconn6.o
+	$(COMPILE) qmail-tcpsrv.c
+	$(LOAD) qmail-tcpsrv rules.o remoteinfo6.o timeoutconn6.o \
+	readclose.o pathexec.o \
+	alloc.a buffer.a case.a cdb.a dns.a error.a env.a fd.a fmt.o \
+	getopt.a ip.a ndelay.a open.a prot.o qlibs/scan.o sig.a \
+	str.a stralloc.a strerr.a time.a wait.a socket.a \
+	qlibs/uint16p.o \
+	case.a \
+	qlibs/error_str.o

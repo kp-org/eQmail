@@ -1,11 +1,9 @@
 /*
- *  Revision 20170210, Kai Peter
- *  - added '#include ip.h'
  *  Revision 20160728, Kai Peter
  *  - new file: consolidated some smaller files:
-      socket_getifname.c, socket_opts.c, socket_v6any.c, socket_delay.c,
-      socket_ip4loopback.c, socket_v6loopback.c, socket_getifidx.c,
-      socket_listen.c, socket_v4mappedprefix.c
+ *    socket_getifname.c, socket_opts.c, socket_v6any.c, socket_delay.c,
+ *    socket_ip4loopback.c, socket_v6loopback.c, socket_getifidx.c,
+ *    socket_listen.c, socket_v4mappedprefix.c
 */
 #include <sys/types.h>
 #include <sys/param.h>
@@ -14,10 +12,8 @@
 #include <net/if.h>
 #include "socket.h"
 
-//const unsigned char ip4loopback[4] = {127,0,0,1};
-//const unsigned char V4loopback[4] = {127,0,0,1};
-
-/* the 'V4mappedprefix constant is needed by 'ip.a' too */
+const unsigned char V4loopback[4] = {127,0,0,1};
+/* the 'V4mappedprefix' constant is needed by 'ip.a' too */
 const unsigned char V4mappedprefix[12]={0,0,0,0,0,0,0,0,0,0,0xff,0xff};
 const unsigned char V6any[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 const unsigned char V6loopback[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};

@@ -1,3 +1,7 @@
+/*
+ *  Revision 20170324, Kai Peter
+ *  - added old definitions from *qmail for (temp) backwards compatibility
+*/
 #ifndef DNS_H
 #define DNS_H
 
@@ -94,5 +98,16 @@ extern int dns_name6_domain(char *,char *);
 // @Kai
 //extern int dns_name6(stralloc *,const char *);
 extern int dns_name6(stralloc *,char *);
+
+/* deprecated: old definitions from *qmail */
+#define DNS_SOFT -1
+#define DNS_HARD -2
+#define DNS_MEM -3
+
+void dns_init();
+int dns_cname();
+int dns_mxip();
+int dns_ip();
+int dns_ptr();
 
 #endif

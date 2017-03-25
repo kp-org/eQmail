@@ -61,3 +61,5 @@ mksrvrcerts
 mkrsadhkeys
 qmail-shcfg
 ssl.bin
+qmail-tcpsrv
+tcprules

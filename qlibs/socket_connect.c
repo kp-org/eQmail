@@ -45,7 +45,6 @@ int socket_connect6(int s,const char ip[16],uint16 port,uint32 scope_id)
 /* this explizit declaration is needed to prevent compiler warnings */
 int read(int _str, void *_buf, int _b);
 
-//int socket_connect4(int s,const char ip[4],uint16 port)
 int socket_connect4(int s,const unsigned char ip[4],uint16 port)
 {
   struct sockaddr_in sa;
