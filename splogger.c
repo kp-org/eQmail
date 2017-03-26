@@ -1,3 +1,7 @@
+/*
+ *  Revision 20170326, Kai Peter
+ *  - deactivated 'stamp_make' (duplicate time stamp)
+*/
 #include <sys/types.h>
 #include <sys/time.h>
 #include <syslog.h>
@@ -9,12 +13,13 @@
 #include "scan.h"
 #include "fmt.h"
 
-char buf[800]; /* syslog truncates long lines (or crashes); GPACIC */
-int bufpos = 0; /* 0 <= bufpos < sizeof(buf) */
+char buf[800];    /* syslog truncates long lines (or crashes); GPACIC */
+int bufpos = 0;   /* 0 <= bufpos < sizeof(buf) */
 int flagcont = 0;
-int priority; /* defined if flagcont */
+int priority;     /* defined if flagcont */
 char stamp[FMT_ULONG + FMT_ULONG + 3]; /* defined if flagcont */
 
+/*
 void stamp_make()
 {
   struct timeval tv;
@@ -26,6 +31,7 @@ void stamp_make()
   s += fmt_uint0(s,(unsigned int) tv.tv_usec,6);
   *s = 0;
 }
+*/
 
 void flush()
 {
@@ -34,20 +40,19 @@ void flush()
     if (flagcont)
       syslog(priority,"%s+%s",stamp,buf); /* logger folds invisibly; GPACIC */
     else {
-      stamp_make();
+//      stamp_make();
       priority = LOG_INFO;
       if (str_start(buf,"warning:")) priority = LOG_WARNING;
       if (str_start(buf,"alert:")) priority = LOG_ALERT;
-      syslog(priority,"%s %s",stamp,buf);
+//      syslog(priority,"%s %s",stamp,buf);
+      syslog(priority,"%s",buf);
       flagcont = 1;
     }
   }
   bufpos = 0;
 }
 
-void main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
 {
   char ch;
 
@@ -69,4 +74,5 @@ char **argv;
     if ((ch < 32) || (ch > 126)) ch = '?'; /* logger truncates at 0; GPACIC */
     buf[bufpos++] = ch;
   }
+  return(0);
 }
