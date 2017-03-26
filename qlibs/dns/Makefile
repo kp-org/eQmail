@@ -1,7 +1,7 @@
 
 COMPILE=../compile
 MAKELIB=../makelib
-CCFLAGS=-I../hdrs
+CCFLAGS=-I../include
 
 default: clean check dns.a
 

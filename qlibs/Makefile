@@ -17,9 +17,10 @@ check:
 	@[ -f $(COMPILE) ] && [ -f $(MAKELIB) ] || ./configure
 
 clean:
-	@echo Cleaning up libs ...
+	@echo -n Cleaning up libs ...
 	@rm -f *.o *.a compile makelib *.tmp
 	@cd dns ; make -s clean
+	@echo " done!"
 
 libs: obj alloc.a buffer.a case.a cdb.a env.a error.a fd.a fs.a getln.a getopt.a lock.a \
 ndelay.a open.a seek.a sig.a substdio.a str.a stralloc.a strerr.a time.a wait.a \
