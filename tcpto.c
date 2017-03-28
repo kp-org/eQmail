@@ -62,7 +62,7 @@ struct ip_mx *ix;
       {
        when = tcpto_buf[i].when;
        if (now() - when < ((60 + (getpid() & 31)) << 6))
-	 return 1;
+     return 1;
       }
      return 0;
     }

@@ -1,4 +1,4 @@
-cc -O2 -I./qlibs/hdrs -DINET6 -DTLS=20160918 -I/usr/local/openssl/include -Wall
+cc -O2 -I./qlibs/include -DINET6 -DTLS=20160918 -I/usr/local/openssl/include -Wall
 
 This will be used to compile .c files. Some additional options will
 be added by the configure script.

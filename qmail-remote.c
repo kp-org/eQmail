@@ -17,8 +17,6 @@
 #include "ip.h"
 #include "ipalloc.h"
 #include "ipme.h"
-//#include "gen_alloc.h"
-//#include "gen_allocdefs.h"
 #include "str.h"
 #include "now.h"
 #include "exit.h"
@@ -391,14 +389,14 @@ int tls_init()
         || !stralloc_catb(&tmp, partner_fqdn, str_len(partner_fqdn)+1))
         temp_nomem();
       if ((stat("control/tlshosts/exhaustivelist", &st) == 0) ||
-	  (stat(tmp.s, &st) == 0)) {
+      (stat(tmp.s, &st) == 0)) {
          alloc_free(tmp.s);
          return 0;
       }
       alloc_free(tmp.s);
     }
   }
- 
+
   if (!smtps) {
     stralloc *sa = ehlokw.sa;
     unsigned int len = ehlokw.len;
@@ -595,7 +593,7 @@ void smtp()
     /* and if EHLO failed, use HELO */
   } else {
 #endif
- 
+
   substdio_puts(&smtpto,"HELO ");
   substdio_put(&smtpto,helohost.s,helohost.len);
   substdio_puts(&smtpto,"\r\n");
@@ -690,9 +688,9 @@ int *flagalias;
 int flagcname;
 {
   int j;
- 
+
   *flagalias = flagcname;
- 
+
   j = str_rchr(s,'@');
   if (!s[j]) {
     if (!stralloc_copys(saout,s)) temp_nomem();
@@ -702,7 +700,7 @@ int flagcname;
   canonbox.len = j;
   if (!quote(saout,&canonbox)) temp_nomem();
   if (!stralloc_cats(saout,"@")) temp_nomem();
- 
+
   if (!stralloc_copys(&canonhost,s + j + 1)) temp_nomem();
   if (flagcname)
     switch(dns_cname(&canonhost)) {

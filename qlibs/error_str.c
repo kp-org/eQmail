@@ -20,8 +20,13 @@ char *error_str(int i)
   X(error_perm,"permission denied")
   X(error_acces,"access denied")
   // @Kai
+  X(error_nodevice,"device not configured")
   X(error_proto,"protocol error")
-  
+  X(error_isdir,"is a directory")
+  X(error_connrefused,"connection refused")
+  X(error_notdir,"not a directory")
+  X(error_rofs,"read-only file system")
+  X(error_connreset,"connection reset")
 #ifdef ESRCH
   X(ESRCH,"no such process")
 #endif

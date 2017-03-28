@@ -4,7 +4,7 @@ SHELL=/bin/sh
 
 COMPILE=./compile
 LOAD=./load
-MAKELIB=.makelib
+MAKELIB=./makelib
 
 # create libs (*.a)
 # create object files (*.o)

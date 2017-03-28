@@ -98,6 +98,14 @@ EACCES;
 -13;
 #endif
 
+// not used in *qmail
+int error_nodevice =
+#ifdef ENXIO
+ENXIO;
+#else
+-14;
+#endif
+
 int error_proto =
 #ifdef EPROTO
 EPROTO;
@@ -118,4 +126,26 @@ ECONNREFUSED;
 #else
 //-15;   /* this was a former value */
 -17;
+#endif
+
+// from ucspi-ssl
+int error_notdir =
+#ifdef ENOTDIR
+ENOTDIR;
+#else
+-18;
+#endif
+
+int error_rofs =
+#ifdef EROFS
+EROFS;
+#else
+-19;
+#endif
+
+int error_connreset =
+#ifdef ECONNRESET
+ECONNRESET;
+#else
+-20;
 #endif
