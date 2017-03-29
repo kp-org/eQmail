@@ -1,4 +1,6 @@
 /*
+ *  Revision 20170329, Kai Peter
+ +  - changed return type of 'tai_now()' to int
  *  Revision 20160728, Kai Peter
  *  - new file: consolidated single files
 */
@@ -57,13 +59,18 @@ int taia_less(struct taia *t,struct taia *u)
   return t->atto < u->atto;
 }
 /* file: taia_now.c ************************************ */
-void taia_now(struct taia *t)
+int taia_now(struct taia *t)
 {
   struct timeval now;
-  gettimeofday(&now,(struct timezone *) 0);
-  tai_unix(&t->sec,now.tv_sec);
-  t->nano = 1000 * now.tv_usec + 500;
+  if (gettimeofday(&now,(struct timezone *) 0) == 0) {
+    tai_unix(&t->sec,now.tv_sec);
+    t->nano = 1000 * now.tv_usec + 500;
+    t->atto = 0;
+    return(0);
+  }
+  t->nano = 0;
   t->atto = 0;
+  return -1;
 }
 /* file: taia_pack.c *********************************** */
 void taia_pack(char *s,struct taia *t)

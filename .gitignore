@@ -22,7 +22,4 @@ dev
 tcpserver
 boot
 test-it
-lib/bck
-lib/dns
-lib/man
 CHANGELOG-1.10

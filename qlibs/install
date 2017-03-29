@@ -3,7 +3,7 @@
 . ./conf-inst
 
 install_libs() { cp *.a $FILES "$LIBDIR" ; }
-install_hdrs() { cp hdrs/*.h "$HDRDIR" ; }
+install_hdrs() { cp include/*.h "$HDRDIR" ; }
 
 echo -n "Installing qlibs ..."
 mkdir -p "$LIBDIR" "$HDRDIR" 2>/dev/null

@@ -15,8 +15,8 @@ default: conf libs obj it mans
 
 clean: TARGETS
 	rm -f *.o *.a *.tmp `cat TARGETS`
-	@cd qlibs ; make --no-print-directory clean
-	@cd man ; make --no-print-directory clean
+	@cd qlibs ; make clean
+	@cd man ; make clean
 
 conf: configure
 	./configure
@@ -29,10 +29,10 @@ setup:
 
 mans:
 	@echo Creating man pages ...
-	@cd man/ ; make --no-print-directory
+	@cd man/ ; make
 
 libs:
-	cd qlibs ; make --no-print-directory
+	cd qlibs ; make
 
 obj:
 	$(COMPILE) hfield.c

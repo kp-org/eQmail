@@ -1,3 +1,7 @@
+/*
+ *  Revision 20170329, Kai Peter
+ *  - changed type of 'taia_now()' from void to int
+*/
 #ifndef TAIA_H
 #define TAIA_H
 
@@ -13,7 +17,7 @@ struct taia {
 
 extern void taia_tai(struct taia *,struct tai *);
 
-extern void taia_now(struct taia *);
+extern int taia_now(struct taia *);
 
 extern double taia_approx(struct taia *);
 extern double taia_frac(struct taia *);

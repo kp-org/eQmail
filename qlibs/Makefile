@@ -108,7 +108,7 @@ time.a: iopause.o tai.o taia.o
 # needed by qmail-tcpsrv - devel
 dns.a:
 	@echo "Building dns lib ..."
-	@cd dns ; make --no-print-directory
+	@cd dns ; make
 	@cp dns/dns.a dns.a
 
 socket.a:
