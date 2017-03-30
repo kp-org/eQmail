@@ -1,8 +1,8 @@
 #!/bin/sh
 
-. ./conf-inst
+. ./conf-build
 
-install_libs() { cp *.a $FILES "$LIBDIR" ; }
+install_libs() { cp *.a $OFILES "$LIBDIR" ; }
 install_hdrs() { cp include/*.h "$HDRDIR" ; }
 
 echo -n "Installing qlibs ..."

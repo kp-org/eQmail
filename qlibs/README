@@ -1,4 +1,4 @@
-qlibs - C library and headers based on 'djblib' and libowfat.
+qlibs - static C library and headers based on "djb's libs" and libowfat.
 
 Initially these libs were excluded from *qmail and forseen to use with eQmail. As
 the packages of djb (D.J. Bernstein) uses these libs in different versions, there
@@ -8,37 +8,22 @@ this was the point where some parts from libowfat were included.
 
 In theorie - these libs can be used with any djb software.
 
-Usage
+Usage:
 
-There are 2  files to configure qlibs:
-  - conf-qlibs: configure compiler flags
-  - conf-inst:  configure installation options
+Some build options  can be configured through 'conf-build'.  Read the comments in
+this file for more information. qlibs could be used local or installed global. To
+do so simply run
 
-See inside these files to get further information.
+  $ make
 
-qlibs could be used local AND global. Here are a configuration example each:
-
-Ex.1: local usage
-
-  - copy the 'qlibs' folder into a subfolder of your package
-  - edit conf-inst to your needs, e.g.
-     LIBDIR=..
-     HDRDIR=
-  - add additional object files (*.o) to FILES (will be installed in $LIBDIR)
-
-Ex. 2: global usage
-  - extract (copy) 'qlibs' whereever you want
-  - edit conf-inst, like, e.g.
-      LIBDIR=/usr/local/lib
-      HDRDIR=/usr/include/qlibs
-
-for both examples:
-  - add additional object files (*.o) to FILES (will be installed in $LIBDIR)
-  - run './configure - make - make install'
-
+which does all the steps of './configure  -  make  -  make install'. Don't forget
+to make sure that libs and headers will be found by the compiler/linker.
 
 CAVEATS:
-- the man pages are simply taken from libowfat (in most cases)
-- 'substdio' is still included for backwards compatibility of code
+  - the man pages are simply taken from libowfat (in most cases)
+  - 'substdio' is still included for backwards compatibility of code
+  - 'slurpclose.o' (deprecated, just for backwards compatibility) will be removed
+    in the future
 
-Updated: 20170319, Kai Peter
+
+Updated: 20170329, Kai Peter

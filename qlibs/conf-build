@@ -1,0 +1,28 @@
+# Build and install options for qlibs
+#
+#********************************************************************************
+# default compiler flags - usually this shouldn't be changed
+CFLAGS='-O2 -Iinclude -DINET6'
+
+#********************************************************************************
+# destination folder(s) (install options of qlibs)
+#
+# Define a destination  where libs and/or header files will be installed into. If
+# a var is empty, then nothing will be installed (copied).  The term  'libs' here
+# means all '*.a' files and additional all files given by $OFILES (see below).
+# Example 1:
+#    LIBDIR=..              - copy all libs into the upper folder
+#    HDRDIR=                - don't copy header files ('*.h')
+# Example 2:
+#    LIBDIR=/usr/local/lib  - copy all libs into /usr/local/lib
+#    HDRDIR=$LIBDIR/include - copy all header files into /usr/local/lib/include
+#
+LIBDIR=..
+HDRDIR=
+
+#********************************************************************************
+# Additional libs (object files, delimited by space, enclosed in "'")
+OFILES='base64.o byte.o fmt.o prot.o pathexec.o readclose.o'
+
+# backwards compatibility:
+OFILES="$OFILES"' slurpclose.o'

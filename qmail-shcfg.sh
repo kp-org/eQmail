@@ -45,9 +45,9 @@ printContent() {
     "3") VALUE=$(openssl x509 -enddate -noout -in $CONFDIR/$f.pem | cut -d= -f2)
          DEFAULT="valid until expire date on $VALUE"
          TODAY=`date +%s`
-         case `uname | tr '[A-Z]' '[a-z]'` in    # expire date
+         case `uname | tr '[A-Z]' '[a-z]'` in    # check expiration date
           freebsd)
-             EDATE=`date -j -f '%B %_d %H:%M:%S %Y %Z' "$VALUE" +%_s`;;
+             EDATE=`date -j -f '%B %d %H:%M:%S %Y %Z' "$VALUE" '+%_s'`;;
           netbsd|openbsd)
              EDATE=`date -j -d "$VALUE" +%s`
              ;;

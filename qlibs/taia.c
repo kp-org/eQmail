@@ -1,6 +1,6 @@
 /*
  *  Revision 20170329, Kai Peter
- +  - changed return type of 'tai_now()' to int
+ *  - changed return type of 'tai_now()' to int
  *  Revision 20160728, Kai Peter
  *  - new file: consolidated single files
 */

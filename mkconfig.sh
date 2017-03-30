@@ -1,6 +1,8 @@
 
 # some basics ('nslookup' should be available always)
 FQDN=`nslookup \`hostname\` | grep ^Name: | awk '{print $2}' | tr '[A-Z]' '[a-z]'`
+[ "$FQDN" ] || FQDN=`uname -n`    # last try to get a FQDN ...
+[ "$FQDN" ] || FQDN="localhost"   # ... or we use "localhost" simply
 HOST=`echo "$FQDN" | cut -d. -f1`
 DOMAIN=`echo "$FQDN" | cut -d. -f2-`
 if [ ! "$DOMAIN" ] ; then

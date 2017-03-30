@@ -39,7 +39,7 @@ dd if=/dev/urandom of=${RNDFILE} bs=64 count=1 2>/dev/null
 chmod 600 ${RNDFILE}
 echo "Creating self-signed certificate"
 "$OPENSSL" req -new -x509 -days ${DAYS} -nodes \
-	-config ${CNFFILE} -out ${PEMFILE} -keyout ${PEMFILE} -rand ${RNDFILE} || cleanup
+    -config ${CNFFILE} -out ${PEMFILE} -keyout ${PEMFILE} -rand ${RNDFILE} || cleanup
 echo "Certificate details"
 "$OPENSSL" x509 -subject -dates -fingerprint -noout -in ${PEMFILE} || cleanup
 chown UID:GID ${PEMFILE}

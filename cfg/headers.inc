@@ -40,15 +40,16 @@ if (head -1 conf-cc | grep -e '\-DTLS' > /dev/null) ; then
 fi
 
 #********************************************************************************
-# check for other header files
-echo -n "Checking for select.h ..."
-if [ -f /usr/include/sys/select.h ] ; then CCOPTS="$CCOPTS -DHAS_SELECT_H"
-   else echo -n " not" ; fi
-echo " found!"
+# obsolete: is in 'qlibs' now
+## check for other header files
+#echo -n "Checking for select.h ..."
+#if [ -f /usr/include/sys/select.h ] ; then CCOPTS="$CCOPTS -DHAS_SELECT_H"
+#   else echo -n " not" ; fi
+#echo " found!"
 
-# On linux we have flock, other systems have lockf instead
-echo -n "Checking for flock/lockf ..."
-which flock 2>/dev/null >/dev/null
-if [ $? -eq 0 ] ; then CCOPTS="$CCOPTS -DHASFLOCK=1" ; echo -n " flock"
-   else echo -n " lockf" ; fi
-echo " found!"
+## On linux we have flock, other systems have lockf instead
+#echo -n "Checking for flock/lockf ..."
+#which flock 2>/dev/null >/dev/null
+#if [ $? -eq 0 ] ; then CCOPTS="$CCOPTS -DHASFLOCK=1" ; echo -n " flock"
+#   else echo -n " lockf" ; fi
+#echo " found!"
