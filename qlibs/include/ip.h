@@ -39,9 +39,11 @@ extern unsigned int ip4_fmt(char *,char *);
 #define ip_fmt ip4_fmt          /*            "            */
 
 /* usually 'ip_scanbracket (should) do IPv4 AND IPv6 */
-extern unsigned int ip_scanbracket();
-extern unsigned int ip46_scanbracket();   /* temp: replacement for IPv4 AND IPv6 */
+extern unsigned int ip_scanbracket(char *,char*);
+//extern unsigned int ip46_scanbracket();   /* temp: replacement for IPv4 AND IPv6 - deprecated! */
 #define ip6_scanbracket ip_scanbracket    /* backwards compatibility */
+#define ip4_scanbracket ip_scanbracket    /*            "            */
+#define ip46_scanbracket ip_scanbracket   /*            "            */
 
 #ifdef INET6
 #define LIBC_HAS_IP6 1  // @Kai: temp. static --> make a "try" (?)

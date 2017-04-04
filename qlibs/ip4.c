@@ -47,37 +47,34 @@ unsigned int ip4_scan(char *s,char ip[4])
  * 'dns.c' (from qmail) --> should be replaced (like in 'ucspi-tcp')   */
 /*
   Params: *s is an IP address enclosed in brackets
-          ip[4]
 */
-unsigned int ip_scanbracket(char *s,char ip[4])
-//unsigned int ip_scanbracket(s,ip)
-//char *s;
-//struct ip_address *ip;
+//unsigned int ip_scanbracket(char *s,char ip[4])
+/*
+unsigned int ip4_scanbracket(char *s,char ip[4])
 {
   unsigned int len;
 
   if (*s != '[') return 0;
-//  len = ip_scan(s + 1,ip);
   len = ip4_scan(s + 1,ip);
   if (!len) return 0;
   if (s[len + 1] != ']') return 0;
   return len + 2;
 }
+*/
+
 /* scan IPv4 or IPv6 ip address enclosed in brackets */
-// temp., not tested yet
-unsigned int ip46_scanbracket(char *s,char *ip_str)
-//char *s;
-//struct ip_address *ip;
+// temp., not "enough" tested yet !!!
+//unsigned int ip46_scanbracket(char *s,char *ip_str)
+unsigned int ip_scanbracket(char *s,char *ip_str)
 {
   unsigned int len;
-//struct ip_address *ip;
-//struct ip6_address *ip6;
 
   if (*s != '[') return 0;
-  if (str_chr(ip_str,':'))
+  if (str_chr(ip_str,':')) {
      len = ip6_scan(s + 1,ip_str);
-  else
+  } else {
      len = ip4_scan(s + 1,ip_str);
+  }
 
   if (!len) return 0;
   if (s[len + 1] != ']') return 0;
