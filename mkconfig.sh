@@ -45,7 +45,7 @@ fi
   cp QMAIL/control/locals QMAIL/control/rcpthosts
   chmod 644 QMAIL/control/rcpthosts
   echo " "
-  echo "Now eqmail will refuse to accept SMTP messages except to those hosts."
+  echo "Now eQmail will refuse to accept SMTP messages except to those hosts."
   echo "Make sure to change rcpthosts if you add hosts to locals or virtualdomains!"
   echo " "
   )
@@ -100,8 +100,6 @@ if [ "$WITHTLS" = "TLS=\"Yes\"" ] ; then
      > QMAIL/control/servercert.cnf
      chmod 640 QMAIL/control/servercert.cnf
      chown root:qmail QMAIL/control/servercert.cnf
-#  echo
-#  echo "Edit QMAIL/control/servercert.cnf before creating certificates."
      )
    mkdir -p QMAIL/control/tlshosts
    [ -f QMAIL/control/servercert.pem ] || ( \

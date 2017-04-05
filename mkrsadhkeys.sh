@@ -8,7 +8,7 @@ umask 0077 || exit 0
 export PATH="$PATH:/usr/local/bin/ssl:/usr/sbin"
 
 OPENSSL=$(which openssl 2>/dev/null)
-if [ $? -ne 0 ] ; then 
+if [ $? -ne 0 ] ; then
    echo "Couldn't find openssl! Aborting!" ; exit 0 ; fi
 
 "$OPENSSL" genrsa -out QMAIL/control/rsa2048.new 2048 &&

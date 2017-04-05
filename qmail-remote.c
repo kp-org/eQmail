@@ -547,7 +547,7 @@ stralloc recip = {0};
 
 void smtp()
 {
-  unsigned long code;
+  unsigned long code = 0;
   int flagbother;
   int i;
   stralloc slop = {0};
@@ -731,6 +731,7 @@ void getcontrols()
   }
 }
 
+/* is in ipme.c
 #ifdef INET6
 int ipme_is46(mxip)
 struct ip_mx *mxip;
@@ -744,6 +745,7 @@ struct ip_mx *mxip;
   return 0;
 }
 #endif
+*/
 
 int timeoutconn46(fd, ix, port, timeout)
 int fd;
@@ -838,9 +840,11 @@ int main(int argc,char **argv)
   prefme = 100000;
   for (i = 0;i < ip.len;++i)
 #ifdef INET6
-   if (ipme_is46(&ip.ix[i]))
+//   if (ipme_is46(&ip.ix[i]))
+   if (ipme_is(&ip.ix[i]))
 #else
-   if (ipme_is(&ip.ix[i].addr.ip))
+//   if (ipme_is(&ip.ix[i].addr.ip))
+   if (ipme_is4(&ip.ix[i].addr.ip))
 #endif
       if (ip.ix[i].pref < prefme)
         prefme = ip.ix[i].pref;

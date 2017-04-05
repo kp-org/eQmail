@@ -119,8 +119,12 @@ cd $OLDPWD
 . ./mkconfig
 
 # some links could be helpful
-cd /usr/local/bin || exit 1
-readlink sendmail > /dev/null || ln -s $QMAILDIR/bin/sendmail sendmail
+[ -d /usr/local/bin ] || mkdir -p /usr/local/bin
+cd /usr/local/bin
+readlink sendmail    2>&1 >/dev/null || ln -s $QMAILDIR/bin/sendmail sendmail
+readlink qmail-qstat 1>/dev/null || ln -s $QMAILDIR/bin/qmail-qstat qmail-qstat
+readlink qmail-fixq  1>/dev/null || ln -s $QMAILDIR/bin/qmail-fixq qmail-fixq
+readlink qmail-shcfg >/dev/null || ln -s $QMAILDIR/bin/qmail-shcfg qmail-shcfg
 
 # ....
 cd $OLDPWD

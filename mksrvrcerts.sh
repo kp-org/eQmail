@@ -24,7 +24,7 @@ echo -e "\033[1m"
 if test -f "$PEMFILE" ; then
    echo "The file '$PEMFILE' exists already and will be overwritten!"
  else
-echo "We are using defaults to create the certifucates now."
+echo "We are using defaults to create the certificates now."
 echo "Please customize ${CNFFILE} and run mksrvcerts later again!"
 fi
 i=10

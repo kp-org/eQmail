@@ -1,3 +1,6 @@
+/*
+ *
+*/
 #include "sig.h"
 #include "readwrite.h"		/* the original definitions */
 #include "stralloc.h"
@@ -257,17 +260,20 @@ char *arg;
   /* could check for termination failure here, but why bother? */
   if (!stralloc_append(&addr,"")) die_nomem();
 
+  /* if address is in "control/localiphost" */
   if (liphostok) {
     i = byte_rchr(addr.s,addr.len,'@');
     if (i < addr.len) /* if not, partner should go read rfc 821 */
       if (addr.s[i + 1] == '[')
-        if (!addr.s[i + 1 + ip_scanbracket(addr.s + i + 1,&ip)])
-          if (ipme_is(&ip)) {
-            addr.len = i + 1;
-            if (!stralloc_cat(&addr,&liphost)) die_nomem();
-            if (!stralloc_0(&addr)) die_nomem();
-          }
-  }
+//        if (byte_rchr(addr.s + 1 + 2,addr.len - 1 - 2,":")) {  /* @Kai ??? (obsolete?) @[IPv6::] */
+          if (!addr.s[i + 1 + ip_scanbracket(addr.s + i + 1,&ip)])
+            if ( (ipme_is4(&ip)) || (ipme_is6(&ip)) ) {
+              addr.len = i + 1;
+              if (!stralloc_cat(&addr,&liphost)) die_nomem();
+              if (!stralloc_0(&addr)) die_nomem();
+            }
+//        }  // end '@[IPv6::]'
+  } // end 'if (liphostok)'
 
   if (addr.len > 900) return 0;
   return 1;

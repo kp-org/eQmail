@@ -6,7 +6,12 @@
 
 extern ipalloc ipme;
 
-extern int ipme_init();
-extern int ipme_is();
+int ipme_init();
+int ipme_is();
+int ipme_is4();
+int ipme_is6();
+//int ipme_is46();
+
+#define ipme_is46 ipme_is   /* backwards compatibility */
 
 #endif
