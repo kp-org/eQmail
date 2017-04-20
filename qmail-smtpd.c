@@ -266,7 +266,7 @@ char *arg;
     if (i < addr.len) /* if not, partner should go read rfc 821 */
       if (addr.s[i + 1] == '[')
 //        if (byte_rchr(addr.s + 1 + 2,addr.len - 1 - 2,":")) {  /* @Kai ??? (obsolete?) @[IPv6::] */
-          if (!addr.s[i + 1 + ip_scanbracket(addr.s + i + 1,&ip)])
+          if (!addr.s[i + 1 + ip_scanbracket(addr.s + i + 1,(char *)&ip)])
             if ( (ipme_is4(&ip)) || (ipme_is6(&ip)) ) {
               addr.len = i + 1;
               if (!stralloc_cat(&addr,&liphost)) die_nomem();

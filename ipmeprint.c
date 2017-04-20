@@ -6,6 +6,7 @@
 #include "ip.h"
 #include "ipme.h"
 #include "exit.h"
+#include "fmt.h"
 
 char ipaddr[IPFMT];
 
@@ -21,10 +22,10 @@ int main()
  for (j = 0;j < ipme.len;++j) {
    switch(ipme.ix[j].af) {
      case AF_INET:
-       substdio_put(subfdout,ipaddr,ip4_fmt(ipaddr,&ipme.ix[j].addr));
+       substdio_put(subfdout,ipaddr,ip4_fmt(ipaddr,(char *)&ipme.ix[j].addr));
        break;
      case AF_INET6:
-       substdio_put(subfdout,ipaddr,ip6_fmt(ipaddr,&ipme.ix[j].addr));
+       substdio_put(subfdout,ipaddr,ip6_fmt(ipaddr,(char *)&ipme.ix[j].addr));
        break;
      default:
        substdio_puts(subfdout,"Unknown address family = ");
