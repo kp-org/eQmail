@@ -6,8 +6,7 @@
 #include "byte.h"
 #include "error.h"
 
-static int oneread(ssize_t (*op)(),int fd,char *buf,unsigned int len)
-{
+static int oneread(ssize_t (*op)(),int fd,char *buf,unsigned int len) {
   int r;
 
   for (;;) {
@@ -17,8 +16,7 @@ static int oneread(ssize_t (*op)(),int fd,char *buf,unsigned int len)
   }
 }
 
-static int getthis(buffer *s,char *buf,unsigned int len)
-{
+static int getthis(buffer *s,char *buf,unsigned int len) {
   if (len > s->p) len = s->p;
   s->p -= len;
   byte_copy(buf,len,s->x + s->n);
@@ -26,8 +24,7 @@ static int getthis(buffer *s,char *buf,unsigned int len)
   return len;
 }
 
-int buffer_feed(buffer *s)
-{
+int buffer_feed(buffer *s) {
   int r;
 
   if (s->p) return s->p;
@@ -39,8 +36,7 @@ int buffer_feed(buffer *s)
   return r;
 }
 
-int buffer_bget(buffer *s,char *buf,unsigned int len)
-{
+int buffer_bget(buffer *s,char *buf,unsigned int len) {
   int r;
 
   if (s->p > 0) return getthis(s,buf,len);
@@ -49,8 +45,7 @@ int buffer_bget(buffer *s,char *buf,unsigned int len)
   return getthis(s,buf,len);
 }
 
-int buffer_get(buffer *s,char *buf,unsigned int len)
-{
+int buffer_get(buffer *s,char *buf,unsigned int len) {
   int r;
 
   if (s->p > 0) return getthis(s,buf,len);
@@ -59,13 +54,11 @@ int buffer_get(buffer *s,char *buf,unsigned int len)
   return getthis(s,buf,len);
 }
 
-char *buffer_peek(buffer *s)
-{
+char *buffer_peek(buffer *s) {
   return s->x + s->n;
 }
 
-void buffer_seek(buffer *s,unsigned int len)
-{
+void buffer_seek(buffer *s,unsigned int len) {
   s->n += len;
   s->p -= len;
 }

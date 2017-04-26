@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <string.h>
-char *np;	/* next program to call */
+char *np;   /* next program to call */
 
 void initialize(argc,argv)
 int argc;

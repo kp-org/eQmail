@@ -18,7 +18,7 @@ echo " found!"
 # On linux we have flock, other systems have lockf instead
 echo -n "Checking for flock/lockf ..."
 which flock 2>/dev/null >/dev/null
-if [ $? -eq 0 ] ; then CCOPTS="$CFLAGS -DHASFLOCK=1" ; echo -n " flock"
+if [ $? -eq 0 ] ; then CFLAGS="$CFLAGS -DHASFLOCK=1" ; echo -n " flock"
    else echo -n " lockf" ; fi
 echo " found!"
 

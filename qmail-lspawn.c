@@ -9,7 +9,7 @@
 #include "substdio.h"
 #include "stralloc.h"
 #include "scan.h"
-#include "exit.h"
+//#include "exit.h"
 #include "error.h"
 #include "cdbread.h"
 #include "case.h"

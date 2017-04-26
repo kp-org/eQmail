@@ -33,7 +33,7 @@ int verbosity = 1;
 int flagkillopts = 1;
 int flagdelay = 1;
 char *banner = "";
-int flagremoteinfo = 1;
+int flagremoteinfo = 0;
 int flagremotehost = 1;
 int flagparanoid = 0;
 unsigned long timeout = 26;
@@ -348,7 +348,7 @@ int main(int argc,char **argv)
       case 'o': flagkillopts = 0; break;
       case 'H': flagremotehost = 0; break;
       case 'h': flagremotehost = 1; break;
-      case 'R': flagremoteinfo = 0; break;
+//      case 'R': flagremoteinfo = 0; break;
       case 'r': flagremoteinfo = 1; break;
       case 't': scan_ulong(optarg,&timeout); break;
       case 'U': x = env_get("UID"); if (x) scan_ulong(x,&uid);

@@ -1,3 +1,51 @@
+commit 2e0ceeac276bb132be13127c69b4a99b98452cc3
+Author: Kai Peter <kp@openqmail.org>
+Date:   Wed Apr 5 14:13:16 2017 +0200
+
+    switched to 'getifaddrs'
+
+commit 34a70d4b187cf7ba0f352890016f6b7bfe364fa6
+Author: Kai Peter <kp@openqmail.org>
+Date:   Tue Apr 4 10:06:15 2017 +0200
+
+    qlibs: consolidated 'ip_scanbracket', upped version
+
+commit 98fc9ffec9ae5146da3434ee8b07a42f7e21c181
+Author: Kai Peter <kp@openqmail.org>
+Date:   Thu Mar 30 11:56:10 2017 +0200
+
+    improved freebsd compat
+
+commit 70a80bbebe318b36910f0d2b0aa74c84b0851e52
+Author: Kai Peter <kp@openqmail.org>
+Date:   Wed Mar 29 10:33:48 2017 +0200
+
+    changed return type of 'taia_now()' to int
+
+commit a693d8ced6dc0522ff10c2b5c19c5eca80ce42c7
+Author: Kai Peter <kp@openqmail.org>
+Date:   Tue Mar 28 13:31:28 2017 +0200
+
+    qlibs: extended error lib
+
+commit 78a473564bc30e6a07b8899d4376320fc4d58f2b
+Author: Kai Peter <kp@openqmail.org>
+Date:   Sun Mar 26 10:09:58 2017 +0200
+
+    splogger: deactivated timestamp
+
+commit 259172cc5f014a844685d0f65066e804c4c076b5
+Author: Kai Peter <kp@openqmail.org>
+Date:   Sun Mar 26 09:58:12 2017 +0200
+
+    qlibs: code clean-up
+
+commit 9a51eda184413fa527d89791361a000efb2fd25e
+Author: Kai Peter <kp@openqmail.org>
+Date:   Sat Mar 25 11:03:36 2017 +0100
+
+    included qmail-tcpsrv
+
 commit f46aed5c315392c843443b0608a4eebc8df5f6a6
 Author: Kai Peter <kp@openqmail.org>
 Date:   Thu Mar 23 16:10:07 2017 +0100

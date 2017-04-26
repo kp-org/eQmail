@@ -18,6 +18,7 @@ int main(int argc,char **argv)
 {
   int pid;
   int wstat;
+  int e;
 
   if (!argv[1])
     strerr_die1x(100,"bouncesaying: usage: bouncesaying error [ program [ arg ... ] ]");
@@ -29,6 +30,7 @@ int main(int argc,char **argv)
     if (pid == 0) {
       execvp(argv[2],argv + 2);
       if (error_temp(errno)) _exit(111);
+//      if (error_str(errno)) _exit(111);
       _exit(100);
     }
     if (wait_pid(&wstat,pid) == -1)

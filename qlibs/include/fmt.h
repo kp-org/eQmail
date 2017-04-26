@@ -16,7 +16,7 @@ extern unsigned int fmt_nbbint(char *,unsigned int,unsigned int,unsigned int,uns
 extern unsigned int fmt_ushort(char *,unsigned short);
 extern unsigned int fmt_xshort(char *,unsigned short);
 extern unsigned int fmt_nbbshort(char *,unsigned int,unsigned int,unsigned int,unsigned short);
-extern unsigned int fmt_ulong(char *,unsigned long);
+extern unsigned int fmt_ulong(char *dest,unsigned long src);
 extern unsigned int fmt_xlong(char *,unsigned long);
 extern unsigned int fmt_nbblong(char *,unsigned int,unsigned int,unsigned int,unsigned long);
 

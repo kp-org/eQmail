@@ -480,6 +480,17 @@ env.a stralloc.a alloc.a substdio.a error.a str.a fs.a dns.lib
 	sig.a env.a getopt.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a `cat dns.lib` buffer.a
 
+tcp-env2: libs
+	./compile -g _tcp-env2.c
+	./load _tcp-env2 byte.o fmt.o qlibs/scan.o \
+	dns.a ip.a case.a env.a alloc.a sig.a str.a stralloc.a \
+	readclose.o time.a qlibs/uint16p.o qlibs/uint32p.o \
+	open.a getopt.a errmsg.a buffer.a stralloc.a \
+	remoteinfo6.o timeoutconn6.o socket.a ndelay.a
+# timeoutread.o
+# timeoutwrite.o
+# timeoutconn.o
+
 tcpto.o: compile tcpto.c
 	./compile tcpto.c
 

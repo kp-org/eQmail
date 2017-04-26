@@ -1,4 +1,7 @@
 /*
+@Kai: This are internal (fallback) error codes. See error.h for comparison.
+      --> should be replaced by system error codes/functions - _errmsg.c
+
  *  Revision 20160703, Kai Peter
  *  - added 'error_proto'
 */

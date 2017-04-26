@@ -22,9 +22,9 @@ clean:
 	@cd dns ; make -s clean
 	@echo " done!"
 
-libs: obj alloc.a buffer.a case.a cdb.a env.a error.a fd.a fs.a getln.a getopt.a lock.a \
+libs: obj alloc.a buffer.a case.a cdb.a env.a errmsg.a fd.a fs.a getln.a getopt.a lock.a \
 ndelay.a open.a seek.a sig.a substdio.a str.a stralloc.a strerr.a time.a wait.a \
-dns.a ip.a socket.a
+dns.a ip.a socket.a error.a
 #	./install
 
 obj:
@@ -55,6 +55,9 @@ env.a:
 
 error.a:
 	$(MAKELIB) error.a error.o error_str.o error_temp.o
+
+errmsg.a:
+	$(MAKELIB) errmsg.a _errstr.o _errmsg.o error.o
 
 fd.a:
 	$(MAKELIB) fd.a fd.o

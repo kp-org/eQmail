@@ -22,7 +22,8 @@ static ssize_t mywrite(int fd,char *buf,int len)
     iopause(&x,1,&deadline,&now);
     if (x.revents) break;
     if (taia_less(&deadline,&now)) {
-      errno = error_timeout;
+//      errno = error_timeout;
+      errno = ETIMEDOUT;
       return -1;
     }
   }
@@ -41,7 +42,7 @@ static ssize_t myread(int fd,char *buf,int len)
     iopause(&x,1,&deadline,&now);
     if (x.revents) break;
     if (taia_less(&deadline,&now)) {
-      errno = error_timeout;
+      errno = ETIMEDOUT;
       return -1;
     }
   }

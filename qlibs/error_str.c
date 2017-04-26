@@ -6,27 +6,27 @@
 char *error_str(int i)
 {
   X(0,"no error")
-  X(error_intr,"interrupted system call")
-  X(error_nomem,"out of memory")
-  X(error_noent,"file does not exist")
-  X(error_txtbsy,"text busy")
-  X(error_io,"input/output error")
-  X(error_exist,"file already exists")
-  X(error_timeout,"timed out")
-  X(error_inprogress,"operation in progress")
-  X(error_again,"temporary failure")
-  X(error_wouldblock,"input/output would block")
-  X(error_pipe,"broken pipe")
-  X(error_perm,"permission denied")
-  X(error_acces,"access denied")
+  X(error_intr,"interrupted system call")        // - EINTR
+  X(error_nomem,"out of memory")                 // - ENOMEM
+  X(error_noent,"file does not exist")           // - ENOENT
+  X(error_txtbsy,"text busy")                    // - ETXTBSY
+  X(error_io,"input/output error")               // - EIO
+  X(error_exist,"file already exists")           // - EEXISTS
+  X(error_timeout,"timed out")                   // - ETIMEDOUT
+  X(error_inprogress,"operation in progress")    // - EINPROGRESS
+  X(error_again,"temporary failure")             // - EAGAIN
+  X(error_wouldblock,"input/output would block") // - EWOULDBLOCK (intern EAGAIN)
+  X(error_pipe,"broken pipe")                    // - EPIPE
+  X(error_perm,"permission denied")              // - EPERM
+  X(error_acces,"access denied")                 // - EACCES
   // @Kai
-  X(error_nodevice,"device not configured")
-  X(error_proto,"protocol error")
-  X(error_isdir,"is a directory")
-  X(error_connrefused,"connection refused")
-  X(error_notdir,"not a directory")
-  X(error_rofs,"read-only file system")
-  X(error_connreset,"connection reset")
+  X(error_nodevice,"device not configured")   // + ENXIO
+  X(error_proto,"protocol error")             // + EPROTO
+  X(error_isdir,"is a directory")             // + EISDIR
+  X(error_connrefused,"connection refused")   // + ECONNREFUSED
+  X(error_notdir,"not a directory")           // + ENOTDIR
+  X(error_rofs,"read-only file system")       // + EROFS
+  X(error_connreset,"connection reset")       // + ECONNRESET
 #ifdef ESRCH
   X(ESRCH,"no such process")
 #endif
