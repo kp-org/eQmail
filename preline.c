@@ -14,7 +14,7 @@
 #include "sig.h"
 #include "error.h"
 
-#define FATAL "preline: fatal: "
+#define FATL "preline: fatal: "
 
 void die_usage()
 {
@@ -58,23 +58,23 @@ int main(int argc,char **argv)
   if (!*argv) die_usage();
 
   if (pipe(pi) == -1)
-    strerr_die2sys(111,FATAL,"unable to create pipe: ");
+    strerr_die2sys(111,FATL,"unable to create pipe: ");
 
   pid = fork();
   if (pid == -1)
-    strerr_die2sys(111,FATAL,"unable to fork: ");
+    strerr_die2sys(111,FATL,"unable to fork: ");
 
   if (pid == 0) {
     close(pi[1]);
     if (fd_move(0,pi[0]) == -1)
-      strerr_die2sys(111,FATAL,"unable to set up fds: ");
+      strerr_die2sys(111,FATL,"unable to set up fds: ");
     sig_pipedefault();
     execvp(*argv,argv);
-    strerr_die4sys(error_temp(errno) ? 111 : 100,FATAL,"unable to run ",*argv,": ");
+    strerr_die4sys(error_temp(errno) ? 111 : 100,FATL,"unable to run ",*argv,": ");
   }
   close(pi[0]);
   if (fd_move(1,pi[1]) == -1)
-    strerr_die2sys(111,FATAL,"unable to set up fds: ");
+    strerr_die2sys(111,FATL,"unable to set up fds: ");
 
   if (flagufline) buffer_puts(&ssout,ufline);
   if (flagrpline) buffer_puts(&ssout,rpline);
@@ -85,9 +85,9 @@ int main(int argc,char **argv)
   close(1);
 
   if (wait_pid(&wstat,pid) == -1)
-    strerr_die2sys(111,FATAL,"wait failed: ");
+    strerr_die2sys(111,FATL,"wait failed: ");
   if (wait_crashed(wstat))
-    strerr_die2x(111,FATAL,"child crashed");
+    strerr_die2x(111,FATL,"child crashed");
   _exit(wait_exitcode(wstat));
   return(0);  /* never reached */
 }

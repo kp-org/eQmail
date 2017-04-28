@@ -9,13 +9,13 @@
 #include "scan.h"
 #include "ip.h"
 #include "fd.h"
-#include "exit.h"
+//#include "exit.h"
 #include "env.h"
 #include "prot.h"
 #include "open.h"
 #include "wait.h"
 #include "stralloc.h"
-#include <alloc.h>
+//#include <alloc.h>
 #include "buffer.h"
 #include "error.h"
 #include "strerr.h"
@@ -266,7 +266,7 @@ void doit(int t)
 
 /* ---------------------------- parent */
 
-#define FATAL "qmail-tcpsrv: fatal: "
+#define FATL "qmail-tcpsrv: fatal: "
 
 void usage(void)
 {

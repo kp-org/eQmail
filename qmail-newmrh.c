@@ -18,15 +18,15 @@
 #include "case.h"
 #include "rename.h"
 
-#define FATAL "qmail-newmrh: fatal: "
+#define FATL "qmail-newmrh: fatal: "
 
 void die_read()
 {
-  strerr_die2sys(111,FATAL,"unable to read control/morercpthosts: ");
+  strerr_die2sys(111,FATL,"unable to read control/morercpthosts: ");
 }
 void die_write()
 {
-  strerr_die2sys(111,FATAL,"unable to write to control/morercpthosts.tmp: ");
+  strerr_die2sys(111,FATL,"unable to write to control/morercpthosts.tmp: ");
 }
 
 char inbuf[1024];
@@ -43,7 +43,7 @@ int main()
 {
   umask(033);
   if (chdir(auto_qmail) == -1)
-    strerr_die4sys(111,FATAL,"unable to chdir to ",auto_qmail,": ");
+    strerr_die4sys(111,FAAL,"unable to chdir to ",auto_qmail,": ");
 
   fd = open_read("control/morercpthosts");
   if (fd == -1) die_read();
@@ -74,7 +74,7 @@ int main()
   if (fsync(fdtemp) == -1) die_write();
   if (close(fdtemp) == -1) die_write(); /* NFS stupidity */
   if (rename("control/morercpthosts.tmp","control/morercpthosts.cdb") == -1)
-    strerr_die2sys(111,FATAL,"unable to move control/morercpthosts.tmp to control/morercpthosts.cdb");
+    strerr_die2sys(111,FATL,"unable to move control/morercpthosts.tmp to control/morercpthosts.cdb");
 
   _exit(0);
 }

@@ -11,9 +11,9 @@
 #include "buffer.h"
 #include "fmt.h"
 
-#define FATAL "forward: fatal: "
+#define FATL "forward: fatal: "
 
-void die_nomem() { strerr_die2x(111,FATAL,"out of memory"); }
+void die_nomem() { strerr_die2x(111,FATL,"out of memory"); }
 
 struct qmail qqt;
 
@@ -40,16 +40,16 @@ int main(int argc,char **argv)
 
   sender = env_get("NEWSENDER");
   if (!sender)
-    strerr_die2x(100,FATAL,"NEWSENDER not set");
+    strerr_die2x(100,FATL,"NEWSENDER not set");
   dtline = env_get("DTLINE");
   if (!dtline)
-    strerr_die2x(100,FATAL,"DTLINE not set");
+    strerr_die2x(100,FATL,"DTLINE not set");
 
   if (qmail_open(&qqt) == -1)
-    strerr_die2sys(111,FATAL,"unable to fork: ");
+    strerr_die2sys(111,FATL,"unable to fork: ");
   qmail_puts(&qqt,dtline);
   if (buffer_copy(&ssout,&ssin) != 0)
-    strerr_die2sys(111,FATAL,"unable to read message: ");
+    strerr_die2sys(111,FATL,"unable to read message: ");
   buffer_flush(&ssout);
 
   num[fmt_ulong(num,qmail_qp(&qqt))] = 0;
@@ -57,7 +57,7 @@ int main(int argc,char **argv)
   qmail_from(&qqt,sender);
   while (*++argv) qmail_to(&qqt,*argv);
   qqx = qmail_close(&qqt);
-  if (*qqx) strerr_die2x(*qqx == 'D' ? 100 : 111,FATAL,qqx + 1);
+  if (*qqx) strerr_die2x(*qqx == 'D' ? 100 : 111,FATL,qqx + 1);
   strerr_die2x(0,"forward: qp ",num);
   return(0);  /* never reached */
 }

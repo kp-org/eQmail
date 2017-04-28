@@ -12,7 +12,7 @@
 #include "wait.h"
 #include "sig.h"
 
-#define FATAL "bouncesaying: fatal: "
+#define FATL "bouncesaying: fatal: "
 
 int main(int argc,char **argv)
 {
@@ -26,7 +26,7 @@ int main(int argc,char **argv)
   if (argv[2]) {
     pid = fork();
     if (pid == -1)
-      strerr_die2sys(111,FATAL,"unable to fork: ");
+      strerr_die2sys(111,FATL,"unable to fork: ");
     if (pid == 0) {
       execvp(argv[2],argv + 2);
       if (error_temp(errno)) _exit(111);
@@ -34,12 +34,12 @@ int main(int argc,char **argv)
       _exit(100);
     }
     if (wait_pid(&wstat,pid) == -1)
-      strerr_die2x(111,FATAL,"wait failed");
+      strerr_die2x(111,FATL,"wait failed");
     if (wait_crashed(wstat))
-      strerr_die2x(111,FATAL,"child crashed");
+      strerr_die2x(111,FATL,"child crashed");
     switch(wait_exitcode(wstat)) {
       case 0: break;
-      case 111: strerr_die2x(111,FATAL,"temporary child error");
+      case 111: strerr_die2x(111,FATL,"temporary child error");
       default: _exit(0);
     }
   }

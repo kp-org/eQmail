@@ -35,10 +35,10 @@ stralloc ufline = {0};
 char inbuf[BUFFER_INSIZE];
 char outbuf[BUFFER_OUTSIZE];
 
-#define FATAL "maildir2mbox: fatal: "
+#define FATL "maildir2mbox: fatal: "
 #define WARNING "maildir2mbox: warning: "
 
-void die_nomem() { strerr_die2x(111,FATAL,"out of memory"); }
+void die_nomem() { strerr_die2x(111,FATL,"out of memory"); }
 
 int main()
 {
@@ -56,9 +56,9 @@ int main()
   umask(077);
 
   mbox = env_get("MAIL");
-  if (!mbox) strerr_die2x(111,FATAL,"MAIL not set");
+  if (!mbox) strerr_die2x(111,FATL,"MAIL not set");
   mboxtmp = env_get("MAILTMP");
-  if (!mboxtmp) strerr_die2x(111,FATAL,"MAILTMP not set");
+  if (!mboxtmp) strerr_die2x(111,FATL,"MAILTMP not set");
 
   if (maildir_chdir() == -1)
     strerr_die1(111,FATAL,&maildir_chdir_err);
@@ -70,25 +70,25 @@ int main()
 
   fdlock = open_append(mbox);
   if (fdlock == -1)
-    strerr_die4sys(111,FATAL,"unable to lock ",mbox,": ");
+    strerr_die4sys(111,FATL,"unable to lock ",mbox,": ");
   if (lock_ex(fdlock) == -1)
-    strerr_die4sys(111,FATAL,"unable to lock ",mbox,": ");
+    strerr_die4sys(111,FATL,"unable to lock ",mbox,": ");
 
   fdoldmbox = open_read(mbox);
   if (fdoldmbox == -1)
-    strerr_die4sys(111,FATAL,"unable to read ",mbox,": ");
+    strerr_die4sys(111,FATL,"unable to read ",mbox,": ");
 
   fdnewmbox = open_trunc(mboxtmp);
   if (fdnewmbox == -1)
-    strerr_die4sys(111,FATAL,"unable to create ",mboxtmp,": ");
+    strerr_die4sys(111,FATL,"unable to create ",mboxtmp,": ");
 
   buffer_init(&ssin,read,fdoldmbox,inbuf,sizeof(inbuf));
   buffer_init(&ssout,write,fdnewmbox,outbuf,sizeof(outbuf));
 
   switch(buffer_copy(&ssout,&ssin))
   {
-    case -2: strerr_die4sys(111,FATAL,"unable to read ",mbox,": ");
-    case -3: strerr_die4sys(111,FATAL,"unable to write to ",mboxtmp,": ");
+    case -2: strerr_die4sys(111,FATL,"unable to read ",mbox,": ");
+    case -3: strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
   }
 
   while (prioq_min(&pq,&pe))
@@ -98,11 +98,11 @@ int main()
 
     fd = open_read(filenames.s + pe.id);
     if (fd == -1)
-      strerr_die4sys(111,FATAL,"unable to read $MAILDIR/",filenames.s + pe.id,": ");
+      strerr_die4sys(111,FATL,"unable to read $MAILDIR/",filenames.s + pe.id,": ");
     buffer_init(&ssin,read,fd,inbuf,sizeof(inbuf));
 
     if (getln(&ssin,&line,&match,'\n') != 0)
-      strerr_die4sys(111,FATAL,"unable to read $MAILDIR/",filenames.s + pe.id,": ");
+      strerr_die4sys(111,FATL,"unable to read $MAILDIR/",filenames.s + pe.id,": ");
 
     if (!stralloc_copys(&ufline,"From XXX ")) die_nomem();
     if (match)
@@ -133,32 +133,32 @@ int main()
     {
       if (gfrom(line.s,line.len))
         if (buffer_puts(&ssout,">") == -1)
-          strerr_die4sys(111,FATAL,"unable to write to ",mboxtmp,": ");
+          strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
       if (buffer_put(&ssout,line.s,line.len) == -1)
-        strerr_die4sys(111,FATAL,"unable to write to ",mboxtmp,": ");
+        strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
       if (!match)
       {
         if (buffer_puts(&ssout,"\n") == -1)
-          strerr_die4sys(111,FATAL,"unable to write to ",mboxtmp,": ");
+          strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
         break;
       }
       if (getln(&ssin,&line,&match,'\n') != 0)
-        strerr_die4sys(111,FATAL,"unable to read $MAILDIR/",filenames.s + pe.id,": ");
+        strerr_die4sys(111,FATL,"unable to read $MAILDIR/",filenames.s + pe.id,": ");
     }
     if (buffer_puts(&ssout,"\n"))
-      strerr_die4sys(111,FATAL,"unable to write to ",mboxtmp,": ");
+      strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
 
    close(fd);
   }
 
   if (buffer_flush(&ssout) == -1)
-    strerr_die4sys(111,FATAL,"unable to write to ",mboxtmp,": ");
+    strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
   if (fsync(fdnewmbox) == -1)
-    strerr_die4sys(111,FATAL,"unable to write to ",mboxtmp,": ");
+    strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
   if (close(fdnewmbox) == -1) /* NFS dorks */
-    strerr_die4sys(111,FATAL,"unable to write to ",mboxtmp,": ");
+    strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
   if (rename(mboxtmp,mbox) == -1)
-    strerr_die6(111,FATAL,"unable to move ",mboxtmp," to ",mbox,": ",&strerr_sys);
+    strerr_die6(111,FATL,"unable to move ",mboxtmp," to ",mbox,": ",&strerr_sys);
 
   while (prioq_min(&pq2,&pe))
   {

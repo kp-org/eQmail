@@ -15,7 +15,7 @@
 #include "buffer.h"
 #include "fmt.h"
 
-#define FATAL "condredirect: fatal: "
+#define FATL "condredirect: fatal: "
 
 struct qmail qqt;
 
@@ -45,36 +45,36 @@ int main(int argc,char **argv)
 
   pid = fork();
   if (pid == -1)
-    strerr_die2sys(111,FATAL,"unable to fork: ");
+    strerr_die2sys(111,FATL,"unable to fork: ");
   if (pid == 0) {
     execvp(argv[2],argv + 2);
     if (error_temp(errno)) _exit(111);
     _exit(100);
   }
   if (wait_pid(&wstat,pid) == -1)
-    strerr_die2x(111,FATAL,"wait failed");
+    strerr_die2x(111,FATL,"wait failed");
   if (wait_crashed(wstat))
-    strerr_die2x(111,FATAL,"child crashed");
+    strerr_die2x(111,FATL,"child crashed");
   switch(wait_exitcode(wstat)) {
     case 0: break;
-    case 111: strerr_die2x(111,FATAL,"temporary child error");
+    case 111: strerr_die2x(111,FATL,"temporary child error");
     default: _exit(0);
   }
 
   if (seek_begin(0) == -1)
-    strerr_die2sys(111,FATAL,"unable to rewind: ");
+    strerr_die2sys(111,FATL,"unable to rewind: ");
   sig_pipeignore();
 
   sender = env_get("SENDER");
-  if (!sender) strerr_die2x(100,FATAL,"SENDER not set");
+  if (!sender) strerr_die2x(100,FATL,"SENDER not set");
   dtline = env_get("DTLINE");
-  if (!dtline) strerr_die2x(100,FATAL,"DTLINE not set");
+  if (!dtline) strerr_die2x(100,FATL,"DTLINE not set");
 
   if (qmail_open(&qqt) == -1)
-    strerr_die2sys(111,FATAL,"unable to fork: ");
+    strerr_die2sys(111,FATL,"unable to fork: ");
   qmail_puts(&qqt,dtline);
   if (buffer_copy(&ssout,&ssin) != 0)
-    strerr_die2sys(111,FATAL,"unable to read message: ");
+    strerr_die2sys(111,FATL,"unable to read message: ");
   buffer_flush(&ssout);
 
   num[fmt_ulong(num,qmail_qp(&qqt))] = 0;
@@ -82,7 +82,7 @@ int main(int argc,char **argv)
   qmail_from(&qqt,sender);
   qmail_to(&qqt,argv[1]);
   qqx = qmail_close(&qqt);
-  if (*qqx) strerr_die2x(*qqx == 'D' ? 100 : 111,FATAL,qqx + 1);
+  if (*qqx) strerr_die2x(*qqx == 'D' ? 100 : 111,FATL,qqx + 1);
   strerr_die2x(99,"condredirect: qp ",num);
   return(0);  /* never reached */
 }

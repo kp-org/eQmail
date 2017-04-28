@@ -16,7 +16,7 @@
 #include "buffer.h"
 #include "sig.h"
 
-#define FATAL "predate: fatal: "
+#define FATL "predate: fatal: "
 
 static char *montab[12] = {
 "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
@@ -44,18 +44,18 @@ int main(int argc,char **argv)
     strerr_die1x(100,"predate: usage: predate child");
 
   if (pipe(pi) == -1)
-    strerr_die2sys(111,FATAL,"unable to create pipe: ");
+    strerr_die2sys(111,FATL,"unable to create pipe: ");
 
   switch(pid = fork()) {
     case -1:
-      strerr_die2sys(111,FATAL,"unable to fork: ");
+      strerr_die2sys(111,FATL,"unable to fork: ");
     case 0:
       close(pi[1]);
       if (fd_move(0,pi[0]) == -1)
-        strerr_die2sys(111,FATAL,"unable to set up fds: ");
+        strerr_die2sys(111,FATL,"unable to set up fds: ");
       sig_pipedefault();
       execvp(argv[1],argv + 1);
-      strerr_die4sys(111,FATAL,"unable to run ",argv[1],": ");
+      strerr_die4sys(111,FATL,"unable to run ",argv[1],": ");
   }
   close(pi[0]);
   buffer_init(&ss,write,pi[1],outbuf,sizeof(outbuf));
@@ -113,9 +113,9 @@ int main(int argc,char **argv)
   close(pi[1]);
 
   if (wait_pid(&wstat,pid) == -1)
-    strerr_die2sys(111,FATAL,"wait failed: ");
+    strerr_die2sys(111,FATL,"wait failed: ");
   if (wait_crashed(wstat))
-    strerr_die2x(111,FATAL,"child crashed");
+    strerr_die2x(111,FATL,"child crashed");
   _exit(wait_exitcode(wstat));
   return(0);  /* never reached */
 }

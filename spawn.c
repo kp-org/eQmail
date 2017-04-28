@@ -60,7 +60,8 @@ int okwrite(fd,buf,n) int fd; char *buf; int n;
  if (!flagwriting) return n;
  w = write(fd,buf,n);
  if (w != -1) return w;
- if (errno == error_intr) return -1;
+// if (errno == error_intr) return -1;
+ if (errno == EINTR) return -1;
  flagwriting = 0; close(fd);
  return n;
 }
@@ -148,7 +149,8 @@ void getcmd()
   { flagreading = 0; return; }
   if (r == -1)
   {
-    if (errno != error_intr)
+//    if (errno != error_intr)
+    if (errno != EINTR)
       flagreading = 0;
     return;
    }
