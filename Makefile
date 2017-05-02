@@ -61,7 +61,8 @@ auto_usera.o:
 
 bouncesaying:
 	$(COMPILE) bouncesaying.c
-	$(LOAD) bouncesaying strerr.a error.a buffer.a str.a wait.a
+	$(LOAD) bouncesaying errmsg.a fmt.o buffer.a qlibs/qstring.a wait.a
+#	$(LOAD) bouncesaying strerr.a error.a errmsg.a fmt.o buffer.a str.a wait.a
 
 commands.o: compile commands.c
 	./compile commands.c
@@ -113,11 +114,10 @@ fmtqfn.o: compile fmtqfn.c
 	./compile fmtqfn.c
 
 forward:
-# compile load forward.c qmail.o strerr.a alloc.a fd.a \
-#wait.a sig.a env.a substdio.a error.a str.a fs.a auto_qmail.o
 	$(COMPILE) forward.c
-	$(LOAD) forward qmail.o strerr.a fd.a wait.a sig.a \
-	env.a buffer.a error.a str.a fs.a auto_qmail.o alloc.a substdio.a
+	$(LOAD) forward qmail.o errmsg.a fd.a wait.a sig.a \
+	env.a buffer.a error.a str.a fs.a auto_qmail.o substdio.a
+#	 alloc.a
 
 gfrom.o: compile gfrom.c
 	./compile gfrom.c
@@ -368,17 +368,6 @@ str.a auto_qmail.o auto_uids.o auto_spawn.o
 	sig.a open.a seek.a lock.a wait.a fd.a stralloc.a alloc.a \
 	substdio.a error.a str.a auto_qmail.o auto_uids.o auto_spawn.o
 
-#qmail-send: compile load qmail-send.c qsutil.o control.o constmap.o newfield.o \
-#prioq.o trigger.o fmtqfn.o quote.o now.o readsubdir.o qmail.o date822fmt.o \
-#datetime.a case.a ndelay.a getln.a wait.a seek.a fd.a sig.a open.a lock.a \
-#stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_split.o env.a
-#	./compile qmail-send.c
-#	./load qmail-send qsutil.o control.o constmap.o newfield.o \
-#	prioq.o trigger.o fmtqfn.o quote.o now.o readsubdir.o \
-#	qmail.o date822fmt.o datetime.a case.a ndelay.a getln.a \
-#	wait.a seek.a fd.a sig.a open.a lock.a stralloc.a alloc.a \
-#	substdio.a error.a str.a fs.a auto_qmail.o auto_split.o env.a
-
 qmail-send: auto_split.o date822fmt.o newfield.o prioq.o qsutil.o readsubdir.o trigger.o
 # compile load qmail-send.c control.o constmap.o \
 # fmtqfn.o quote.o now.o qmail.o date822fmt.o \
@@ -480,9 +469,9 @@ env.a stralloc.a alloc.a substdio.a error.a str.a fs.a dns.lib
 	sig.a env.a getopt.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a `cat dns.lib` buffer.a
 
-tcp-env2: libs remoteinfo6.o timeoutconn6.o
-	./compile -g _tcp-env2.c
-	./load _tcp-env2 byte.o fmt.o qlibs/scan.o \
+qmail-envars: libs remoteinfo6.o timeoutconn6.o
+	./compile -g qmail-envars.c
+	./load qmail-envars byte.o fmt.o qlibs/scan.o \
 	dns.a ip.a case.a env.a alloc.a sig.a str.a stralloc.a \
 	readclose.o time.a qlibs/uint16p.o qlibs/uint32p.o \
 	open.a getopt.a errmsg.a buffer.a stralloc.a \
@@ -572,4 +561,4 @@ qmail-tcpsrv: rules.o remoteinfo6.o timeoutconn6.o
 	str.a stralloc.a strerr.a time.a wait.a socket.a \
 	qlibs/uint16p.o \
 	case.a \
-	qlibs/error_str.o
+	qlibs/errstr.o

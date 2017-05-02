@@ -1,34 +1,33 @@
 /*
- *  Revistion 20170317, Kai Peter
+ *  Revision 20170502, Kai Peter
+ *  - switched to 'errmsg', removed 'strerr'
+ *  Revision 20170317, Kai Peter
  *  - switched to 'buffer'
  *  - changed return type of main to int
  */
-#include "sig.h"
 #include <unistd.h>
+#include "sig.h"
 #include "env.h"
 #include "qmail.h"
-#include "strerr.h"
+#include "error.h"
 #include "buffer.h"
 #include "fmt.h"
 
-#define FATL "forward: fatal: "
-
-void die_nomem() { strerr_die2x(111,FATL,"out of memory"); }
+#define WHO "forward: "
 
 struct qmail qqt;
 
-ssize_t mywrite(int fd,char *buf,int len)
-{
+ssize_t mywrite(int fd,char *buf,int len) {
   qmail_put(&qqt,buf,len);
   return len;
 }
 
 char inbuf[BUFFER_INSIZE];
 char outbuf[1];
-buffer ssin = BUFFER_INIT(read,0,inbuf,sizeof inbuf);
-buffer ssout = BUFFER_INIT(mywrite,-1,outbuf,sizeof outbuf);
+buffer bin = BUFFER_INIT(read,0,inbuf,sizeof inbuf);
+buffer bout = BUFFER_INIT(mywrite,-1,outbuf,sizeof outbuf);
 
-char num[FMT_ULONG];
+char strnum[FMT_ULONG];
 
 int main(int argc,char **argv)
 {
@@ -40,24 +39,31 @@ int main(int argc,char **argv)
 
   sender = env_get("NEWSENDER");
   if (!sender)
-    strerr_die2x(100,FATL,"NEWSENDER not set");
+    err_tmp_plus(ESOFT,"NEWSENDER not set");
   dtline = env_get("DTLINE");
   if (!dtline)
-    strerr_die2x(100,FATL,"DTLINE not set");
+    err_tmp_plus(ESOFT,"DTLINE not set");
 
   if (qmail_open(&qqt) == -1)
-    strerr_die2sys(111,FATL,"unable to fork: ");
+    err_sys_plus(errno,"unable to fork: ");
   qmail_puts(&qqt,dtline);
-  if (buffer_copy(&ssout,&ssin) != 0)
-    strerr_die2sys(111,FATL,"unable to read message: ");
-  buffer_flush(&ssout);
+  if (buffer_copy(&bout,&bin) != 0)
+    err_sys_plus(EHARD,"unable to read message: ");
+  buffer_flush(&bout);
 
-  num[fmt_ulong(num,qmail_qp(&qqt))] = 0;
+  strnum[fmt_ulong(strnum,qmail_qp(&qqt))] = 0;
 
   qmail_from(&qqt,sender);
   while (*++argv) qmail_to(&qqt,*argv);
   qqx = qmail_close(&qqt);
-  if (*qqx) strerr_die2x(*qqx == 'D' ? 100 : 111,FATL,qqx + 1);
-  strerr_die2x(0,"forward: qp ",num);
-  return(0);  /* never reached */
+  if (*qqx) {
+    err_sys_plus(*qqx == 'D' ? ESOFT : EHARD,qqx +1); }
+
+//  strerr_die2x(0,"forward: qp ",num);
+  buffer_puts(buffer_1,"forward: qp ");
+  buffer_puts(buffer_1,strnum);
+  buffer_puts(buffer_1,"\n");
+  buffer_flush(buffer_1);
+
+  return(0);
 }
