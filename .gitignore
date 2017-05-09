@@ -28,3 +28,4 @@ ext
 qlibs
 
 qmail-envars*
+auto_*.c

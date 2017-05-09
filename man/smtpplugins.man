@@ -1,12 +1,9 @@
 .TH smtpplugins 5 "" openqmail
 .SH NAME
-smtpplugins \- configuration file of qmail-spp
+smtpplugins \- configuration file of qmail-spp (smtpplugins)
 .SH DESCRIPTION
-By default
-.B smtpplugins
-is the configuration file of qmail-spp, located in
-.IR QMAILHOME/control 
-directory. It consist of few sections, one for each command:
+\fBQMAILHOME/etc/smtpplugins\fR is the configuration file for qmail-spp.
+It consist of few sections, one for each command:
 .P
     connection - for plugins run just after client connection
     helo       - for HELO/EHLO
@@ -15,22 +12,18 @@ directory. It consist of few sections, one for each command:
     data       - for DATA
     auth       - for AUTH
 .P
-Section names are marked using square brackets ('[' and ']'). 
-After a section name there have to be inserted one ore more
-.IR plugins 
-to execute for this command - one per line. Pathes are relative
-to QMAILHOME. Lines startting with '#' will be ignored.
+Section names are marked using square brackets ('[' and ']'). After a section
+name there have to be inserted one ore more \fIplugins\fR to execute for this
+command - one per line. Pathes are relative to QMAILHOME. Lines startting with
+'\fI#\fR' will be ignored.
 .P
-If line starts with a colon (':'), then the
-.IR plugin
-will be invoked by a system shell (/bin/sh -c). This is useful 
-for debugging a plugin but slighty slower than normal mode.
-
+If line starts with a colon (':'), then the \fIplugin\fR will be invoked by a
+system shell (/bin/sh -c). This is useful for debugging a plugin but slighty
+slower than normal mode.
+.P
+If config file \fBsmtpplugins\fR doesn't exist, \fBqmail-spp\fR is disabled.
 .SH EXAMPLE
-Assuming that all
-.IR plugins
-are located in
-.IR QMAILHOME/bin/plugins ","
+Assuming that all \fIplugins\fR are located in \fIQMAILHOME/bin/plugins\fR,
 the config file could look like this:
 .P
 .RS
@@ -65,15 +58,9 @@ bin/plugins/morelog
 [auth]
 .RE
 .P
-In this example on each incomming mail
-.IR QMAILHOME/bin/plugins/badhelo 
-will be invoked and in case the mail was not rejected
-.IR QMAILHOME/bin/plugins/betterlog
-in a new system shell.
-." Assumption:
-.SH RESTRICTIONS
-The config file itself has to exist (even if it's empty), otherwise eqmail 
-will crash with an "segfault ... error 4" (from glibc).
+In this example on each incomming mail \fBQMAILHOME/bin/plugins/badhelo\fR
+will be invoked. If the message was not rejected by \fBbadhelo\fR, next the
+\fBR QMAILHOME/bin/plugins/morelog\fR will be executed in a new system shell.
 .SH AUTHOR
 Written by Kai Peter. Adapted from the qmail-spp documentation website.
 Original publisher information (as of December 2015):
