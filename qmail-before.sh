@@ -12,6 +12,6 @@ TMP=`head -1 QMAILHOME/etc/CFGFILE`
 [ -x "$TMP" ] && PRG="$TMP" || ( \
   [ ! "$TMP" = "NOLOG" ] && \
   ErrMsg="warning: ignoring invalid value '$TMP' in config file!" && \
-  echo "$ErrMsg" | "$BINDIR/splogger" `basename $0` )
+  echo "$ErrMsg" | splogger `basename $0` )
 
 DoExec "$@"
