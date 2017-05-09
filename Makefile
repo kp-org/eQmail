@@ -146,7 +146,7 @@ headerbody.o: compile headerbody.c
 ipalloc.o: compile ipalloc.c
 	./compile ipalloc.c
 
-ipme.o: compile ipme.c hassalen.h
+ipme.o: compile ipme.c
 	./compile ipme.c
 
 ipmeprint: compile load ipmeprint.c ipme.o ip.a ipalloc.o \
@@ -219,13 +219,13 @@ prioq.o: compile prioq.c
 
 qmail-before: qmail-before.sh
 	cat warn-auto.sh qmail-before.sh \
-	| sed s}QMAILDIR}"`head -1 conf-qmail`"}g \
-	| sed s}BEFORE}"beforequeue"}g \
-	| sed s}PROG}"qmail-queue"}g > qmail-bfque
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}CFGFILE}"beforequeue"}g \
+	| sed s}PROGRAM}"qmail-queue"}g > qmail-bfque
 	cat warn-auto.sh qmail-before.sh \
-	| sed s}QMAILDIR}"`head -1 conf-qmail`"}g \
-	| sed s}BEFORE}"beforemote"}g \
-	| sed s}PROG}"qmail-remote"}g > qmail-bfrmt
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}CFGFILE}"beforemote"}g \
+	| sed s}PROGRAM}"qmail-remote"}g > qmail-bfrmt
 	chmod 754 qmail-bfque qmail-bfrmt
 	chgrp qmail qmail-bfque qmail-bfrmt
 
@@ -462,7 +462,7 @@ splogger: compile load splogger.c substdio.a error.a str.a fs.a
 
 tcp-env: compile load tcp-env.c dns.o remoteinfo.o timeoutread.o \
 timeoutwrite.o timeoutconn.o ip.a ipalloc.o case.a ndelay.a sig.a \
-env.a stralloc.a alloc.a substdio.a error.a str.a fs.a dns.lib
+env.a stralloc.a alloc.a substdio.a error.a str.a fs.a dns.lib hassalen.h
 	./compile tcp-env.c
 	./load tcp-env dns.o remoteinfo.o timeoutread.o \
 	timeoutwrite.o timeoutconn.o ip.a ipalloc.o case.a ndelay.a \
@@ -474,11 +474,8 @@ qmail-envars: libs remoteinfo6.o timeoutconn6.o
 	./load qmail-envars byte.o fmt.o qlibs/scan.o \
 	dns.a ip.a case.a env.a alloc.a sig.a str.a stralloc.a \
 	readclose.o time.a qlibs/uint16p.o qlibs/uint32p.o \
-	open.a getopt.a errmsg.a buffer.a stralloc.a \
-	remoteinfo6.o timeoutconn6.o errmsg.a socket.a ndelay.a
-# timeoutread.o
-# timeoutwrite.o
-# timeoutconn.o
+	open.a getopt.a errmsg.a buffer.a \
+	remoteinfo6.o timeoutconn6.o socket.a ndelay.a
 
 tcpto.o: compile tcpto.c
 	./compile tcpto.c

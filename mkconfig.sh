@@ -81,12 +81,9 @@ chmod 644 QMAIL/control/beforequeue     )
 # create config file for qmail-bfrmt
 [ -f QMAIL/control/beforemote ] || \
 ( echo "Creating config file beforemote..."
-printf "#!/bin/sh
-# config file for qmail-bfrmt\n#\n
-# Enter commands here, like
+printf "/usr/local/qmail/bin/qmail-remote
 
-export DKREMOTE=\"\$BINDIR/qmail-remote\"
-np=\"\$BINDIR/qmail-remote\" ; exec \$np \"\$@\"
+See qmail-bfrmt(8), beforemote(5) and qmail picture for details.
 "       >> QMAIL/control/beforemote
 chown root:qmail QMAIL/control/beforemote
 chmod 644 QMAIL/control/beforemote     )
