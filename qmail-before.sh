@@ -10,7 +10,7 @@ DoExec() { exec "$PRG" "$@"; exit; }
 # get plugin from config file and try to execute it
 TMP=`head -1 QMAILHOME/etc/CFGFILE`
 [ -x "$TMP" ] && PRG="$TMP" || ( \
-  [ ! "$TMP" = "NOLOG" ] && \
+  [ ! -z "$TMP" ] && \
   ErrMsg="warning: ignoring invalid value '$TMP' in config file!" && \
   echo "$ErrMsg" | splogger `basename $0` )
 

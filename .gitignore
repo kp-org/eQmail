@@ -29,3 +29,6 @@ qlibs
 
 qmail-envars*
 auto_*.c
+ipme2*
+ipalloc2*
+ipmeprint2*

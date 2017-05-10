@@ -16,8 +16,7 @@ If \fIprogram\fR is a valid executable file, it will be invoked instead of
 one time only.
 .P
 If \fIprogram\fR is invalid, \fBqmail-bfrmt\fR writes a warning to syslog.
-By setting the first line of config file to \fINOLOG\fR, logging will be
-disabled.
+If the first line of the config file is empty, logging will be disabled.
 .SH CONFIG FILE
 \fBqmail-bfrmt\fR reads the first line from \fIQMAILHOME/etc/beforemote\fR.
 If the config file doesn't exitst or something went wrong, \fIqmail-remote\fR
