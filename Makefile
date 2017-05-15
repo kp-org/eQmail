@@ -360,13 +360,22 @@ error.a str.a fs.a auto_qmail.o base64.o dns.lib tls.o ssl_timeoutio.o
 	str.a fs.a auto_qmail.o  base64.o `cat dns.lib` \
 	buffer.a
 
-qmail-rspawn: compile load qmail-rspawn.c spawn.o tcpto_clean.o now.o \
-sig.a open.a seek.a lock.a wait.a fd.a stralloc.a alloc.a substdio.a error.a \
-str.a auto_qmail.o auto_uids.o auto_spawn.o
+#qmail-rspawn: compile load qmail-rspawn.c spawn.o tcpto_clean.o now.o \
+#sig.a open.a seek.a lock.a wait.a fd.a stralloc.a alloc.a substdio.a error.a \
+#str.a auto_qmail.o auto_uids.o auto_spawn.o
+#	./compile qmail-rspawn.c
+#	./load qmail-rspawn spawn.o tcpto_clean.o now.o \
+#	sig.a open.a seek.a lock.a wait.a fd.a stralloc.a alloc.a \
+#	substdio.a error.a stralloc.a str.a auto_qmail.o auto_uids.o auto_spawn.o
+
+qmail-rspawn: compile load qmail-rspawn.c spawn.o tcpto_clean.o now.o
+#sig.a open.a seek.a lock.a wait.a fd.a stralloc.a alloc.a substdio.a error.a \
+#str.a auto_qmail.o auto_uids.o auto_spawn.o
 	./compile qmail-rspawn.c
 	./load qmail-rspawn spawn.o tcpto_clean.o now.o \
-	sig.a open.a seek.a lock.a wait.a fd.a stralloc.a alloc.a \
-	substdio.a error.a str.a auto_qmail.o auto_uids.o auto_spawn.o
+	sig.a open.a seek.a lock.a wait.a fd.a stralloc.a \
+	errmsg.a buffer.a qstring.a substdio.a \
+	error.a stralloc.a auto_qmail.o auto_uids.o auto_spawn.o
 
 qmail-send: auto_split.o date822fmt.o newfield.o prioq.o qsutil.o readsubdir.o trigger.o
 # compile load qmail-send.c control.o constmap.o \
