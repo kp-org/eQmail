@@ -61,8 +61,10 @@ auto_usera.o:
 
 bouncesaying:
 	$(COMPILE) bouncesaying.c
-	$(LOAD) bouncesaying errmsg.a fmt.o buffer.a qlibs/qstring.a wait.a
-#	$(LOAD) bouncesaying strerr.a error.a errmsg.a fmt.o buffer.a str.a wait.a
+	$(LOAD) bouncesaying errmsg.a buffer.a qstring.a wait.a
+
+buildins.o:
+	$(COMPILE) buildins.c
 
 commands.o: compile commands.c
 	./compile commands.c
@@ -93,7 +95,7 @@ date822fmt.o: compile date822fmt.c
 datemail: \
 warn-auto.sh datemail.sh conf-qmail conf-break conf-split
 	cat warn-auto.sh datemail.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> datemail
@@ -155,10 +157,12 @@ stralloc.a alloc.a substdio.a error.a str.a fs.a
 	./load ipmeprint ipme.o ip.a ipalloc.o stralloc.a alloc.a \
 	substdio.a error.a str.a fs.a
 
-it: \
+it: all
+
+all: \
 qmail-local qmail-lspawn qmail-getpw qmail-remote qmail-rspawn \
 qmail-clean qmail-send qmail-start splogger qmail-queue qmail-inject \
-predate datemail mailsubj qmail-newu \
+predate datemail mailsubj qmail-newu qmail-print \
 qmail-pw2u qmail-qread qmail-qstat qmail-tcpto qmail-tcpok \
 qmail-qmqpc qmail-qmqpd qmail-qmtpd \
 qmail-smtpd sendmail tcp-env qmail-newmrh mkconfig \
@@ -169,14 +173,7 @@ maildir2mbox \
 qmail-before ipmeprint \
 mkrsadhkeys mksrvrcerts qmail-fixq qmail-shcfg
 
-#maildir.o:
-#	$(COMPILE) maildir.c
-
 maildir2mbox:
-# maildir.o
-# compile load maildir2mbox.c maildir.o prioq.o now.o \
-#myctime.o gfrom.o lock.a getln.a env.a open.a strerr.a stralloc.a \
-#alloc.a substdio.a error.a str.a fs.a datetime.a
 	$(COMPILE) maildir2mbox.c
 	$(LOAD) maildir2mbox maildir.o prioq.o now.o myctime.o \
 	gfrom.o lock.a getln.a env.a open.a strerr.a stralloc.a \
@@ -281,6 +278,10 @@ qmail-newu:
 	$(COMPILE) qmail-newu.c
 	$(LOAD) qmail-newu cdb.a getln.a open.a seek.a buffer.a \
 	case.a stralloc.a alloc.a error.a str.a auto_qmail.o
+
+qmail-print: buildins.o
+	$(COMPILE) qmail-print.c
+	$(LOAD) qmail-print errmsg.a stralloc.a str.a fs.a buildins.o buffer.a
 
 qmail-pw2u:
 	$(COMPILE) qmail-pw2u.c
@@ -390,9 +391,12 @@ qmail-send: auto_split.o date822fmt.o newfield.o prioq.o qsutil.o readsubdir.o t
 	buffer.a error.a str.a fs.a auto_qmail.o auto_split.o env.a \
 	substdio.a
 
+
+#	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+
 qmail-shcfg: conf.tmp qmail-shcfg.sh warn-auto.sh
 	@echo build $@
-	@cat warn-auto.sh conf.tmp qmail-shcfg.sh > qmail-shcfg
+	@cat warn-auto.sh qmail-shcfg.sh | sed s}QMAILHOME}"`head -1 conf-home`"}g > qmail-shcfg
 	@chmod 0755 qmail-shcfg
 
 qmail-spp.o: compile qmail-spp.c
@@ -538,12 +542,8 @@ mksrvrcerts: mksrvrcerts.sh conf-users conf-groups warn-auto.sh
 
 #*****************************************************************
 # qmail-tcpsrv
-
 remoteinfo6.o:
 	$(COMPILE) remoteinfo6.c
-
-#socket_ip4loopback.o:
-#	$(COMPILE) socket_ip4loopback.c
 
 timeoutconn6.o:
 	$(COMPILE) timeoutconn6.c

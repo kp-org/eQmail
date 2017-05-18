@@ -1,4 +1,6 @@
 
+QMAILDIR="QMAILHOME"
+
 # some escape sequences to format output
 OFF=$'\e[0m'   # all attributes off
 BLD=$'\e[1m'   # bold
@@ -6,28 +8,7 @@ ULN=$'\e[4m'   # underlined
 YLW=$'\e[33m'  # yellow foreground
 RED=$'\e[91m'  # light red foreground
 
-printf "\033[1m\033[4m%s\033[0m\n\n" "Compiled-in values:"
-echo "   eQmail home directory: $HOMEDIR"
-echo "user extension delimiter: '$BREAK'"
-echo "   Paternalism (decimal): $PATRN"
-echo "silent concurrency limit: $SPAWN"
-echo "queue subdirectory split: $SPLIT"
-echo
-echo "user and group id's:"
-echo "      alias user: $UIDA"
-echo "     daemon user: $UIDD"
-echo "        log user: $UIDL"
-echo "       misc user: $UIDO"
-echo "     passwd user: $UIDP"
-echo "      queue user: $UIDQ"
-echo "     remote user: $UIDR"
-echo "       send user: $UIDS"
-echo "  standard group: $GIDQ"
-echo "   process group: $GIDN"
-echo
-echo "supports TLS/SSL: $TLS"
-echo "support for IPv6: $IP6"
-echo
+$QMAILDIR/bin/qmail-print
 
 printContent() {
   printf "\033[1m%s\033[0m" "$f:"
@@ -65,7 +46,7 @@ printContent() {
   FMT=0 ; COMMENT="" ; DEFCMNT=""
 }
 
-CONFDIR=$HOMEDIR/control
+CONFDIR=$QMAILDIR/control
 if [ ! -d $CONFDIR ] ; then echo "error reading controls directory!" ; exit 1 ; fi
 
 FILES="me defaultdomain locals defaulthost plusdomain rcpthosts morercpthosts \
