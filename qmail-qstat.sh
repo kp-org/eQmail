@@ -1,20 +1,23 @@
-cd QMAIL
-DIRS=`ls queue/mess/ | wc -l | xargs`
+QMAILDIR="QMAILHOME"
+cd $QMAILDIR
+DIRS=`ls queue/mess/ | wc -l | xargs`   # check and count queue split
+# simple try to check out the 'service start' process
+for s in eqmaild qmail svscan    # xinetd ???
+do
+  [ -f "/etc/init.d/$s" ] && BC="$s" && break
+done
 
 showHelp() {
-#  echo
   echo "Usage: qmail-qstat [option [value]]"
   echo
   echo -e "  -h\t\tShow this help"
   echo -e "  -D <id>\tDelete message with id 'id' from queue"
+  echo -e "  -d\t\tdelete all messages from queue"
   echo -e "  -i\t\tList ID's of all messages in queue"
   echo -e "  -l\t\tList all messages in queue"
   echo -e "  -L\t\tCount messages with local receipient"
   echo -e "  -m <id>\tShow message with id 'id'"
   echo -e "  -R\t\tCount messages with remote receipient"
-#  echo -e "\t\t  l: clean up local queue"
-#  echo -e "\t\t  r: clean up remote queue"
-#  echo -e "\t\t  b: delete all messages from queue"
   echo
   exit 0
 }
@@ -57,25 +60,38 @@ listMsgIDs() {
   for ID in $(find queue/$QSUBDIR/*/* -print 2>/dev/null)
   do echo `basename "$ID"` ; done
 }
+stopServices() {
+  # return and continue w/o stopping services
+  [ ! "$BC" ] && echo "Warning: couldn't stop services ..." && return
+  echo "stopping services ..."
+  # try to stop service and if it fails - bummer!
+  /etc/init.d/"$BC" stop 2>&1 >/dev/null
+}
+startServices() {
+  [ ! "$BC" ] && echo "Please restart 'qmail-send' now!" && return
+  echo "restarting services ..."
+  #
+  /etc/init.d/"$BC" start #2>&1 >/dev/null
+}
 deleteMessage() {
+  stopServices
   [ "$QSUBDIR" ] || QSUBDIR="mess"
   [ "$N" ] && FARGS="-name $N"
   echo -n "deleting message "`basename "$N"`" ... "
-  for M in $(find queue/*/*/* $FARGS -print 2>/dev/null)
+  for M in $(find queue/*/*/* $FARGS 2>/dev/null | xargs)
   do
     Q=`echo $M | cut -d/ -f2`
 #    echo "deleting "`basename $M`" from queue/$Q: "
     rm -f "$M"
   done
-  if [ "$M" ] ; then
-    echo "done" ; else echo "failed: no such message" ; fi
+  if [ "$M" ] ; then echo "done" ; 
+    else echo "failed: no such message" ; fi
+  startServices
 }
 
 if [ ! $1 ] ; then default ; exit 0 ; fi
-while getopts ":hliLRm:D:" o; do
+while getopts ":hliLRm:D:d" o; do
     case "${o}" in
-#        u) STARTUID=${OPTARG};;
-#        g) STARTGID=${OPTARG};;
         L) QSUBDIR="local" ; listMessages ; echo ; countLocal ; echo ; exit;;
         R) QSUBDIR="remote" ; listMessages ; echo ; countRemote ; echo ; exit;;
         h) showHelp;;
@@ -83,6 +99,8 @@ while getopts ":hliLRm:D:" o; do
         l) listMessages ; default;;
         m) N=${OPTARG} ; listMessages ; echo;;
         D) N=${OPTARG} ; deleteMessage ;;
+        d) deleteMessage;;
+
         *) echo "Invalid option!" ; showHelp;;
     esac
 done ; shift $((OPTIND-1))

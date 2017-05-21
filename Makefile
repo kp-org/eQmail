@@ -335,7 +335,7 @@ auto_qmail.o auto_split.o
 
 qmail-qstat: warn-auto.sh qmail-qstat.sh conf-qmail conf-break conf-split
 	cat warn-auto.sh qmail-qstat.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g > qmail-qstat
 	chmod 755 qmail-qstat
