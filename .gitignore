@@ -26,9 +26,10 @@ CHANGELOG-1.10
 conf-build
 ext
 qlibs
-
 qmail-envars*
 auto_*.c
 ipme2*
 ipalloc2*
 ipmeprint2*
+hostname.c
+hostname

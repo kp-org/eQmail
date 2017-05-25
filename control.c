@@ -50,16 +50,16 @@ int control_rldef(stralloc *sa,char *fn,int flagme,char *def)
 
 int control_readline(stralloc *sa,char *fn)
 {
-  buffer ss;
+  buffer b;
   int fd;
   int match;
 
   fd = open_read(fn);
-  if (fd == -1) { if (errno == error_noent) return 0; return -1; }
+  if (fd == -1) { if (errno == ENOENT) return 0; return -1; }
 
-  buffer_init(&ss,read,fd,inbuf,sizeof(inbuf));
+  buffer_init(&b,read,fd,inbuf,sizeof(inbuf));
 
-  if (getln(&ss,sa,&match,'\n') == -1) { close(fd); return -1; }
+  if (getln(&b,sa,&match,'\n') == -1) { close(fd); return -1; }
 
   striptrailingwhitespace(sa);
   close(fd);
@@ -82,16 +82,16 @@ int control_readint(int *i,char *fn)
 
 int control_readfile(stralloc *sa,char *fn,int flagme)
 {
-  buffer ss;
+  buffer b;
   int fd;
   int match;
 
   if (!stralloc_copys(sa,"")) return -1;
 
   fd = open_read(fn);
-  if (fd == -1) 
+  if (fd == -1)
   {
-    if (errno == error_noent)
+    if (errno == ENOENT)
     {
       if (flagme && meok)
       {
@@ -104,11 +104,11 @@ int control_readfile(stralloc *sa,char *fn,int flagme)
     return -1;
   }
 
-  buffer_init(&ss,read,fd,inbuf,sizeof(inbuf));
+  buffer_init(&b,read,fd,inbuf,sizeof(inbuf));
 
   for (;;)
   {
-    if (getln(&ss,&line,&match,'\n') == -1) break;
+    if (getln(&b,&line,&match,'\n') == -1) break;
     if (!match && !line.len) { close(fd); return 1; }
     striptrailingwhitespace(&line);
     if (!stralloc_0(&line)) break;

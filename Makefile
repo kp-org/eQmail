@@ -35,6 +35,7 @@ libs:
 	cd qlibs ; make
 
 obj:
+	$(COMPILE) commands.c
 	$(COMPILE) hfield.c
 	$(COMPILE) maildir.c
 
@@ -66,8 +67,8 @@ bouncesaying:
 buildins.o:
 	$(COMPILE) buildins.c
 
-commands.o: compile commands.c
-	./compile commands.c
+#commands.o: compile commands.c
+#	./compile commands.c
 
 condredirect:
 	$(COMPILE) condredirect.c
@@ -407,7 +408,7 @@ timeoutread.o timeoutwrite.o ip.a ipme.o ipalloc.o control.o constmap.o \
 received.o date822fmt.o now.o qmail.o cdb.a fd.a wait.a datetime.a \
 getln.a open.a sig.a case.a env.a stralloc.a alloc.a substdio.a \
 error.a str.a fs.a auto_qmail.o base64.o qmail-spp.o \
-tls.o ssl_timeoutio.o ndelay.a
+tls.o ssl_timeoutio.o ndelay.a 
 	./compile qmail-smtpd.c
 	./load qmail-smtpd rcpthosts.o commands.o timeoutread.o \
 	timeoutwrite.o ip.a ipme.o ipalloc.o control.o constmap.o \
@@ -568,3 +569,14 @@ qmail-tcpsrv: rules.o remoteinfo6.o timeoutconn6.o
 	qlibs/uint16p.o \
 	case.a \
 	qlibs/errstr.o
+
+#************************************************
+hostname:
+	./compile hostname.c
+	./load hostname buffer.a str.a
+
+qmail-plugz:
+	./compile qmail-plugz.c
+	./load qmail-plugz buildins.o constmap.o control.o fmt.o \
+	getln.a open.a stralloc.a buffer.a qstring.a errmsg.a
+	
