@@ -33,3 +33,4 @@ ipalloc2*
 ipmeprint2*
 hostname.c
 hostname
+qmail-plug*

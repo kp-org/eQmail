@@ -77,7 +77,7 @@ chmod 0622         $QMAILDIR/queue/lock/trigger
 cp bouncesaying condredirect datemail except forward maildir2mbox \
    maildirmake mailsubj mksrvrcerts mkrsadhkeys predate preline $QMAILDIR/bin
 cp qmail-bfque qmail-bfrmt qmail-clean qmail-fixq qmail-getpw qmail-inject \
-   qmail-local qmail-lspawn qmail-newmrh qmail-newu qmail-pw2u \
+   qmail-local qmail-lspawn qmail-newmrh qmail-newu qmail-print qmail-pw2u \
    qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-qstat \
    qmail-queue qmail-remote qmail-rspawn qmail-send qmail-shcfg \
    qmail-smtpd qmail-start qmail-tcpok qmail-tcpto              $QMAILDIR/bin
@@ -121,10 +121,9 @@ cd $OLDPWD
 # some links could be helpful
 [ -d /usr/local/bin ] || mkdir -p /usr/local/bin
 cd /usr/local/bin
-readlink sendmail    2>&1 >/dev/null || ln -s $QMAILDIR/bin/sendmail sendmail
-readlink qmail-qstat 1>/dev/null || ln -s $QMAILDIR/bin/qmail-qstat qmail-qstat
-readlink qmail-fixq  1>/dev/null || ln -s $QMAILDIR/bin/qmail-fixq qmail-fixq
-readlink qmail-shcfg >/dev/null || ln -s $QMAILDIR/bin/qmail-shcfg qmail-shcfg
-
+for L in maildirmake qmail-fixq sendmail qmail-qstat qmail-shcfg
+do
+  readlink $L 2>&1 >/dev/null || ln -s $QMAILDIR/bin/$L $L
+done
 # ....
 cd $OLDPWD

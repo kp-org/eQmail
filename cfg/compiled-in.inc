@@ -30,4 +30,4 @@ fd_spn=$SPAWN
 [ $fd_spn -gt $fd_max ] && fd_spn=$fd_max
 echo "int spawn_limit = $fd_spn;"            >> $oFN
 echo "int queue_split = $SPLIT;"             >> $oFN
-echo "char *queuedir = \"$QUEUEDIR\";"      >> $oFN
+echo "char *queuedir = \"$QUEUEDIR\";"       >> $oFN

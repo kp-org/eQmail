@@ -34,6 +34,9 @@ echo "build on "${ARCH}"!"
 . cfg/shared-libs.inc
 
 #********************************************************************************
+#
+. cfg/compiled-in.inc
+#********************************************************************************
 echo
 if [ "$CRITICAL" ] ; then
    printf "\033[1m""Critical:$CRITICAL not found!""\033[0m\n"

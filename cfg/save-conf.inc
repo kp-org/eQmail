@@ -1,6 +1,6 @@
 #!/bin/sh
 #***********************************************************************
-# Save some values for later usage (e.g. in qmail-shcfg)               *
+# Save some values for later usage -> required by mkconfig only        *
 #***********************************************************************
 
 TMPFILE="conf.tmp"
