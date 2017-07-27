@@ -58,7 +58,7 @@ FILES="me defaultdomain locals defaulthost plusdomain rcpthosts morercpthosts \
        badmailfrom badmailto percenthack \
        smtpplugins checkpwtools \
 "
-if [ "$TLS" = "Yes" ] ; then 
+if [ "$TLS" = "Yes" ] ; then
    FILES=" $FILES servercert clientcert tlsserverciphers tlsclientciphers \
           dh2048.pem rsa2048.pem"
 fi
@@ -188,7 +188,7 @@ do
       printContent;;
     plusdomain)
       if [ ! -f "$CONFDIR/$f" ] ; then FMT="0" ; else FMT="1" ; fi
-      COMMENT="this domain name will be added to addesses w/o a domain: "
+      COMMENT="this domain name will be added to addresses w/o a domain: "
       DEFAULT="not set"
       printContent;;
     qmqpservers)
