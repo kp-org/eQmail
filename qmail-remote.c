@@ -293,7 +293,7 @@ char *append;
   out(".\n");
   outsmtptext();
 
-#if defined(TLS) && defined(DEBUG)
+#if defined(TLS) && defined(DEBUG_TLS)
   if (ssl) {
     X509 *peercert;
 
@@ -782,6 +782,7 @@ int main(int argc,char **argv)
   if (!stralloc_copys(&auth_smtp_user,"")) temp_nomem();
   if (!stralloc_copys(&auth_smtp_pass,"")) temp_nomem();
 
+  /* relayhost comes from smtproutes */
   relayhost = 0;
   for (i = 0;i <= host.len;++i)
     if ((i == 0) || (i == host.len) || (host.s[i] == '.'))
