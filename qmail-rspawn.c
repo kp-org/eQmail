@@ -93,10 +93,11 @@ void report(buffer *b,int wstat,char *s,int len)
 int spawn(int fdmess,int fdout,char *s,char *r,int at)
 {
   struct stat st;
-//  np = "qmail-bfrmt";
   stralloc sa = {0};
-  stralloc_copys(&sa,auto_qmail);
-  stralloc_catb(&sa,"/bin/qmail-bfrmt",17); /* len: 16 + \0 */
+
+  if(!stralloc_copys(&sa,auto_qmail)) err_sys(errno);
+  if(!stralloc_catb(&sa,"/bin/qmail-bfrmt",16)) err_sys(errno); /* len: 16 + \0 */
+  if(!stralloc_0(&sa)) err_sys(errno);
   char *x = sa.s;
   if (stat(x,&st) != 0) { np = "qmail-remote"; }
 
