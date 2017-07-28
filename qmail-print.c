@@ -3,6 +3,8 @@
  *  - new file
  */
 #include <unistd.h>
+#include <socket.h>
+#include <netdb.h>
 #include "buffer.h"
 #include "fmt.h"
 #include "str.h"
@@ -12,11 +14,30 @@
 
 #define WHO "qmail-print: "
 
+void myhostname1() {
+  char host[1023];  /* */
+
+  host[0] = 0;
+  gethostname(host,sizeof(host));  /* */
+  host[sizeof(host) - 1] = 0;
+
+  struct hostent* h;
+  h = gethostbyname(host);
+
+  buffer_puts(buffer_1,"                Hostname: ");
+  buffer_puts(buffer_1,h->h_name);
+  buffer_puts(buffer_1,"\n");
+  buffer_flush(buffer_1);
+  return;
+}
+
 int main()
 {
   char strnum[FMT_ULONG];
 
   buffer_puts(buffer_1,"\033[1mCompiled-in values:\033[0m\n\n");
+
+//  myhostname1();
 
   buffer_puts(buffer_1,"    qmail home directory: ");
   buffer_puts(buffer_1,qmailhome);
