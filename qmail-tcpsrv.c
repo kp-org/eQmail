@@ -9,13 +9,11 @@
 #include "scan.h"
 #include "ip.h"
 #include "fd.h"
-//#include "exit.h"
 #include "env.h"
 #include "prot.h"
 #include "open.h"
 #include "wait.h"
 #include "stralloc.h"
-//#include <alloc.h>
 #include "buffer.h"
 #include "error.h"
 #include "strerr.h"
@@ -38,6 +36,8 @@ int flagremotehost = 1;
 int flagparanoid = 0;
 unsigned long timeout = 26;
 uint32 netif = 0;
+// 
+int ipv4socket = 0;
 
 static stralloc tcpremoteinfo;
 
@@ -357,7 +357,8 @@ int main(int argc,char **argv)
       case 'g': scan_ulong(optarg,&gid); break;
       case 'I': netif=socket_getifidx(optarg); break;
       case '1': flag1 = 1; break;
-      case '4': noipv6 = 1; break;
+//      case '4': noipv6 = 1; break;
+      case '4': ipv4socket = 1; break;
       case '6': forcev6 = 1; break;
       case 'l': localhost = optarg; break;
       default: usage();
@@ -401,7 +402,8 @@ int main(int argc,char **argv)
       strerr_die3x(111,FATAL,"no IP address for ",hostname);
     byte_copy(localip,16,addresses.s);
     if (ip6_isv4mapped(localip))
-      noipv6=1;
+//      noipv6=1;
+      ipv4socket = 1;
   }
 
   s = socket_tcp6();

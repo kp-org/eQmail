@@ -1030,7 +1030,7 @@ int tls_verify()
       protocol = proto.s;
       relayclient = "";
       /* also inform qmail-queue */
-      if (!env_put("RELAYCLIENT=")) die_nomem();
+      if (!env_puts("RELAYCLIENT=")) die_nomem();
     }
 
     X509_free(peercert);
