@@ -20,7 +20,7 @@ qmail-rspawn
 qmail-clean
 qmail-send
 qmail-start
-syslog.lib
+#syslog.lib
 splogger
 qmail-queue
 qmail-inject

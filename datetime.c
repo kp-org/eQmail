@@ -11,19 +11,19 @@ datetime_sec t;
   int yday;
   int wday;
   int mon;
- 
+
   tod = t % 86400;
   day = t / 86400;
   if (tod < 0) { tod += 86400; --day; }
- 
+
   dt->hour = tod / 3600;
   tod %= 3600;
   dt->min = tod / 60;
   dt->sec = tod % 60;
- 
+
   wday = (day + 4) % 7; if (wday < 0) wday += 7;
   dt->wday = wday;
- 
+
   day -= 11017;
   /* day 0 is march 1, 2000 */
   year = 5 + day / 146097;
@@ -63,29 +63,29 @@ struct datetime *dt;
   int year;
   int day;
   int mon;
- 
+
   year = dt->year + 1900;
- 
+
   mon = dt->mon;
   if (mon >= 2) { mon -= 2; }
   else { mon += 10; --year; }
- 
+
   day = (dt->mday - 1) * 10 + 5 + 306 * mon;
   day /= 10;
- 
+
   if (day == 365) { year -= 3; day = 1460; }
   else { day += 365 * (year % 4); }
   year /= 4;
- 
+
   day += 1461 * (year % 25);
   year /= 25;
- 
+
   if (day == 36524) { year -= 3; day = 146096; }
   else { day += 36524 * (year % 4); }
   year /= 4;
- 
+
   day += 146097 * (year - 5);
   day += 11017;
- 
+
   return ((day * 24 + dt->hour) * 60 + dt->min) * 60 + dt->sec;
 }

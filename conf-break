@@ -1,8 +1,8 @@
-+
+-
 
 This character is the user-ext delimiter. The default delimiter is -,
 meaning that user joe controls joe-anything. Some system administrators
-prefer - or =.
+prefer + or =.
 
 You can override this choice at run time with the qmail-users mechanism.
 

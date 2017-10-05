@@ -67,9 +67,6 @@ bouncesaying:
 buildins.o:
 	$(COMPILE) buildins.c
 
-#commands.o: compile commands.c
-#	./compile commands.c
-
 condredirect:
 	$(COMPILE) condredirect.c
 	$(LOAD) condredirect qmail.o strerr.a fd.a sig.a wait.a \
@@ -120,7 +117,6 @@ forward:
 	$(COMPILE) forward.c
 	$(LOAD) forward qmail.o errmsg.a fd.a wait.a sig.a \
 	env.a buffer.a error.a str.a fs.a auto_qmail.o substdio.a
-#	 alloc.a
 
 gfrom.o: compile gfrom.c
 	./compile gfrom.c
@@ -131,17 +127,8 @@ trysalen.c compile
 	&& echo \#define HASSALEN 1 || exit 0 ) > hassalen.h
 #	rm -f trysalen.o
 
-# needed by wait.o (wait_pid)
-#haswaitp.h: trywaitp.c compile load
-#	( ( ./compile trywaitp.c && ./load trywaitp ) >/dev/null 2>&1 \
-#	&& echo \#define HASWAITPID 1 || exit 0 ) > haswaitp.h
-##	rm -f trywaitp.o trywaitp
-
 headerbody.o: compile headerbody.c
 	./compile headerbody.c
-
-#hfield.o: compile hfield.c
-#	./compile hfield.c
 
 #ip.o: compile ip.c
 #	./compile ip.c
@@ -392,9 +379,6 @@ qmail-send: auto_split.o date822fmt.o newfield.o prioq.o qsutil.o readsubdir.o t
 	buffer.a error.a str.a fs.a auto_qmail.o auto_split.o env.a \
 	substdio.a
 
-
-#	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-
 qmail-shcfg: conf.tmp qmail-shcfg.sh warn-auto.sh
 	@echo build $@
 	@cat warn-auto.sh qmail-shcfg.sh | sed s}QMAILHOME}"`head -1 conf-home`"}g > qmail-shcfg
@@ -579,4 +563,3 @@ qmail-plugz:
 	./compile qmail-plugz.c
 	./load qmail-plugz buildins.o constmap.o control.o fmt.o \
 	getln.a open.a stralloc.a buffer.a qstring.a errmsg.a
-	
