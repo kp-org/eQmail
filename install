@@ -9,39 +9,48 @@ QMAILDIR=`head -1 conf-qmail`
 SPLIT=`head -1 conf-split`
 . cfg/getids.inc
 
+BINDIR="$QMAILDIR/bin"
+CFGDIR="$QMAILDIR/etc"
+MANDIR="$QMAILDIR/man"
+DOCDIR="$QMAILDIR/doc"
+VARDIR="$QMAILDIR/var"
+
 # man pages
 for i in 1 5 7 8 ; do
-  [ -d $QMAILDIR/man/man$i ] || mkdir -p $QMAILDIR/man/man$i
-  cp man/$i/* $QMAILDIR/man/man$i
+  [ -d $MANDIR/man$i ] || mkdir -p $MANDIR/man$i
+  cp man/$i/* $MANDIR/man$i
 done
 
-chmod -R 0644 $QMAILDIR/man
-chmod 0755 $QMAILDIR/man $QMAILDIR/man/*
+chmod -R 0644 $MANDIR   #$QMAILDIR/man
+#chmod 0755 $QMAILDIR/man $QMAILDIR/man/*
+chmod 0755 $MANDIR $MANDIR/*
 
 # doc
-mkdir -p $QMAILDIR/doc
-cp doc/FAQ      $QMAILDIR/doc
-cp doc/INSTAL*  $QMAILDIR/doc
-cp doc/PIC.*    $QMAILDIR/doc
+mkdir -p "$DOCDIR"
+cp doc/FAQ      "$DOCDIR"
+cp doc/INSTAL*  "$DOCDIR"
+cp doc/PIC.*    "$DOCDIR"
 #cp README* $QMAILDIR/doc
-cp doc/REMOVE.* $QMAILDIR/doc
-cp doc/SENDMAIL $QMAILDIR/doc
-cp doc/TEST.*   $QMAILDIR/doc
-cp doc/UPGRADE  $QMAILDIR/doc
+cp doc/REMOVE.* "$DOCDIR"
+cp doc/SENDMAIL "$DOCDIR"
+cp doc/TEST.*   "$DOCDIR"
+cp doc/UPGRADE  "$DOCDIR"
 
-chmod 0644 $QMAILDIR/doc/*
+chmod 0644 "$DOCDIR"/*
 
 # top level
-T=$QMAILDIR           # just to shortening next commands (T: tmp)
-mkdir -p $T/alias $T/bin $T/control/bootctrl $T/queue
-#chmod 2755            $QMAILDIR/alias
-#chown $UIDA:$GIDQ     $QMAILDIR/alias
-chown -R $UIDO:$GIDQ  $QMAILDIR/bin $QMAILDIR/control
+mkdir -p $BINDIR $VARDIR/alias $VARDIR/queue  # $T/bin 
+#T=$QMAILDIR           # just to shortening next commands (T: tmp)
+#mkdir -p $T/control/bootctrl $T/tmp
+mkdir -p "$CFGDIR/bootctrl" $QMAILDIR/tmp
+chown -R $UIDO:$GIDQ  "$BINDIR" "$CFGDIR"
 # dir users could be special: if it exists don't touch it!
-[ -d $T/users ] || (mkdir $T/users ; chown $UIDO:$GIDQ $T/users)
+#[ -d $T/users ] || (mkdir $T/users ; chown $UIDO:$GIDQ $T/users)
+[ -d $VARDIR/users ] || (mkdir $VARDIR/users ; chown $UIDO:$GIDQ $VARDIR/users)
 
 # queue
-T=$QMAILDIR/queue     # just to shortening next commands (T: tmp)
+#T=$QMAILDIR/queue     # just to shortening next commands (T: tmp)
+T=$VARDIR/queue     # just to shortening next commands (T: tmp)
 mkdir -p $T/bounce $T/lock $T/pid
 i=0
 #until [ $i -eq `head -1 conf-split` ]
@@ -52,67 +61,76 @@ do
   i=$(($i+1))
 done
 # set all:
-chown -R $UIDQ:$GIDQ  $QMAILDIR/queue
-chmod -R 0750         $QMAILDIR/queue
+chown -R $UIDQ:$GIDQ  $VARDIR/queue  # $QMAILDIR/queue
+chmod -R 0750         $VARDIR/queue  # $QMAILDIR/queue
 # set new: bounce, info, local, remote
 chown -R $UIDS:$GIDQ  $T/bounce $T/info $T/local $T/remote
 chmod -R 0700         $T/info $T/intd $T/local $T/pid $T/remote
 # upgrade/qmail-fixq: set correct mode of files (messages)
-find $QMAILDIR/queue/ -type f -exec chmod 644 {} + -exec chown $UIDQ:0 {} +
+find $VARDIR/queue/ -type f -exec chmod 644 {} + -exec chown $UIDQ:0 {} +
+#find $QMAILDIR/queue/ -type f -exec chmod 644 {} + -exec chown $UIDQ:0 {} +
 
 # special files in 'lock'
-dd if=/dev/zero of=$QMAILDIR/queue/lock/tcpto bs=2048 count=1 2>/dev/null
-chown $UIDR:$GIDQ  $QMAILDIR/queue/lock/tcpto
-chmod 0644         $QMAILDIR/queue/lock/tcpto
+#dd if=/dev/zero of=$QMAILDIR/queue/lock/tcpto bs=2048 count=1 2>/dev/null
+dd if=/dev/zero of=$VARDIR/queue/lock/tcpto bs=2048 count=1 2>/dev/null
+chown $UIDR:$GIDQ  $VARDIR/queue/lock/tcpto  # $QMAILDIR/queue/lock/tcpto
+chmod 0644         $VARDIR/queue/lock/tcpto  # $QMAILDIR/queue/lock/tcpto
 
-touch $QMAILDIR/queue/lock/sendmutex
-chown $UIDS:$GIDQ  $QMAILDIR/queue/lock/sendmutex
-chmod 0600         $QMAILDIR/queue/lock/sendmutex
+#touch $QMAILDIR/queue/lock/sendmutex
+touch $VARDIR/queue/lock/sendmutex
+chown $UIDS:$GIDQ  $VARDIR/queue/lock/sendmutex  # $QMAILDIR/queue/lock/sendmutex
+chmod 0600         $VARDIR/queue/lock/sendmutex  # $QMAILDIR/queue/lock/sendmutex
 
-mkfifo             $QMAILDIR/queue/lock/trigger 2>/dev/null
-chown $UIDS:$GIDQ  $QMAILDIR/queue/lock/trigger
-chmod 0622         $QMAILDIR/queue/lock/trigger
+#mkfifo             $QMAILDIR/queue/lock/trigger 2>/dev/null
+mkfifo             $VARDIR/queue/lock/trigger 2>/dev/null
+chown $UIDS:$GIDQ  $VARDIR/queue/lock/trigger  # $QMAILDIR/queue/lock/trigger
+chmod 0622         $VARDIR/queue/lock/trigger  # $QMAILDIR/queue/lock/trigger
+
+#
+ln -s $VARDIR/queue $QMAILDIR/queue    # as long not changed in code
+
 
 # bin
 cp bouncesaying condredirect datemail except forward maildir2mbox \
-   maildirmake mailsubj mksrvrcerts mkrsadhkeys predate preline $QMAILDIR/bin
+   maildirmake mailsubj mksrvrcerts mkrsadhkeys predate preline "$BINDIR"  #$QMAILDIR/bin
 cp qmail-bfque qmail-bfrmt qmail-clean qmail-fixq qmail-getpw qmail-inject \
    qmail-local qmail-lspawn qmail-newmrh qmail-newu qmail-print qmail-pw2u \
    qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-qstat \
    qmail-queue qmail-remote qmail-rspawn qmail-send qmail-shcfg \
-   qmail-smtpd qmail-start qmail-tcpok qmail-tcpto              $QMAILDIR/bin
-cp qreceipt sendmail splogger tcp-env                           $QMAILDIR/bin
-cp qmail-tcpsrv tcprules                                        $QMAILDIR/bin
+   qmail-smtpd qmail-start qmail-tcpok qmail-tcpto              "$BINDIR"  #$QMAILDIR/bin
+cp qreceipt sendmail splogger tcp-env                           "$BINDIR"  #$QMAILDIR/bin
+cp qmail-tcpsrv tcprules                                        "$BINDIR"  #$QMAILDIR/bin
 
-chown $UIDO:$GIDQ  $QMAILDIR/bin/*
-chmod 0755         $QMAILDIR/bin/*
+chown $UIDO:$GIDQ  $BINDIR/*
+chmod 0755         $BINDIR/*
 
-cd "$QMAILDIR/bin"
+cd "$BINDIR"
 chmod 0711 qmail-getpw qmail-local qmail-remote qmail-rspawn \
            qmail-clean qmail-send qmail-pw2u splogger
 chmod 0700 qmail-lspawn qmail-start qmail-newu qmail-newmrh
 cd $OLDPWD
-chown $UIDQ:$GIDQ  $QMAILDIR/bin/qmail-queue
-chmod 4711         $QMAILDIR/bin/qmail-queue
+chown $UIDQ:$GIDQ  $BINDIR/qmail-queue
+chmod 4711         $BINDIR/qmail-queue
 
 # alias dir
-cd $QMAILDIR/alias
+cd $VARDIR/alias
 touch .qmail-root
 echo root > .qmail-postmaster
 [ -L .qmail-mailer-daemon ] || ln -s .qmail-postmaster .qmail-mailer-daemon
 chmod 644 .qmail-*
-../bin/maildirmake .Maildir 2>/dev/null
+$BINDIR/maildirmake .Maildir 2>/dev/null
 cd $OLDPWD
-chown -R $UIDA:$GIDQ $QMAILDIR/alias
-chmod 2755           $QMAILDIR/alias
+chown -R $UIDA:$GIDQ $VARDIR/alias
+chmod 2755           $VARDIR/alias
 
 # at least set rights and group of the home dir
 chmod 755 $QMAILDIR ; chgrp $GIDQ $QMAILDIR
 
 # rename 'control' to 'etc' and create a link
+#mkdir -p "$CFGDIR"		# usually done already --> test it!
 cd $QMAILDIR
-[ -d etc ] || mv control etc
-[ -L control ] || ln -s etc control
+#[ -d etc ] || mv control etc
+[ -L control ] || ln -s etc control   # change mkconfig before removing this!
 cd $OLDPWD
 
 # basic configuration
@@ -123,7 +141,8 @@ cd $OLDPWD
 cd /usr/local/bin
 for L in maildirmake qmail-fixq sendmail qmail-qstat qmail-shcfg
 do
-  readlink $L 2>&1 >/dev/null || ln -s $QMAILDIR/bin/$L $L
+#  readlink $L 2>&1 >/dev/null || ln -s $QMAILDIR/bin/$L $L
+  readlink $L 2>&1 >/dev/null || ln -s $BINDIR/$L $L
 done
 # ....
 cd $OLDPWD

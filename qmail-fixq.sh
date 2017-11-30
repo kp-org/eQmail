@@ -3,7 +3,7 @@
 CFGFILE="conf.tmp"
 OUTFILE="qmail-fixq"
 
-[ -f "$CFGFILE" ] || exit 0
+[ -f "$CFGFILE" ] || exit 1
 
 # the 'stat' command is different on Linux/BSD
 STATOPTS="-f %Lp"
@@ -18,7 +18,7 @@ echo $(cat "$CFGFILE" | grep ^UIDR)                               >> "$OUTFILE"
 echo $(cat "$CFGFILE" | grep ^UIDS)                               >> "$OUTFILE"
 echo $(cat "$CFGFILE" | grep ^GIDQ)                               >> "$OUTFILE"
 echo $(cat "$CFGFILE" | grep ^SPLIT)                              >> "$OUTFILE"
-#echo "" >> "$OUTFILE"
+echo "" >> "$OUTFILE"
 
 echo "
 showHelp() {

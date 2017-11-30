@@ -1,7 +1,6 @@
 /*
  *  Revision 20160713, Kai Peter
  *  - switched to 'buffer'
- *
  *  Revision 20160504, Kai Peter
  *  - changed return type of main to int
  *  - added '<unistd.h>' to prevent compiler warnings
@@ -52,7 +51,8 @@ void mailq()
   _exit(111);
 }
 
-void do_sender(const char *s)
+//void do_sender(const char *s)
+void do_sender(char *s)
 {
   char *x;
   int n;
@@ -72,7 +72,7 @@ void do_sender(const char *s)
     env_put("QMAILUSER", s);
     return;
   }
-  env_put("QMAILHOST", s + a + 1);
+  env_put("QMAILHOST",s + a + 1);
 
   x = (char *) alloc((a + 1) * sizeof(char));
   if (!x) nomem();

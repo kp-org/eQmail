@@ -308,7 +308,7 @@ str.a fs.a auto_qmail.o
 	./load qmail-qmtpd rcpthosts.o control.o constmap.o \
 	received.o date822fmt.o now.o qmail.o cdb.a fd.a wait.a \
 	datetime.a open.a getln.a sig.a case.a env.a stralloc.a \
-	alloc.a substdio.a error.a str.a fs.a auto_qmail.o buffer.a
+	alloc.a error.a str.a fs.a auto_qmail.o buffer.a substdio.a
 
 qmail-qmtpd.o: compile qmail-qmtpd.c
 	./compile qmail-qmtpd.c
