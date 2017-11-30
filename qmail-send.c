@@ -1,4 +1,6 @@
 /*
+ *  Revision 20171130, Kai Peter
+ *  - changed folder name 'control' to 'etc'
  *  Revision 20160712, Kai Peter
  *  - switched to 'buffer'
  *  Revision 20160509, Kai Peter
@@ -732,9 +734,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
      qmail_fail(&qqt);
    else
     {
-//     substdio_fdbuf(&ssread,read,fd,inbuf,sizeof(inbuf));
      buffer_init(&ssread,read,fd,inbuf,sizeof(inbuf));
-//     while ((r = substdio_get(&ssread,buf,sizeof(buf))) > 0)
      while ((r = buffer_get(&ssread,buf,sizeof(buf))) > 0)
        qmail_put(&qqt,buf,r);
      close(fd);
@@ -753,9 +753,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
      qmail_fail(&qqt);
    else
     {
-//     substdio_fdbuf(&ssread,read,fd,inbuf,sizeof(inbuf));
      buffer_init(&ssread,read,fd,inbuf,sizeof(inbuf));
-//     while ((r = substdio_get(&ssread,buf,sizeof(buf))) > 0)
      while ((r = buffer_get(&ssread,buf,sizeof(buf))) > 0)
        qmail_put(&qqt,buf,r);
      close(fd);
@@ -1003,7 +1001,6 @@ struct
   int j; /* defined if id; job number */
   int fd; /* defined if id; reading from {local,remote} */
   seek_pos mpos; /* defined if id; mark position */
-//  substdio ss;
   buffer ss;
   char buf[128];
 }
@@ -1091,7 +1088,6 @@ int c;
    if (pass[c].fd == -1) goto trouble;
    if (!getinfo(&line,&birth,pe.id)) { close(pass[c].fd); goto trouble; }
    pass[c].id = pe.id;
-//   substdio_fdbuf(&pass[c].ss,read,pass[c].fd,pass[c].buf,sizeof(pass[c].buf));
    buffer_init(&pass[c].ss,read,pass[c].fd,pass[c].buf,sizeof(pass[c].buf));
    pass[c].j = job_open(pe.id,c);
    jo[pass[c].j].retry = nextretry(birth,c);
@@ -1196,9 +1192,7 @@ unsigned long id;
 
   /* -todo -info -local -remote -bounce; we can relax */
   fnmake_foop(id);
-// if (substdio_putflush(&sstoqc,fn.s,fn.len) == -1) { cleandied(); return; }
   if (buffer_putflush(&sstoqc,fn.s,fn.len) == -1) { cleandied(); return; }
-//  if (substdio_get(&ssfromqc,&ch,1) != 1) { cleandied(); return; }
   if (buffer_get(&ssfromqc,&ch,1) != 1) { cleandied(); return; }
   if (ch != '+')
     log3("warning: qmail-clean unable to clean up ",fn.s,"\n");
@@ -1237,7 +1231,6 @@ datetime_sec nexttodorun;
 int flagtododir = 0; /* if 0, have to readsubdir_init again */
 readsubdir todosubdir;
 stralloc todoline = {0};
-//char todobuf[SUBSTDIO_INSIZE];
 char todobuf[BUFFER_INSIZE];
 char todobufinfo[512];
 char todobufchan[CHANNELS][1024];
@@ -1263,11 +1256,8 @@ datetime_sec *wakeup;
 void todo_do(fd_set *rfds)
 {
   struct stat st;
-// substdio ss;
   buffer ss;
   int fd;
-//  substdio ssinfo; int fdinfo;
-//  substdio sschan[CHANNELS];
   buffer ssinfo; int fdinfo;
   buffer sschan[CHANNELS];
   int fdchan[CHANNELS];
@@ -1338,8 +1328,6 @@ void todo_do(fd_set *rfds)
 
  for (c = 0;c < CHANNELS;++c) flagchan[c] = 0;
 
-// substdio_fdbuf(&ss,read,fd,todobuf,sizeof(todobuf));
-// substdio_fdbuf(&ssinfo,write,fdinfo,todobufinfo,sizeof(todobufinfo));
   buffer_init(&ss,read,fd,todobuf,sizeof(todobuf));
   buffer_init(&ssinfo,write,fdinfo,todobufinfo,sizeof(todobufinfo));
 
@@ -1365,7 +1353,6 @@ void todo_do(fd_set *rfds)
        scan_ulong(todoline.s + 1,&pid);
        break;
      case 'F':
-//       if (substdio_putflush(&ssinfo,todoline.s,todoline.len) == -1)
        if (buffer_putflush(&ssinfo,todoline.s,todoline.len) == -1)
 	{
 	 fnmake_info(id);
@@ -1394,12 +1381,10 @@ void todo_do(fd_set *rfds)
 	 fdchan[c] = open_excl(fn.s);
 	 if (fdchan[c] == -1)
           { log3("warning: unable to create ",fn.s,"\n"); goto fail; }
-//	 substdio_fdbuf(&sschan[c]
 	 buffer_init(&sschan[c]
 	   ,write,fdchan[c],todobufchan[c],sizeof(todobufchan[c]));
 	 flagchan[c] = 1;
 	}
-//       if (substdio_bput(&sschan[c],rwline.s,rwline.len) == -1)
        if (buffer_put(&sschan[c],rwline.s,rwline.len) == -1)
         {
      fnmake_chanaddr(id,c);
@@ -1415,7 +1400,6 @@ void todo_do(fd_set *rfds)
  close(fd); fd = -1;
 
   fnmake_info(id);
-// if (substdio_flush(&ssinfo) == -1)
   if (buffer_flush(&ssinfo) == -1)
     { log3("warning: trouble writing to ",fn.s,"\n"); goto fail; }
   if (fsync(fdinfo) == -1)
@@ -1426,7 +1410,6 @@ void todo_do(fd_set *rfds)
    if (fdchan[c] != -1)
     {
      fnmake_chanaddr(id,c);
-//     if (substdio_flush(&sschan[c]) == -1)
      if (buffer_flush(&sschan[c]) == -1)
       { log3("warning: trouble writing to ",fn.s,"\n"); goto fail; }
      if (fsync(fdchan[c]) == -1)
@@ -1435,9 +1418,7 @@ void todo_do(fd_set *rfds)
     }
 
  fnmake_todo(id);
-// if (substdio_putflush(&sstoqc,fn.s,fn.len) == -1) { cleandied(); return; }
  if (buffer_putflush(&sstoqc,fn.s,fn.len) == -1) { cleandied(); return; }
-// if (substdio_get(&ssfromqc,&ch,1) != 1) { cleandied(); return; }
  if (buffer_get(&ssfromqc,&ch,1) != 1) { cleandied(); return; }
  if (ch != '+')
   {
@@ -1467,26 +1448,26 @@ void todo_do(fd_set *rfds)
 /* this file is too long ---------------------------------------------- MAIN */
 
 int getcontrols() { if (control_init() == -1) return 0;
- if (control_readint(&lifetime,"control/queuelifetime") == -1) return 0;
- if (control_readint((int *)&concurrency[0],"control/concurrencylocal") == -1) return 0;
- if (control_readint((int *)&concurrency[1],"control/concurrencyremote") == -1) return 0;
- if (control_rldef(&envnoathost,"control/envnoathost",1,"envnoathost") != 1) return 0;
- if (control_rldef(&bouncefrom,"control/bouncefrom",0,"MAILER-DAEMON") != 1) return 0;
- if (control_rldef(&bouncehost,"control/bouncehost",1,"bouncehost") != 1) return 0;
- if (control_rldef(&doublebouncehost,"control/doublebouncehost",1,"doublebouncehost") != 1) return 0;
- if (control_rldef(&doublebounceto,"control/doublebounceto",0,"postmaster") != 1) return 0;
+ if (control_readint(&lifetime,"etc/queuelifetime") == -1) return 0;
+ if (control_readint((int *)&concurrency[0],"etc/concurrencylocal") == -1) return 0;
+ if (control_readint((int *)&concurrency[1],"etc/concurrencyremote") == -1) return 0;
+ if (control_rldef(&envnoathost,"etc/envnoathost",1,"envnoathost") != 1) return 0;
+ if (control_rldef(&bouncefrom,"etc/bouncefrom",0,"MAILER-DAEMON") != 1) return 0;
+ if (control_rldef(&bouncehost,"etc/bouncehost",1,"bouncehost") != 1) return 0;
+ if (control_rldef(&doublebouncehost,"etc/doublebouncehost",1,"doublebouncehost") != 1) return 0;
+ if (control_rldef(&doublebounceto,"etc/doublebounceto",0,"postmaster") != 1) return 0;
  if (!stralloc_cats(&doublebounceto,"@")) return 0;
  if (!stralloc_cat(&doublebounceto,&doublebouncehost)) return 0;
  if (!stralloc_0(&doublebounceto)) return 0;
- if (control_readfile(&locals,"control/locals",1) != 1) return 0;
+ if (control_readfile(&locals,"etc/locals",1) != 1) return 0;
  if (!constmap_init(&maplocals,locals.s,locals.len,0)) return 0;
- switch(control_readfile(&percenthack,"control/percenthack",0))
+ switch(control_readfile(&percenthack,"etc/percenthack",0))
   {
    case -1: return 0;
    case 0: if (!constmap_init(&mappercenthack,"",0,0)) return 0; break;
    case 1: if (!constmap_init(&mappercenthack,percenthack.s,percenthack.len,0)) return 0; break;
   }
- switch(control_readfile(&vdoms,"control/virtualdomains",0))
+ switch(control_readfile(&vdoms,"etc/virtualdomains",0))
   {
    case -1: return 0;
    case 0: if (!constmap_init(&mapvdoms,"",0,1)) return 0; break;
@@ -1501,11 +1482,11 @@ void regetcontrols()
 {
  int r;
 
- if (control_readfile(&newlocals,"control/locals",1) != 1)
-  { log1("alert: unable to reread control/locals\n"); return; }
- r = control_readfile(&newvdoms,"control/virtualdomains",0);
+ if (control_readfile(&newlocals,"etc/locals",1) != 1)
+  { log1("alert: unable to reread etc/locals\n"); return; }
+ r = control_readfile(&newvdoms,"etc/virtualdomains",0);
  if (r == -1)
-  { log1("alert: unable to reread control/virtualdomains\n"); return; }
+  { log1("alert: unable to reread etc/virtualdomains\n"); return; }
 
  constmap_free(&maplocals);
  constmap_free(&mapvdoms);

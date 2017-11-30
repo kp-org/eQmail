@@ -1,3 +1,7 @@
+/*
+ *  Revision 20171130, Kai Peter
+ *  - changed folder name 'control' to 'etc'
+*/
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -379,16 +383,16 @@ int tls_init()
   if (partner_fqdn) {
     struct stat st;
     stralloc tmp = {0};
-    if (!stralloc_copys(&tmp, "control/tlshosts/")
+    if (!stralloc_copys(&tmp, "etc/tlshosts/")
       || !stralloc_catb(&tmp, partner_fqdn, str_len(partner_fqdn))
       || !stralloc_catb(&tmp, ".pem", 5)) temp_nomem();
     if (stat(tmp.s, &st) == 0) 
       servercert = tmp.s;
     else {
-      if (!stralloc_copys(&tmp, "control/notlshosts/")
+      if (!stralloc_copys(&tmp, "etc/notlshosts/")
         || !stralloc_catb(&tmp, partner_fqdn, str_len(partner_fqdn)+1))
         temp_nomem();
-      if ((stat("control/tlshosts/exhaustivelist", &st) == 0) ||
+      if ((stat("etc/tlshosts/exhaustivelist", &st) == 0) ||
       (stat(tmp.s, &st) == 0)) {
          alloc_free(tmp.s);
          return 0;
@@ -430,10 +434,10 @@ int tls_init()
   }
 
   /* let the other side complain if it needs a cert and we don't have one */
-# define CLIENTCERT "control/clientcert.pem"
+#define CLIENTCERT "etc/clientcert.pem"
   if (SSL_CTX_use_certificate_chain_file(ctx, CLIENTCERT))
     SSL_CTX_use_RSAPrivateKey_file(ctx, CLIENTCERT, SSL_FILETYPE_PEM);
-# undef CLIENTCERT
+#undef CLIENTCERT
 
   myssl = SSL_new(ctx);
   SSL_CTX_free(ctx);
@@ -446,7 +450,7 @@ int tls_init()
   if (!smtps) substdio_putsflush(&smtpto, "STARTTLS\r\n");
 
   /* while the server is preparing a response, do something else */
-  if (control_readfile(&saciphers, "control/tlsclientciphers", 0) == -1)
+  if (control_readfile(&saciphers, "etc/tlsclientciphers", 0) == -1)
     { SSL_free(myssl); temp_control(); }
   if (saciphers.len) {
     for (i = 0; i < saciphers.len - 1; ++i)
@@ -716,12 +720,12 @@ int flagcname;
 void getcontrols()
 {
   if (control_init() == -1) temp_control();
-  if (control_readint(&timeout,"control/timeoutremote") == -1) temp_control();
-  if (control_readint(&timeoutconnect,"control/timeoutconnect") == -1)
+  if (control_readint(&timeout,"etc/timeoutremote") == -1) temp_control();
+  if (control_readint(&timeoutconnect,"etc/timeoutconnect") == -1)
     temp_control();
-  if (control_rldef(&helohost,"control/helohost",1,(char *) 0) != 1)
+  if (control_rldef(&helohost,"etc/helohost",1,(char *) 0) != 1)
     temp_control();
-  switch(control_readfile(&routes,"control/smtproutes",0)) {
+  switch(control_readfile(&routes,"etc/smtproutes",0)) {
     case -1:
       temp_control();
     case 0:

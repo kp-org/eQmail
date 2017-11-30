@@ -1,4 +1,6 @@
 /*
+ *  Revision 20171130, Kai Peter
+ *  - changed folder name 'control' to 'etc'
  *  Revision 20160711, Kai Peter
  *  - switched to 'buffer'
  *  - changed parameter declarations
@@ -33,7 +35,7 @@ static void striptrailingwhitespace(stralloc *sa)
 int control_init()
 {
   int r;
-  r = control_readline(&me,"control/me");
+  r = control_readline(&me,"etc/me");
   if (r == 1) meok = 1;
   return r;
 }

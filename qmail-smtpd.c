@@ -1,5 +1,6 @@
 /*
- *
+ *	Revision 20171130, Kai Peter
+ *  - changed folder name 'control' to 'etc'
 */
 #include "sig.h"
 #include "readwrite.h"		/* the original definitions */
@@ -172,25 +173,25 @@ void setup()
   unsigned long u;
 
   if (control_init() == -1) die_control();
-  if (control_rldef(&greeting,"control/smtpgreeting",1,(char *) 0) != 1)
+  if (control_rldef(&greeting,"etc/smtpgreeting",1,(char *) 0) != 1)
     die_control();
-  liphostok = control_rldef(&liphost,"control/localiphost",1,(char *) 0);
+  liphostok = control_rldef(&liphost,"etc/localiphost",1,(char *) 0);
   if (liphostok == -1) die_control();
-  if (control_readint(&timeout,"control/timeoutsmtpd") == -1) die_control();
+  if (control_readint(&timeout,"etc/timeoutsmtpd") == -1) die_control();
   if (timeout <= 0) timeout = 1;
   if (rcpthosts_init() == -1) die_control();
   if (spp_init() == -1) die_control();
 
-  bmfok = control_readfile(&bmf,"control/badmailfrom",0);
+  bmfok = control_readfile(&bmf,"etc/badmailfrom",0);
   if (bmfok == -1) die_control();
   if (bmfok)
     if (!constmap_init(&mapbmf,bmf.s,bmf.len,0)) die_nomem();
- 
-  if (control_readint(&databytes,"control/databytes") == -1) die_control();
+
+  if (control_readint(&databytes,"etc/databytes") == -1) die_control();
   x = env_get("DATABYTES");
   if (x) { scan_ulong(x,&u); databytes = u; }
   if (!(databytes + 1)) --databytes;
- 
+
   protocol = "SMTP";
   remoteip = env_get("TCPREMOTEIP");
   if (!remoteip) remoteip = "unknown";
@@ -260,7 +261,7 @@ char *arg;
   /* could check for termination failure here, but why bother? */
   if (!stralloc_append(&addr,"")) die_nomem();
 
-  /* if address is in "control/localiphost" */
+  /* if address is in "localiphost" */
   if (liphostok) {
     i = byte_rchr(addr.s,addr.len,'@');
     if (i < addr.len) /* if not, partner should go read rfc 821 */
@@ -445,7 +446,7 @@ void smtp_ehlo(arg) char *arg;
   if(!spp_helo(arg)) return;
   smtp_greet("250-"); 
 #ifdef TLS
-  if (!ssl && (stat("control/servercert.pem",&st) == 0))
+  if (!ssl && (stat("etc/servercert.pem",&st) == 0))
     out("\r\n250-STARTTLS");
 #endif
   size[fmt_ulong(size,(unsigned int) databytes)] = 0;
@@ -917,7 +918,7 @@ RSA *tmp_rsa_cb(SSL *ssl, int export, int keylen)
 {
   if (!export) keylen = 2048;
   if (keylen == 2048) {
-    FILE *in = fopen("control/rsa2048.pem", "r");
+    FILE *in = fopen("etc/rsa2048.pem", "r");
     if (in) {
       RSA *rsa = PEM_read_RSAPrivateKey(in, NULL, NULL, NULL);
       fclose(in);
@@ -931,7 +932,7 @@ DH *tmp_dh_cb(SSL *ssl, int export, int keylen)
 {
   if (!export) keylen = 2048;
   if (keylen == 2048) {
-    FILE *in = fopen("control/dh2048.pem", "r");
+    FILE *in = fopen("etc/dh2048.pem", "r");
     if (in) {
       DH *dh = PEM_read_DHparams(in, NULL, NULL, NULL);
       fclose(in);
@@ -959,9 +960,9 @@ void tls_out(const char *s1, const char *s2)
 }
 void tls_err(const char *s) { tls_out(s, ssl_error()); if (smtps) die_read(); }
 
-# define CLIENTCA "control/clientca.pem"
-# define CLIENTCRL "control/clientcrl.pem"
-# define SERVERCERT "control/servercert.pem"
+#define CLIENTCA "etc/clientca.pem"
+#define CLIENTCRL "etc/clientcrl.pem"
+#define SERVERCERT "etc/servercert.pem"
 
 int tls_verify()
 {
@@ -973,7 +974,7 @@ int tls_verify()
 
   /* request client cert to see if it can be verified by one of our CAs
    * and the associated email address matches an entry in tlsclients */
-  switch (control_readfile(&clients, "control/tlsclients", 0))
+  switch (control_readfile(&clients, "etc/tlsclients", 0))
   {
   case 1:
     if (constmap_init(&mapclients, clients.s, clients.len, 0)) {
@@ -1093,7 +1094,7 @@ void tls_init()
 
   ciphers = env_get("TLSCIPHERS");
   if (!ciphers) {
-    if (control_readfile(&saciphers, "control/tlsserverciphers", 0) == -1)
+    if (control_readfile(&saciphers, "etc/tlsserverciphers", 0) == -1)
       { SSL_free(myssl); die_control(); }
     if (saciphers.len) { /* convert all '\0's except the last one to ':' */
       int i;
