@@ -1,6 +1,12 @@
+/*
+ *  Revision 20171130, Kai Peter
+ *  - changed folder name 'control' to 'etc'
+ *  - switched to 'buffer'
+*/
 #include <unistd.h>
 #include "stralloc.h"
-#include "substdio.h"
+//#include "substdio.h"
+#include "buffer.h"
 #include "qmail.h"
 #include "now.h"
 #include "str.h"
@@ -16,7 +22,8 @@
 void badproto() { _exit(100); }
 void resources() { _exit(111); }
 
-int safewrite(fd,buf,len) int fd; char *buf; int len;
+//int safewrite(fd,buf,len) int fd; char *buf; int len;
+int safewrite(int fd,char *buf,int len)
 {
   int r;
   r = write(fd,buf,len);
@@ -24,27 +31,34 @@ int safewrite(fd,buf,len) int fd; char *buf; int len;
   return r;
 }
 
-char ssoutbuf[256];
-substdio ssout = SUBSTDIO_FDBUF(safewrite,1,ssoutbuf,sizeof ssoutbuf);
+//char ssoutbuf[256];
+//substdio ssout = SUBSTDIO_FDBUF(safewrite,1,ssoutbuf,sizeof ssoutbuf);
+char boutbuf[256];
+buffer bout = BUFFER_INIT(safewrite,1,boutbuf,sizeof boutbuf);
 
-int saferead(fd,buf,len) int fd; char *buf; int len;
+//int saferead(fd,buf,len) int fd; char *buf; int len;
+int saferead(int fd,char *buf,int len)
 {
   int r;
-  substdio_flush(&ssout);
+//  substdio_flush(&ssout);
+  buffer_flush(&bout);
   r = read(fd,buf,len);
   if (r <= 0) _exit(0);
   return r;
 }
 
-char ssinbuf[512];
-substdio ssin = SUBSTDIO_FDBUF(saferead,0,ssinbuf,sizeof ssinbuf);
+//char ssinbuf[512];
+//substdio ssin = SUBSTDIO_FDBUF(saferead,0,ssinbuf,sizeof ssinbuf);
+char binbuf[512];
+buffer bin = BUFFER_INIT(saferead,0,binbuf,sizeof binbuf);
 
 unsigned long getlen()
 {
   unsigned long len = 0;
   char ch;
   for (;;) {
-    substdio_get(&ssin,&ch,1);
+//    substdio_get(&ssin,&ch,1);
+    buffer_get(&bin,&ch,1);
     if (ch == ':') return len;
     if (len > 200000000) resources();
     len = 10 * len + (ch - '0');
@@ -54,7 +68,8 @@ unsigned long getlen()
 void getcomma()
 {
   char ch;
-  substdio_get(&ssin,&ch,1);
+//  substdio_get(&ssin,&ch,1);
+  buffer_get(&bin,&ch,1);
   if (ch != ',') badproto();
 }
 
@@ -100,7 +115,7 @@ int main()
   relayclient = env_get("RELAYCLIENT");
   relayclientlen = relayclient ? str_len(relayclient) : 0;
 
-  if (control_readint(&databytes,"control/databytes") == -1) resources();
+  if (control_readint(&databytes,"etc/databytes") == -1) resources();
   x = env_get("DATABYTES");
   if (x) { scan_ulong(x,&u); databytes = u; }
   if (!(databytes + 1)) --databytes;
@@ -125,7 +140,8 @@ int main()
     if (qmail_open(&qq) == -1) resources();
     qp = qmail_qp(&qq);
 
-    substdio_get(&ssin,&ch,1);
+//    substdio_get(&ssin,&ch,1);
+    buffer_get(&bin,&ch,1);
     --len;
     if (ch == 10) flagdos = 0;
     else if (ch == 13) flagdos = 1;
@@ -137,10 +153,12 @@ int main()
 
     if (flagdos)
       while (len > 0) {
-        substdio_get(&ssin,&ch,1);
+//        substdio_get(&ssin,&ch,1);
+        buffer_get(&bin,&ch,1);
         --len;
         while ((ch == 13) && len) {
-          substdio_get(&ssin,&ch,1);
+//          substdio_get(&ssin,&ch,1);
+          buffer_get(&bin,&ch,1);
           --len;
           if (ch == 10) break;
           if (bytestooverflow) if (!--bytestooverflow) qmail_fail(&qq);
@@ -156,7 +174,8 @@ int main()
           qmail_fail(&qq);
         }
       while (len > 0) { /* XXX: could speed this up, obviously */
-        substdio_get(&ssin,&ch,1);
+//        substdio_get(&ssin,&ch,1);
+        buffer_get(&bin,&ch,1);
         --len;
         qmail_put(&qq,&ch,1);
       }
@@ -169,17 +188,19 @@ int main()
       buf[0] = 0;
       flagsenderok = 0;
       for (i = 0;i < len;++i)
-        substdio_get(&ssin,&ch,1);
+//        substdio_get(&ssin,&ch,1);
+        buffer_get(&bin,&ch,1);
     }
     else {
       for (i = 0;i < len;++i) {
-        substdio_get(&ssin,buf + i,1);
+//        substdio_get(&ssin,buf + i,1);
+        buffer_get(&bin,buf + i,1);
         if (!buf[i]) flagsenderok = 0;
       }
       buf[len] = 0;
     }
     getcomma();
- 
+
     flagbother = 0;
     qmail_from(&qq,buf);
     if (!flagsenderok) qmail_fail(&qq);
@@ -191,7 +212,8 @@ int main()
       len = 0;
       for (;;) {
         if (!biglen) badproto();
-        substdio_get(&ssin,&ch,1);
+//        substdio_get(&ssin,&ch,1);
+        buffer_get(&bin,&ch,1);
         --biglen;
         if (ch == ':') break;
         if (len > 200000000) resources();
@@ -201,11 +223,13 @@ int main()
       if (len + relayclientlen >= 1000) {
         failure.s[failure.len - 1] = 'L';
         for (i = 0;i < len;++i)
-          substdio_get(&ssin,&ch,1);
+//          substdio_get(&ssin,&ch,1);
+          buffer_get(&bin,&ch,1);
       }
       else {
         for (i = 0;i < len;++i) {
-          substdio_get(&ssin,buf + i,1);
+//          substdio_get(&ssin,buf + i,1);
+          buffer_get(&bin,buf + i,1);
           if (!buf[i]) failure.s[failure.len - 1] = 'N';
         }
         buf[len] = 0;
@@ -254,13 +278,16 @@ int main()
     for (i = 0;i < failure.len;++i)
       switch(failure.s[i]) {
         case 0:
-          substdio_put(&ssout,buf,len);
+//          substdio_put(&ssout,buf,len);
+          buffer_put(&bout,buf,len);
           break;
         case 'D':
-          substdio_puts(&ssout,"66:Dsorry, that domain isn't in my list of allowed rcpthosts (#5.7.1),");
+//          substdio_puts(&ssout,"66:Dsorry, that domain isn't in my list of allowed rcpthosts (#5.7.1),");
+          buffer_puts(&bout,"66:Dsorry, that domain isn't in my list of allowed rcpthosts (#5.7.1),");
           break;
         default:
-          substdio_puts(&ssout,"46:Dsorry, I can't handle that recipient (#5.1.3),");
+//          substdio_puts(&ssout,"46:Dsorry, I can't handle that recipient (#5.1.3),");
+          buffer_puts(&bout,"46:Dsorry, I can't handle that recipient (#5.1.3),");
           break;
       }
 
