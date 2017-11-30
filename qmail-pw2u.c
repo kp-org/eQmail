@@ -1,4 +1,6 @@
 /*
+ *  Revision 20171023, Kai Peter
+ *  - moved folder 'users' to 'var/users'
  *  Revision 20160714, Kai Peter
  *  - switched to 'buffer'
  *  - changed return type of main to int
@@ -256,15 +258,15 @@ int main(int argc,char **argv) {
 
   /* no need for control_init() */
 
-  okincl = control_readfile(&incl,"users/include",0);
+  okincl = control_readfile(&incl,"var/users/include",0);
   if (okincl == -1) die_control();
   if (okincl) if (!constmap_init(&mapincl,incl.s,incl.len,0)) die_nomem();
 
-  okexcl = control_readfile(&excl,"users/exclude",0);
+  okexcl = control_readfile(&excl,"var/users/exclude",0);
   if (okexcl == -1) die_control();
   if (okexcl) if (!constmap_init(&mapexcl,excl.s,excl.len,0)) die_nomem();
 
-  okmana = control_readfile(&mana,"users/mailnames",0);
+  okmana = control_readfile(&mana,"var/users/mailnames",0);
   if (okmana == -1) die_control();
   if (okmana) if (!constmap_init(&mapmana,mana.s,mana.len,1)) die_nomem();
 
@@ -277,7 +279,7 @@ int main(int argc,char **argv) {
   }
   if (!flagalias) die_alias();
 
-  fd = open_read("users/subusers");
+  fd = open_read("var/users/subusers");
   if (fd == -1) {
     if (errno != error_noent) die_control();
   }
@@ -295,7 +297,7 @@ int main(int argc,char **argv) {
     close(fd);
   }
 
-  fd = open_read("users/append");
+  fd = open_read("var/users/append");
   if (fd == -1) {
     if (errno != error_noent) die_control();
   }
