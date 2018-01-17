@@ -80,8 +80,8 @@ condredirect:
 	$(LOAD) condredirect qmail.o strerr.a fd.a sig.a wait.a \
 	seek.a env.a buffer.a error.a str.a fs.a auto_qmail.o alloc.a substdio.a
 
-mkconfig: warn-auto.sh mkconfig.sh
-	cat warn-auto.sh mkconfig.sh | sed s}QMAIL}"$(QPRFX)"}g > mkconfig
+mkconfig:
+	cat warn-auto.sh mkconfig.sh | sed s}QPRFX}"$(QPRFX)"}g > mkconfig
 	chmod 755 mkconfig
 
 date822fmt.o: compile date822fmt.c
