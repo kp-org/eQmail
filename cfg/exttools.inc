@@ -3,7 +3,8 @@
 # Check for external tools
 
 # check for system tools (required) !!!
-for f in bash hostname [ test make perl awk
+AT="bash hostname [ test make perl awk"
+for f in ${AT}
 do
   echo -n "Checking for $f ... "
   which $f 2>/dev/null
@@ -12,6 +13,8 @@ done
 
 # check for one of multiple tools
 rm _MISSED.tmp 2>/dev/null
+#AT="\\"ip ifconfig ip\\"\\ \\"nslookup dig\\""
+#for f in $AT
 for f in "ip ifconfig ip" "nslookup dig"
 do
   [ -f _MISSED.tmp ] && break

@@ -5,8 +5,11 @@
 # Having a comfortable shell like bash available always would make
 # things much easier and the code more compact!
 #********************************************************************************
-. `dirname $0`/conf-build			# 'conf-build' have to be in the same folder
-. cfg/getids.inc
+#. `dirname $0`/conf-build			# 'conf-build' have to be in the same folder
+#. cfg/getids.inc
+
+. `dirname $0`/conf.tmp			# 'conf.tmp'
+PKGDIR="$HOMEDIR"
 
 BINDIR="$PKGDIR/bin"
 CFGDIR="$PKGDIR/etc"

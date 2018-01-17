@@ -2,7 +2,7 @@ systype
 load
 compile
 makelib
-auto_qmail.c
+#auto_qmail.c
 auto_patrn.c
 auto_spawn.c
 auto_uids.c
@@ -63,3 +63,6 @@ qmail-shcfg
 ssl.bin
 qmail-tcpsrv
 tcprules
+
+autocf-break
+autocf-spawn

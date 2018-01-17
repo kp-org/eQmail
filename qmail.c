@@ -12,6 +12,7 @@ static char *binqqargs[2] = { 0, 0 } ;
 static void setup_qqargs() {
   if(!binqqargs[0])
     binqqargs[0] = env_get("QMAILQUEUE");
+  /* TODO: check if the QMAILQUEUE value is valid */
   if(!binqqargs[0])
     binqqargs[0] = "bin/qmail-queue";
 }

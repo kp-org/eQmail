@@ -179,12 +179,12 @@ permanent failures.
 .I virtualdomains
 List of virtual users or domains, one per line.
 A virtual user has the form
-.IR user\fB@\fIdomain\fB:\fIprepend ,
+.IR user\fB@\fIdomain\fB:\fIprepend\fR ,
 without any extra spaces.
 When
 .B qmail-send
 sees the recipient address
-.IR user\fB@\fIdomain ,
+.IR user\fB@\fIdomain\fR ,
 it converts it to
 .I prepend\fB-\fIuser\fB@\fIdomain
 and treats it as local.

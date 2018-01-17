@@ -6,7 +6,7 @@ qmail-bfrmt \- run a program before invoking \fBqmail-remote\fR
 .SH DESCRIPTION
 \fBqmail-bfrmt\fR plugs into the pipe \fIqmail-rspawn\fR\->\fIqmail-remote\fR.
 It reads a series of remote delivery commands from \fBqmail-rspawn\fR. Then it 
-reads \fIprogram\fR from its config file \fIQMAILHOME/etc/beforemote\fR.
+reads \fIprogram\fR from its config file \fIQPRFX/etc/beforemote\fR.
 If \fIprogram\fR is a valid executable file, it will be invoked instead of
 \fIqmail-remote\fR.
 .P
@@ -18,7 +18,7 @@ one time only.
 If \fIprogram\fR is invalid, \fBqmail-bfrmt\fR writes a warning to syslog.
 If the first line of the config file is empty, logging will be disabled.
 .SH CONFIG FILE
-\fBqmail-bfrmt\fR reads the first line from \fIQMAILHOME/etc/beforemote\fR.
+\fBqmail-bfrmt\fR reads the first line from \fIQPRFX/etc/beforemote\fR.
 If the config file doesn't exitst or something went wrong, \fIqmail-remote\fR
 will be executed.
 

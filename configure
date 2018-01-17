@@ -19,7 +19,7 @@ echo "build on "${ARCH}"!"
 
 #********************************************************************************
 # Checking conf-* files
-. cfg/conf-files.inc
+#. cfg/conf-files.inc
 
 #********************************************************************************
 # Check headers
@@ -27,15 +27,18 @@ echo "build on "${ARCH}"!"
 
 #********************************************************************************
 # Create compile, load, makelib
-. cfg/buildtools.inc
+. configure.in/buildtools.inc
 
 #********************************************************************************
 # Checking for shared libraries
-. cfg/shared-libs.inc
+#. cfg/shared-libs.inc
+. configure.in/systemlibs.inc
 
 #********************************************************************************
 #
-. cfg/compiled-in.inc
+. configure.in/compiled-in.inc
+. configure.in/qmail-ids
+. cfg/save-conf.inc
 #********************************************************************************
 echo
 if [ "$CRITICAL" ] ; then

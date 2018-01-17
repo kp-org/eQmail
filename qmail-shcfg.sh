@@ -1,5 +1,5 @@
 
-QMAILDIR="QMAILHOME"
+QMAILDIR="QPRFX"
 
 # some escape sequences to format output
 OFF=$'\e[0m'   # all attributes off
@@ -8,7 +8,7 @@ ULN=$'\e[4m'   # underlined
 YLW=$'\e[33m'  # yellow foreground
 RED=$'\e[91m'  # light red foreground
 
-$QMAILDIR/bin/qmail-print
+$QPRFX/bin/qmail-print
 
 printContent() {
   printf "\033[1m%s\033[0m" "$f:"
@@ -46,7 +46,7 @@ printContent() {
   FMT=0 ; COMMENT="" ; DEFCMNT=""
 }
 
-CONFDIR=$QMAILDIR/control
+CONFDIR=$QMAILDIR/etc
 if [ ! -d $CONFDIR ] ; then echo "error reading controls directory!" ; exit 1 ; fi
 
 FILES="me defaultdomain locals defaulthost plusdomain rcpthosts morercpthosts \

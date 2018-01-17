@@ -1,14 +1,14 @@
 
-PATH="QMAILHOME:$PATH"
-PRG="QMAILHOME/bin/PROGRAM"    # failsafe default
+PATH="QPREFIX:$PATH"
+PRG="QPREFIX/bin/PROGRAM"    # failsafe default
 
 DoExec() { exec "$PRG" "$@"; exit; }
 
 # silently ignore if config file doesn't exists
-[ -f QMAILHOME/etc/CFGFILE ] || DoExec "$@"
+[ -f QPRFX/etc/CFGFILE ] || DoExec "$@"
 
 # get plugin from config file and try to execute it
-TMP=`head -1 QMAILHOME/etc/CFGFILE`
+TMP=`head -1 QPRFX/etc/CFGFILE`
 [ -x "$TMP" ] && PRG="$TMP" || ( \
   [ ! -z "$TMP" ] && \
   ErrMsg="warning: ignoring invalid value '$TMP' in config file!" && \

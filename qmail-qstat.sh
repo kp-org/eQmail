@@ -1,4 +1,4 @@
-QMAILDIR="QMAILHOME"
+QMAILDIR="QPRFX"
 cd $QMAILDIR
 DIRS=`ls queue/mess/ | wc -l | xargs`   # check and count queue split
 # simple try to check out the 'service start' process
@@ -76,16 +76,20 @@ startServices() {
 deleteMessage() {
   stopServices
   [ "$QSUBDIR" ] || QSUBDIR="mess"
-  [ "$N" ] && FARGS="-name $N"
-  echo -n "deleting message "`basename "$N"`" ... "
+  [ "$N" ] && FARGS="-name $N"	# set 'find' arguments for a single message
+  echo -n "deleting message"
+  [ "$N" ] && echo -n " $N" || echo -n "s"	# be a bit verbose ...
+  # find and delete message(s)
   for M in $(find queue/*/*/* $FARGS 2>/dev/null | xargs)
   do
     Q=`echo $M | cut -d/ -f2`
-#    echo "deleting "`basename $M`" from queue/$Q: "
     rm -f "$M"
   done
-  if [ "$M" ] ; then echo "done" ; 
-    else echo "failed: no such message" ; fi
+  if [ "$M" ] ; then echo "... done" ;		# print result
+    else [ "$FARGS" ] && \
+      echo " ... failed: no such message!" || \
+      echo " ... no messages in queue found!"
+  fi
   startServices
 }
 

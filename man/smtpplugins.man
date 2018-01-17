@@ -14,7 +14,7 @@ It consist of few sections, one for each command:
 .P
 Section names are marked using square brackets ('[' and ']'). After a section
 name there have to be inserted one ore more \fIplugins\fR to execute for this
-command - one per line. Pathes are relative to QMAILHOME. Lines startting with
+command - one per line. Pathes are relative to QPRFX. Lines startting with
 '\fI#\fR' will be ignored.
 .P
 If line starts with a colon (':'), then the \fIplugin\fR will be invoked by a
@@ -23,7 +23,7 @@ slower than normal mode.
 .P
 If config file \fBsmtpplugins\fR doesn't exist, \fBqmail-spp\fR is disabled.
 .SH EXAMPLE
-Assuming that all \fIplugins\fR are located in \fIQMAILHOME/bin/plugins\fR,
+Assuming that all \fIplugins\fR are located in \fIQPRFX/bin/plugins\fR,
 the config file could look like this:
 .P
 .RS
@@ -58,9 +58,9 @@ bin/plugins/morelog
 [auth]
 .RE
 .P
-In this example on each incomming mail \fBQMAILHOME/bin/plugins/badhelo\fR
+In this example on each incomming mail \fBQPRFX/bin/plugins/badhelo\fR
 will be invoked. If the message was not rejected by \fBbadhelo\fR, next the
-\fBR QMAILHOME/bin/plugins/morelog\fR will be executed in a new system shell.
+\fBR QPRFX/bin/plugins/morelog\fR will be executed in a new system shell.
 .SH AUTHOR
 Written by Kai Peter. Adapted from the qmail-spp documentation website.
 Original publisher information (as of December 2015):

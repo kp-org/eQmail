@@ -7,6 +7,7 @@ extras
 *.bck.h
 *.bck
 *.diff
+*.lib
 *.orig
 *.rej
 *.tmp
@@ -34,3 +35,5 @@ ipmeprint2*
 hostname.c
 hostname
 qmail-plug*
+
+autocf-*

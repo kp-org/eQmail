@@ -44,6 +44,11 @@ void report(buffer *b,int wstat,char *s,int len)
     case 112: buffer_puts(b,"Z112_Unable to run ");
               buffer_puts(b,np);
               buffer_puts(b,".\n"); return;
+// test: suppress bounces
+    case 113: buffer_puts(b,"Z113_Stopped bounces ");
+              //buffer_puts(b,np);
+              buffer_puts(b,".\n"); return;
+
    default:   buffer_puts(b,"D000_Unable to run ");
               buffer_puts(b,np);
               buffer_puts(b,".\n"); return;
@@ -111,14 +116,10 @@ int spawn(int fdmess,int fdout,char *s,char *r,int at)
 
   if (!(f = fork()))
   {
-//    if (fd_move(0,fdmess) == -1) _exit(111);
     if (fd_move(0,fdmess) == -1) err_sys(errno);
-//    if (fd_move(1,fdout) == -1) _exit(111);
     if (fd_move(1,fdout) == -1) err_sys(errno);
-//    if (fd_copy(2,1) == -1) _exit(111);
     if (fd_copy(2,1) == -1) err_sys(errno);
     execvp(*args,args);
-//    if (error_temp(errno)) _exit(112);
     if (errno) err_sys(errno);
     _exit(100);  /* TODO: check exit code */
   }

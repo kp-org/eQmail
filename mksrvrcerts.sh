@@ -13,7 +13,7 @@
 OPENSSL="OPENSSLBIN"
 if [ ! -f "$OPENSSL" ] ; then echo "Couldn't find openssl! Aborting!"; exit 0; fi
 
-CONFDIR="QMAIL/control"
+CONFDIR="QPRFX/etc"
 PEMFILE="$CONFDIR/servercert.pem"
 RNDFILE="$CONFDIR/servercert.rnd"       # rand(om) file
 CNFFILE="$CONFDIR/servercert.cnf"       # certificate config file

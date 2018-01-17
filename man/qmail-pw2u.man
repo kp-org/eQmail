@@ -43,7 +43,7 @@ are ignored by
 If you put the output of
 .B qmail-pw2u
 into
-.BR QMAILHOME/users/assign ,
+.BR QPRFX/var/users/assign ,
 and then run
 .BR qmail-newu ,
 .B qmail-lspawn
@@ -86,13 +86,13 @@ control over the basic
 .I user
 address and
 all addresses of the form
-.IR user\fBBREAK\fIanything .
+.IR user\fBBREAK\fIanything\fR .
 A catch-all user,
 .BR alias ,
 controls all other addresses.
 
 You may change these rules by setting up files in
-.BR QMAILHOME/users :
+.BR QPRFX/var/users :
 .TP
 .B include
 Allowed users, one per line.

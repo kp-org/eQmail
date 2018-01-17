@@ -20,6 +20,7 @@ echo $(cat "$CFGFILE" | grep ^GIDQ)                               >> "$OUTFILE"
 echo $(cat "$CFGFILE" | grep ^SPLIT)                              >> "$OUTFILE"
 echo "" >> "$OUTFILE"
 
+echo "VARDIR=\"\$QMAILDIR/var\""  >> "$OUTFILE"
 echo "
 showHelp() {
   echo \"Usage: $OUTFILE [option [-m]\"
