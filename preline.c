@@ -1,24 +1,26 @@
 /*
+ *  Revision 20180116, Kai Peter
+ *  - changed ssout/ssin to bout/bin (substdio --> buffer)
+ *  - switched to errmsg
  *  Revision 20160712, Kai Peter
  *  - switched to 'buffer'
  *  Revision 20160504, Kai Peter
  *  - changed return type of main to int
  */
-#include "fd.h"
 #include <unistd.h>
-#include "strerr.h"
 #include "buffer.h"
+#include "fd.h"
 #include "getoptb.h"
 #include "wait.h"
 #include "env.h"
 #include "sig.h"
 #include "error.h"
 
-#define FATL "preline: fatal: "
+#define WHO "preline: "
 
 void die_usage()
 {
-  strerr_die1x(100,"preline: usage: preline cmd [ arg ... ]");
+  err_tmp_plus(EINVAL,"usage: preline cmd [ arg ... ]");
 }
 
 int flagufline = 1; char *ufline;
@@ -27,8 +29,8 @@ int flagdtline = 1; char *dtline;
 
 char outbuf[BUFFER_OUTSIZE];
 char inbuf[BUFFER_INSIZE];
-buffer ssout = BUFFER_INIT(write,1,outbuf,sizeof outbuf);
-buffer ssin = BUFFER_INIT(read,0,inbuf,sizeof inbuf);
+buffer bout = BUFFER_INIT(write,1,outbuf,sizeof outbuf);
+buffer bin = BUFFER_INIT(read,0,inbuf,sizeof inbuf);
 
 int main(int argc,char **argv)
 {
@@ -58,36 +60,37 @@ int main(int argc,char **argv)
   if (!*argv) die_usage();
 
   if (pipe(pi) == -1)
-    strerr_die2sys(111,FATL,"unable to create pipe: ");
+	err_sys_plus(EHARD,"unable to create pipe: ");
 
   pid = fork();
   if (pid == -1)
-    strerr_die2sys(111,FATL,"unable to fork: ");
+    err_sys_plus(EHARD,"unable to fork: ");
 
   if (pid == 0) {
     close(pi[1]);
     if (fd_move(0,pi[0]) == -1)
-      strerr_die2sys(111,FATL,"unable to set up fds: ");
+      err_sys_plus(EHARD,"unable to set up fds: ");
     sig_pipedefault();
     execvp(*argv,argv);
-    strerr_die4sys(error_temp(errno) ? 111 : 100,FATL,"unable to run ",*argv,": ");
+//  strerr_die4sys(error_temp(errno) ? 111 : 100,FATL,"unable to run ",*argv,": ");
+    err_sys_plus((errno),"invalid argument");
   }
   close(pi[0]);
   if (fd_move(1,pi[1]) == -1)
-    strerr_die2sys(111,FATL,"unable to set up fds: ");
+    err_sys_plus(EHARD,"unable to set up fds: ");
 
-  if (flagufline) buffer_puts(&ssout,ufline);
-  if (flagrpline) buffer_puts(&ssout,rpline);
-  if (flagdtline) buffer_puts(&ssout,dtline);
-  if (buffer_copy(&ssout,&ssin) != 0)
-    strerr_die2sys(111,FATAL,"unable to copy input: ");
-  buffer_flush(&ssout);
+  if (flagufline) buffer_puts(&bout,ufline);
+  if (flagrpline) buffer_puts(&bout,rpline);
+  if (flagdtline) buffer_puts(&bout,dtline);
+  if (buffer_copy(&bout,&bin) != 0)
+    err_sys_plus(EHARD,"unable to copy input: ");
+  buffer_flush(&bout);
   close(1);
 
   if (wait_pid(&wstat,pid) == -1)
-    strerr_die2sys(111,FATL,"wait failed: ");
+    err_sys_plus(EHARD,"wait failed: ");
   if (wait_crashed(wstat))
-    strerr_die2x(111,FATL,"child crashed");
+    err_sys_plus(EHARD,"child crashed");
   _exit(wait_exitcode(wstat));
   return(0);  /* never reached */
 }
