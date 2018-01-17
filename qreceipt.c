@@ -38,7 +38,7 @@ void die_read() {
  if (errno == error_nomem) die_nomem();
  substdio_putsflush(subfderr,"qreceipt: fatal: read error\n"); die_temp(); }
 void doordie(sa,r) stralloc *sa; int r; {
- if (r == 1) return; if (r == -1) die_nomem();
+ if (r == 1) { return; } if (r == -1) die_nomem();
  substdio_putsflush(subfderr,"qreceipt: fatal: unable to parse this: ");
  substdio_putflush(subfderr,sa->s,sa->len); die(); }
 
