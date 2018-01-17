@@ -1,4 +1,7 @@
 /*
+ *  Revision 20180115, Kai Peter
+ *  - prevented 'misleading-indentation' warning (gcc-6)
+ *  - replaced 'ssin/ssout' by 'bin/bout' (substdio --> buffer)
  *  Revision 20160712, Kai Peter
  *  - switched to 'buffer'
  *  Revision 20160503, Kai Peter
@@ -42,10 +45,8 @@ void die_nomem() { strerr_die2x(111,FATL,"out of memory"); }
 
 int main()
 {
-// substdio ssin;
-// substdio ssout;
-  buffer ssin;
-  buffer ssout;
+  buffer bin;
+  buffer bout;
   struct prioq_elt pe;
   int fdoldmbox;
   int fdnewmbox;
@@ -82,10 +83,10 @@ int main()
   if (fdnewmbox == -1)
     strerr_die4sys(111,FATL,"unable to create ",mboxtmp,": ");
 
-  buffer_init(&ssin,read,fdoldmbox,inbuf,sizeof(inbuf));
-  buffer_init(&ssout,write,fdnewmbox,outbuf,sizeof(outbuf));
+  buffer_init(&bin,read,fdoldmbox,inbuf,sizeof(inbuf));
+  buffer_init(&bout,write,fdnewmbox,outbuf,sizeof(outbuf));
 
-  switch(buffer_copy(&ssout,&ssin))
+  switch(buffer_copy(&bout,&bin))
   {
     case -2: strerr_die4sys(111,FATL,"unable to read ",mbox,": ");
     case -3: strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
@@ -99,9 +100,9 @@ int main()
     fd = open_read(filenames.s + pe.id);
     if (fd == -1)
       strerr_die4sys(111,FATL,"unable to read $MAILDIR/",filenames.s + pe.id,": ");
-    buffer_init(&ssin,read,fd,inbuf,sizeof(inbuf));
+    buffer_init(&bin,read,fd,inbuf,sizeof(inbuf));
 
-    if (getln(&ssin,&line,&match,'\n') != 0)
+    if (getln(&bin,&line,&match,'\n') != 0)
       strerr_die4sys(111,FATL,"unable to read $MAILDIR/",filenames.s + pe.id,": ");
 
     if (!stralloc_copys(&ufline,"From XXX ")) die_nomem();
@@ -120,38 +121,39 @@ int main()
       for (i = 14;i < line.len - 2;++i)
         if ((line.s[i] == ' ') || (line.s[i] == '\t'))
           ufline.s[ufline.len++] = '-';
-        else
+        else {
           ufline.s[ufline.len++] = line.s[i];
           if (!stralloc_cats(&ufline," ")) die_nomem();
+          }
         }
       }
     if (!stralloc_cats(&ufline,myctime(pe.dt))) die_nomem();
-    if (buffer_put(&ssout,ufline.s,ufline.len) == -1)
+    if (buffer_put(&bout,ufline.s,ufline.len) == -1)
       strerr_die4sys(111,FATAL,"unable to write to ",mboxtmp,": ");
 
     while (match && line.len)
     {
       if (gfrom(line.s,line.len))
-        if (buffer_puts(&ssout,">") == -1)
+        if (buffer_puts(&bout,">") == -1)
           strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
-      if (buffer_put(&ssout,line.s,line.len) == -1)
+      if (buffer_put(&bout,line.s,line.len) == -1)
         strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
       if (!match)
       {
-        if (buffer_puts(&ssout,"\n") == -1)
+        if (buffer_puts(&bout,"\n") == -1)
           strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
         break;
       }
-      if (getln(&ssin,&line,&match,'\n') != 0)
+      if (getln(&bin,&line,&match,'\n') != 0)
         strerr_die4sys(111,FATL,"unable to read $MAILDIR/",filenames.s + pe.id,": ");
     }
-    if (buffer_puts(&ssout,"\n"))
+    if (buffer_puts(&bout,"\n"))
       strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
 
    close(fd);
   }
 
-  if (buffer_flush(&ssout) == -1)
+  if (buffer_flush(&bout) == -1)
     strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
   if (fsync(fdnewmbox) == -1)
     strerr_die4sys(111,FATL,"unable to write to ",mboxtmp,": ");
