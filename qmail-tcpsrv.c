@@ -1,3 +1,7 @@
+/*
+ *  Revision 20180119, Kai Peter
+ *  - prevent 'misleading-indentation' warning
+*/
 #include <sys/types.h>
 #include <sys/param.h>
 #include <netdb.h>
@@ -315,7 +319,7 @@ void sigchld()
       strnum2[fmt_ulong(strnum2,wstat)] = 0;
       strerr_warn4("qmail-tcpsrv: end ",strnum," status ",strnum2,0);
     }
-    if (numchildren) --numchildren; printstatus();
+    if (numchildren) { --numchildren; } printstatus();
   }
 }
 

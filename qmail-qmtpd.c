@@ -1,11 +1,12 @@
 /*
+ *  Revision 20180123, Kai Peter
+ *  - changed type of saferead/safewrite to ssize_t
  *  Revision 20171130, Kai Peter
  *  - changed folder name 'control' to 'etc'
  *  - switched to 'buffer'
 */
 #include <unistd.h>
 #include "stralloc.h"
-//#include "substdio.h"
 #include "buffer.h"
 #include "qmail.h"
 #include "now.h"
@@ -23,7 +24,7 @@ void badproto() { _exit(100); }
 void resources() { _exit(111); }
 
 //int safewrite(fd,buf,len) int fd; char *buf; int len;
-int safewrite(int fd,char *buf,int len)
+ssize_t safewrite(int fd,char *buf,int len)
 {
   int r;
   r = write(fd,buf,len);
@@ -37,7 +38,7 @@ char boutbuf[256];
 buffer bout = BUFFER_INIT(safewrite,1,boutbuf,sizeof boutbuf);
 
 //int saferead(fd,buf,len) int fd; char *buf; int len;
-int saferead(int fd,char *buf,int len)
+ssize_t saferead(int fd,char *buf,int len)
 {
   int r;
 //  substdio_flush(&ssout);
@@ -291,7 +292,7 @@ int main()
           break;
       }
 
-    /* ssout will be flushed when we read from the network again */
+    /* bout will be flushed when we read from the network again */
   }
   return(0);  /* never reached */
 }
