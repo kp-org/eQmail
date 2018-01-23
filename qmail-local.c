@@ -1,10 +1,12 @@
-/*  Revision 20160709, Kai Peter
+/*
+ *  Revision 20180123, Kai Peter
+ *  - prevented 'misleading-indentation' warning
+ *  Revision 20160709, Kai Peter
  *  - switched to 'buffer'
  *  Revision 20160503, Kai Peter
  *  - added explicit braces to inline if-else block (line 321)
  *  - changed return type of main to int
  */
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -220,7 +222,7 @@ char *fn;
    if (getln(&ss,&messline,&match,'\n') != 0) 
     {
      strerr_warn3("Unable to read message: ",error_str(errno),". (#4.3.0)",0);
-     if (flaglocked) seek_trunc(fd,pos); close(fd);
+     if (flaglocked) { seek_trunc(fd,pos); } close(fd);
      _exit(111);
     }
    if (!match && !messline.len) break;

@@ -1,3 +1,10 @@
+/*
+ *  Revision 20160510, Kai Peter
+ *  - removed unused vars: 'i' (324), fqdn (383), txt (45)
+ *  Revision 20160509, Kai Peter
+ *  - added some parentheses
+ *  - removed unused var 'len' in function iaafmt6()
+ */
 #include <stdio.h>
 #include <netdb.h>
 #include <sys/types.h>
@@ -51,22 +58,26 @@ int type;
  if (!stralloc_copy(&glue,domain)) return DNS_MEM;
  if (!stralloc_0(&glue)) return DNS_MEM;
  if (!responsebuflen)
-  if (response.buf = (unsigned char *)alloc(PACKETSZ+1))
+  {
+  if ((response.buf = (unsigned char *)alloc(PACKETSZ+1)))
    responsebuflen = PACKETSZ+1;
   else return DNS_MEM;
+  }
 
  responselen = lookup(glue.s,C_IN,type,response.buf,responsebuflen);
  if ((responselen >= responsebuflen) ||
      (responselen > 0 && (((HEADER *)response.buf)->tc)))
   {
    if (responsebuflen < 65536)
-    if (alloc_re(&response.buf, responsebuflen, 65536))
+   {
+    if ((alloc_re(&response.buf, responsebuflen, 65536)))
      responsebuflen = 65536;
     else return DNS_MEM;
     saveresoptions = _res.options;
     _res.options |= RES_USEVC;
     responselen = lookup(glue.s,C_IN,type,response.buf,responsebuflen);
     _res.options = saveresoptions;
+   }
   }
  if (responselen <= 0)
   {
@@ -90,7 +101,6 @@ int type;
  return 0;
 }
 
-
 static int findname(wanttype)
 int wanttype;
 {
@@ -108,7 +118,7 @@ int wanttype;
 
  i = responseend - responsepos;
  if (i < 4 + 3 * 2) return DNS_SOFT;
-   
+
  rrtype = getshort(responsepos);
  rrdlen = getshort(responsepos + 8);
  responsepos += 10;
@@ -120,7 +130,7 @@ int wanttype;
    responsepos += rrdlen;
    return 1;
   }
-   
+
  responsepos += rrdlen;
  return 0;
 }
@@ -158,7 +168,7 @@ int wanttype;
    responsepos += rrdlen;
    return 1;
   }
-   
+
  responsepos += rrdlen;
  return 0;
 }
@@ -328,9 +338,9 @@ struct ip6_address *ip;
 {
 //  unsigned int i;
   int j;
-  unsigned int len;
+//  unsigned int len;
   static char data[] = "0123456789abcdef";
-  len = 0;
+//  len = 0;
 
   if (s) {
 	for (j = 15; j >= 0; j--) {
@@ -380,15 +390,17 @@ int pref;
   int r;
   struct ip_mx ix = {0};
   int err4 = 0, err6 = 0;
-#ifdef TLS
-  stralloc fqdn = {0};
-#endif
+// Kai: gcc warning: unused variable
+//#ifdef TLS
+//  stralloc fqdn = {0};
+//#endif
 
  if (!stralloc_copy(&glue,sa)) return DNS_MEM;
  if (!stralloc_0(&glue)) return DNS_MEM;
  if (glue.s[0]) {
 	ix.af = AF_INET;
-	if (!glue.s[ip_scan(glue.s,&ix.addr.ip)] || !glue.s[ip_scanbracket(glue.s,&ix.addr.ip)])
+//	if (!glue.s[ip_scan(glue.s,&ix.addr.ip)] || !glue.s[ip_scanbracket(glue.s,&ix.addr.ip)])
+	if (!glue.s[ip4_scan(glue.s,(char *)&ix.addr.ip)] || !glue.s[ip_scanbracket(glue.s,(char *)&ix.addr.ip)])
     {
 	ix.af = AF_INET;
 	if (!ipalloc_append(ia,&ix)) return DNS_MEM;
@@ -417,7 +429,7 @@ int pref;
 #endif
 
  switch(resolve(sa,T_A))
-  {
+ {
 	case DNS_MEM: err4 = DNS_MEM; break;
 	case DNS_SOFT: err4 = DNS_SOFT; break;
 	case DNS_HARD: err4 = DNS_HARD; break;
@@ -429,14 +441,14 @@ int pref;
 	ix.pref = pref;
 	if (r == DNS_SOFT) { err4 = DNS_SOFT; break; }
 	if (r == 1) {
-
 #ifdef IX_FQDN
      ix.fqdn = glue.s;
 #endif
 	if (!ipalloc_append(ia,&ix)) { err4 = DNS_MEM; break; }
 	}
-	break;
   }
+  break;
+ }
 #ifdef IX_FQDN
  glue.s = 0;
 #endif
@@ -448,7 +460,7 @@ int pref;
 #else
   return err4;
 #endif
-  }
+//  }
 }
 int dns_ip(ia,sa)
 ipalloc *ia;
@@ -479,7 +491,8 @@ unsigned long random;
  if (!stralloc_0(&glue)) return DNS_MEM;
  if (glue.s[0]) {
     ix.pref = 0;
-	if (!glue.s[ip_scan(glue.s,(char *)&ix.addr.ip)] || !glue.s[ip_scanbracket(glue.s,&ix.addr.ip)])
+//	if (!glue.s[ip_scan(glue.s,&ix.addr.ip)] || !glue.s[ip_scanbracket(glue.s,&ix.addr.ip)])
+	if (!glue.s[ip4_scan(glue.s,(char *)&ix.addr.ip)] || !glue.s[ip_scanbracket(glue.s,(char *)&ix.addr.ip)])
     {
 #ifdef TLS
   	  ix.fqdn = NULL;
@@ -552,5 +565,4 @@ unsigned long random;
 
  alloc_free(mx);
  return flagsoft;
-  return(0);   /* never reached */
 }
