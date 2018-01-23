@@ -1,4 +1,6 @@
 /*
+ *  Revision 20180123, Kai Peter
+ *  - prevented 'misleading-indentation' warning
  *  Revision 20171130, Kai Peter
  *  - changed folder name 'control' to 'etc'
  *  Revision 20160711, Kai Peter
@@ -83,7 +85,7 @@ void die_read() {
   buffer_putsflush(buffer_2,"qmail-inject: fatal: read error\n"); temp(); }
 
 void doordie(sa,r) stralloc *sa; int r; {
- if (r == 1) return; if (r == -1) die_nomem();
+ if (r == 1) { return; } if (r == -1) die_nomem();
   buffer_putsflush(buffer_2,"qmail-inject: fatal: unable to parse this line:\n");
   buffer_putflush(buffer_2,sa->s,sa->len); perm();
 }

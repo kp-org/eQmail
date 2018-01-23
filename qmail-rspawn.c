@@ -1,4 +1,6 @@
 /*
+ *  Revision 20180123, Kai Peter
+ *  - prevented 'misleading-indentation' warning
  *  Revision 20170515, Kai Peter
  *  - switched to stralloc (instead of <string.h>)
  *  Revision 20160712, Kai Peter
@@ -61,6 +63,7 @@ void report(buffer *b,int wstat,char *s,int len)
   result = -1;
   j = 0;
   for (k = 0;k < len;++k)
+  {
     if (!s[k])
     {
       if (s[j] == 'K') { result = 1; break; }
@@ -68,10 +71,12 @@ void report(buffer *b,int wstat,char *s,int len)
       if (s[j] == 'D') break;
       j = k + 1;
     }
-    orr = result;
-    switch(s[0]) {
-      case 's': orr = 0; break;
-      case 'h': orr = -1;
+  }
+
+  orr = result;
+  switch(s[0]) {
+    case 's': orr = 0; break;
+    case 'h': orr = -1;
   }
 
   switch(orr) {
