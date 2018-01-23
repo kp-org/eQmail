@@ -4,6 +4,9 @@
 #
 # Beware of the order of checks!
 #********************************************************************************
+cd `dirname $0`
+echo Act. Dir: `pwd`
+
 CRITICAL=""
 
 echo -n "Checking system ... "
@@ -15,7 +18,8 @@ echo "build on "${ARCH}"!"
 
 #********************************************************************************
 # check for external system tools
-. cfg/exttools.inc
+#. cfg/exttools.inc
+. configure.in/exttools.inc
 
 #********************************************************************************
 # Checking conf-* files
@@ -36,8 +40,9 @@ echo "build on "${ARCH}"!"
 
 #********************************************************************************
 #
-. configure.in/compiled-in.inc
-. configure.in/qmail-ids
+#. configure.in/compiled-in.inc
+#. configure.in/qmail-ids
+[ -f "configure.in/package.inc" ] && source configure.in/package.inc
 . cfg/save-conf.inc
 #********************************************************************************
 echo

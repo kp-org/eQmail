@@ -1,9 +1,10 @@
 
 # some basics ('nslookup' should be available always)
-FQDN=`nslookup \`hostname\` | grep ^Name: | awk '{print $2}' | tr '[A-Z]' '[a-z]'`
+#FQDN=`nslookup \`hostname\` | grep ^Name: | awk '{print $2}' | tr '[A-Z]' '[a-z]'`
+FQDN=`./hostname`
 [ "$FQDN" ] || FQDN=`uname -n`    # last try to get a FQDN ...
 [ "$FQDN" ] || FQDN="localhost"   # ... or we use "localhost" simply
-HOST=`echo "$FQDN" | cut -d. -f1`
+#HOST=`echo "$FQDN" | cut -d. -f1`
 DOMAIN=`echo "$FQDN" | cut -d. -f2-`
 if [ ! "$DOMAIN" ] ; then
    echo -e "\n\033[1m >>> Couldn't determine DNS domain! Check your config!\033[0m\n" ; fi

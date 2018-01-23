@@ -40,7 +40,7 @@ int main()
 //  myhostname1();
 
   buffer_puts(buffer_1,"    qmail home directory: ");
-  buffer_puts(buffer_1,qmailhome);
+  buffer_puts(buffer_1,qprfxdir);
   buffer_puts(buffer_1,"\n");
 
   buffer_puts(buffer_1,"user extension delimiter: '");
@@ -57,7 +57,7 @@ int main()
 
   if(str_equal(queuedir,"")) {
     stralloc sa = {0};
-    if(!stralloc_copys(&sa,qmailhome)) err_sys(errno);
+    if(!stralloc_copys(&sa,qprfxdir)) err_sys(errno);
     if(!stralloc_catb(&sa,"/queue",10)) err_sys(errno);
     if(!stralloc_0(&sa)) err_sys(errno);
     queuedir = sa.s;

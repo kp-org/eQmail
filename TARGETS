@@ -63,6 +63,7 @@ qmail-shcfg
 ssl.bin
 qmail-tcpsrv
 tcprules
+hostname
 
 autocf-break
 autocf-spawn

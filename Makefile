@@ -4,23 +4,21 @@ SHELL=/bin/sh
 
 COMPILE=./compile
 MAKELIB=./makelib
-MAKEEXE=./load
-LOAD=$(MAKEEXE)
+LOADBIN=./load
+LOAD=$(LOADBIN)
+CCFLAGS=-Iqlibs/include
+LDFLAGS=-Lqlibs
 
 QPRFX = `head -1 autocf-qprfx`
+QLIBS = $(LDFLAGS) -lqlibs
 
 DNSLIB = `head -1 resolv.lib`
 SSLLIB = `echo \`cat ssl.lib\` \`cat crypto.lib\` \`cat dl.lib\``
 
-# create libs (*.a)
-# create object files (*.o)
-# link files
-# create man pages
-
 default: conf libs obj it mans
 
 clean: TARGETS
-	rm -f *.o *.a *.tmp `cat TARGETS`
+	rm -f *.o *.a *.tmp *.lib `cat TARGETS`
 	@cd qlibs ; make clean
 	@cd man ; make clean
 
@@ -80,7 +78,7 @@ condredirect:
 	$(LOAD) condredirect qmail.o strerr.a fd.a sig.a wait.a \
 	seek.a env.a buffer.a error.a str.a fs.a auto_qmail.o alloc.a substdio.a
 
-mkconfig:
+mkconfig: hostname
 	cat warn-auto.sh mkconfig.sh | sed s}QPRFX}"$(QPRFX)"}g > mkconfig
 	chmod 755 mkconfig
 
@@ -124,6 +122,10 @@ trysalen.c compile
 headerbody.o: compile headerbody.c
 	./compile headerbody.c
 
+hostname:
+	$(COMPILE) hostname.c
+	$(LOADBIN) hostname $(QLIBS)
+
 ipalloc.o: compile ipalloc.c
 	./compile ipalloc.c
 
@@ -154,8 +156,8 @@ mkrsadhkeys mksrvrcerts qmail-fixq qmail-shcfg
 
 maildir2mbox:
 	$(COMPILE) maildir2mbox.c
-	$(MAKEEXE) maildir2mbox  maildir.o prioq.o now.o myctime.o gfrom.o \
-	 qlibs/strerr.a datetime.a -lqlibs
+	$(LOAD) maildir2mbox  maildir.o prioq.o now.o myctime.o gfrom.o \
+	 qlibs/strerr.a datetime.a $(LDFLAGS) -lqlibs
 #	$(LOAD) maildir2mbox maildir.o prioq.o now.o myctime.o \
 #	gfrom.o lock.a getln.a env.a open.a strerr.a stralloc.a \
 #	alloc.a buffer.a error.a str.a fs.a datetime.a
@@ -185,7 +187,7 @@ predate:
 
 preline:
 	$(COMPILE) preline.c
-	$(MAKEEXE) preline -lqlibs
+	$(LOAD) preline $(LDFLAGS) -lqlibs
 #	$(LOAD) preline fd.a fmt.o wait.a sig.a env.a \
 #	getopt.a buffer.a errmsg.a str.a alloc.a
 #	$(LOAD) preline strerr.a fd.a wait.a sig.a env.a \
@@ -219,8 +221,7 @@ qmail-getpw: auto_break.o auto_usera.o
 	$(LOAD) qmail-getpw case.a buffer.a error.a str.a fs.a \
 	auto_break.o auto_usera.o
 
-qmail-inject: compile load qmail-inject.c headerbody.o hfield.o \
-token822.o
+qmail-inject: compile load qmail-inject.c headerbody.o hfield.o token822.o
 #newfield.o quote.o now.o control.o date822fmt.o constmap.o qmail.o \
 #case.a fd.a wait.a open.a getln.a sig.a getopt.a datetime.a  \
 #env.a stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o
@@ -261,7 +262,7 @@ qmail-newu:
 
 qmail-print: buildins.o
 	$(COMPILE) qmail-print.c
-	$(LOAD) qmail-print buildins.o -lqlibs
+	$(LOAD) qmail-print buildins.o $(LDFLAGS) -lqlibs
 #	$(LOAD) qmail-print errmsg.a stralloc.a str.a fs.a buildins.o buffer.a
 
 qmail-pw2u:
@@ -329,15 +330,16 @@ error.a str.a fs.a auto_qmail.o auto_split.o auto_uids.o
 qmail-remote: compile load qmail-remote.c control.o constmap.o timeoutread.o \
 timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ip.a ipalloc.o ipme.o quote.o \
 ndelay.a case.a sig.a open.a lock.a seek.a getln.a stralloc.a alloc.a substdio.a \
-error.a str.a fs.a auto_qmail.o base64.o dns.lib tls.o ssl_timeoutio.o
+error.a str.a fs.a auto_qmail.o base64.o tls.o ssl_timeoutio.o
 	./compile qmail-remote.c
 	./load qmail-remote control.o constmap.o timeoutread.o \
 	timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ip.a \
-	tls.o ssl_timeoutio.o -L/usr/local/ssl/lib -lssl -lcrypto \
+	tls.o ssl_timeoutio.o $(SSLLIB) \
 	ipalloc.o ipme.o quote.o ndelay.a case.a sig.a open.a \
 	lock.a seek.a getln.a stralloc.a alloc.a substdio.a error.a \
-	str.a fs.a auto_qmail.o  base64.o `cat dns.lib` \
+	str.a fs.a auto_qmail.o  base64.o $(DNSLIB) \
 	buffer.a
+#	tls.o ssl_timeoutio.o -L/usr/local/ssl/lib -lssl -lcrypto
 
 qmail-rspawn: compile load qmail-rspawn.c spawn.o tcpto_clean.o now.o
 	./compile qmail-rspawn.c
@@ -376,20 +378,19 @@ tls.o ssl_timeoutio.o ndelay.a
 	./compile qmail-smtpd.c
 	./load qmail-smtpd rcpthosts.o commands.o timeoutread.o \
 	timeoutwrite.o ip.a ipme.o ipalloc.o control.o constmap.o \
-	tls.o ssl_timeoutio.o ndelay.a -L/usr/local/ssl/lib -lssl -lcrypto \
+	tls.o ssl_timeoutio.o ndelay.a $(SSLLIB) \
 	received.o date822fmt.o now.o qmail.o cdb.a fd.a wait.a \
 	datetime.a getln.a open.a sig.a case.a qmail-spp.o env.a stralloc.a \
 	alloc.a substdio.a error.a str.a fs.a auto_qmail.o base64.o buffer.a
+#	tls.o ssl_timeoutio.o ndelay.a -L/usr/local/ssl/lib -lssl -lcrypto \
 
 qmail-start: compile load qmail-start.c prot.o fd.a auto_uids.o
 	./compile qmail-start.c
 	./load qmail-start prot.o fd.a auto_uids.o
 
-qmail-tcpok: compile load qmail-tcpok.c open.a lock.a strerr.a \
-substdio.a error.a str.a auto_qmail.o
-	./compile qmail-tcpok.c
-	./load qmail-tcpok open.a lock.a strerr.a substdio.a \
-	error.a str.a auto_qmail.o buffer.a
+qmail-tcpok:
+	$(COMPILE) qmail-tcpok.c
+	$(LOADBIN) qmail-tcpok $(LDFLAGS) -lqlibs buildins.o
 
 qmail-tcpto: compile load qmail-tcpto.c ip.a now.o open.a lock.a \
 substdio.a error.a str.a fs.a auto_qmail.o
@@ -440,12 +441,12 @@ splogger: compile load splogger.c substdio.a error.a str.a fs.a
 
 tcp-env: compile load tcp-env.c dns.o remoteinfo.o timeoutread.o \
 timeoutwrite.o timeoutconn.o ip.a ipalloc.o case.a ndelay.a sig.a \
-env.a stralloc.a alloc.a substdio.a error.a str.a fs.a dns.lib hassalen.h
+env.a stralloc.a alloc.a substdio.a error.a str.a fs.a hassalen.h
 	./compile tcp-env.c
 	./load tcp-env dns.o remoteinfo.o timeoutread.o \
 	timeoutwrite.o timeoutconn.o ip.a ipalloc.o case.a ndelay.a \
 	sig.a env.a getopt.a stralloc.a alloc.a substdio.a error.a \
-	str.a fs.a `cat dns.lib` buffer.a
+	str.a fs.a $(DNSLIB) buffer.a
 
 qmail-envars: libs remoteinfo6.o timeoutconn6.o
 	./compile -g qmail-envars.c
@@ -528,20 +529,10 @@ tcprules: rules.o
 
 qmail-tcpsrv: rules.o remoteinfo6.o timeoutconn6.o
 	$(COMPILE) qmail-tcpsrv.c
-	$(LOAD) qmail-tcpsrv rules.o remoteinfo6.o timeoutconn6.o \
-	readclose.o pathexec.o \
-	alloc.a buffer.a case.a cdb.a dns.a error.a env.a fd.a fmt.o \
-	getopt.a ip.a ndelay.a open.a prot.o qlibs/scan.o sig.a \
-	str.a stralloc.a strerr.a time.a wait.a socket.a \
-	qlibs/uint16p.o \
-	case.a \
-	qlibs/errstr.o
+	$(LOADBIN) qmail-tcpsrv rules.o remoteinfo6.o timeoutconn6.o \
+	strerr.a $(LDFLAGS) -lqlibs
 
 #************************************************
-hostname:
-	./compile hostname.c
-	./load hostname buffer.a str.a
-
 qmail-plugz:
 	./compile qmail-plugz.c
 	./load qmail-plugz buildins.o constmap.o control.o fmt.o \

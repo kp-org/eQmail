@@ -117,9 +117,9 @@ chmod 2755           $VARDIR/alias
 # at least set rights and group of the home dir
 chmod 755 $PKGDIR ; chgrp $GIDQ $PKGDIR
 
-cd $PKGDIR
-[ -L control ] || ln -s etc control   # change mkconfig before removing this!
-cd $OLDPWD
+#cd $PKGDIR
+#[ -L control ] || ln -s etc control   # change mkconfig before removing this!
+#cd $OLDPWD
 
 # basic configuration
 . ./mkconfig

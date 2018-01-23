@@ -1,7 +1,8 @@
-#ifndef BUILINS_H
+#ifndef BUILDINS_H
 #define BUILDINS_H
 
-extern char qmailhome[];
+//extern char qmailhome[];
+extern char qprfxdir[];
 extern char username_alias[];
 extern char username_daemon[];
 extern char username_log[];

@@ -1,5 +1,6 @@
 
 QMAILDIR="QPRFX"
+TLS="Yes"	# we define this static here for now
 
 # some escape sequences to format output
 OFF=$'\e[0m'   # all attributes off
@@ -8,7 +9,7 @@ ULN=$'\e[4m'   # underlined
 YLW=$'\e[33m'  # yellow foreground
 RED=$'\e[91m'  # light red foreground
 
-$QPRFX/bin/qmail-print
+QPRFX/bin/qmail-print
 
 printContent() {
   printf "\033[1m%s\033[0m" "$f:"
