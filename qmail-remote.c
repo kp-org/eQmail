@@ -1,6 +1,13 @@
 /*
  *  Revision 20171130, Kai Peter
  *  - changed folder name 'control' to 'etc'
+ *  - prevented 'misleading-indentation' warning
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - casting pointers (char *)
+ *  - added some parenthesis to condition '(relayhost = constmap('
+ *  - added 'close.h', 'chdir.h', 'base64,h', 'getpid.h'
+ *  - initialize var 'code' in function smtp()
 */
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -115,10 +122,10 @@ void outhost()
 #ifdef INET6
   if (partner.af == AF_INET) {
 #endif
-  if (substdio_put(subfdoutsmall,x,ip_fmt(x,&partner.addr.ip)) == -1) _exit(0);
+  if (substdio_put(subfdoutsmall,x,ip_fmt(x,(char *)&partner.addr.ip)) == -1) _exit(0);
 #ifdef INET6
   } else {
-  if (substdio_put(subfdoutsmall,x,ip6_fmt(x,&partner.addr.ip6)) == -1) _exit(0);
+  if (substdio_put(subfdoutsmall,x,ip6_fmt(x,(char *)&partner.addr.ip6)) == -1) _exit(0);
   }
 #endif
 }
@@ -360,11 +367,11 @@ void tls_quit(const char *s1, const char *s2)
 
 int match_partner(const char *s, int len)
 {
-  if (!case_diffb(partner_fqdn, len, s) && !partner_fqdn[len]) return 1;
+  if (!case_diffb(partner_fqdn, len,(char *) s) && !partner_fqdn[len]) return 1;
   /* we also match if the name is *.domainname */
   if (*s == '*') {
     const char *domain = partner_fqdn + str_chr(partner_fqdn, '.');
-    if (!case_diffb(domain, --len, ++s) && !domain[len]) return 1;
+    if (!case_diffb((char *)domain, --len,(char *) ++s) && !domain[len]) return 1;
   }
   return 0;
 }
@@ -506,7 +513,7 @@ int tls_init()
         const GENERAL_NAME *gn = sk_GENERAL_NAME_value(gens, i);
         if (gn->type == GEN_DNS){
           found_gen_dns = 1;
-          if (match_partner(gn->d.ia5->data, gn->d.ia5->length)) {
+          if (match_partner((char *)gn->d.ia5->data, gn->d.ia5->length)) {
             matched_gen_dns = 1;
             break;
           }
@@ -522,7 +529,7 @@ int tls_init()
       i = X509_NAME_get_index_by_NID(subj, NID_commonName, -1);
       if (i >= 0) {
         const ASN1_STRING *s = X509_NAME_get_entry(subj, i)->value;
-        if (s) { (peer.len = s->length); (peer.s = s->data); }
+        if (s) { (peer.len = s->length); (peer.s = (char *)s->data); }
       }
       if (peer.len <= 0) {
         out("ZTLS unable to verify server ");
@@ -729,9 +736,9 @@ void getcontrols()
     case -1:
       temp_control();
     case 0:
-      if (!constmap_init(&maproutes,"",0,1)) temp_nomem(); break;
+      if (!constmap_init(&maproutes,"",0,1)) { temp_nomem(); } break;
     case 1:
-      if (!constmap_init(&maproutes,routes.s,routes.len,1)) temp_nomem(); break;
+      if (!constmap_init(&maproutes,routes.s,routes.len,1)) { temp_nomem(); } break;
   }
 }
 
