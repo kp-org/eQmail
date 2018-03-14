@@ -14,9 +14,9 @@
 #include "wait.h"
 #include "env.h"
 #include "sig.h"
-#include "error.h"
+#include "errmsg.h"
 
-#define WHO "preline: "
+#define WHO "preline"
 
 void die_usage()
 {
@@ -41,9 +41,9 @@ int main(int argc,char **argv)
 
   sig_pipeignore();
 
-  if (!(ufline = env_get("UFLINE"))) die_usage();
-  if (!(rpline = env_get("RPLINE"))) die_usage();
-  if (!(dtline = env_get("DTLINE"))) die_usage();
+  if (!(ufline = env_get("UFLINE"))) die_usage();	/* From_ line (UUCP style) */
+  if (!(rpline = env_get("RPLINE"))) die_usage();	/* Return-Path line  */
+  if (!(dtline = env_get("DTLINE"))) die_usage();	/* delivered-to line */
 
   while ((opt = getopt(argc,argv,"frdFRD")) != opteof)
     switch(opt) {
@@ -57,6 +57,7 @@ int main(int argc,char **argv)
     }
   argc -= optind;
   argv += optind;
+
   if (!*argv) die_usage();
 
   if (pipe(pi) == -1)
@@ -72,8 +73,7 @@ int main(int argc,char **argv)
       err_sys_plus(EHARD,"unable to set up fds: ");
     sig_pipedefault();
     execvp(*argv,argv);
-//  strerr_die4sys(error_temp(errno) ? 111 : 100,FATL,"unable to run ",*argv,": ");
-    err_sys_plus((errno),"invalid argument");
+    err_sys_plus((errno),B("unable to run ",*argv,": "));
   }
   close(pi[0]);
   if (fd_move(1,pi[1]) == -1)

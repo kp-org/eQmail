@@ -9,11 +9,11 @@
 #include "sig.h"
 #include "env.h"
 #include "qmail.h"
-#include "error.h"
+#include "errmsg.h"
 #include "buffer.h"
 #include "fmt.h"
 
-#define WHO "forward: "
+#define WHO "forward"
 
 struct qmail qqt;
 
@@ -48,7 +48,7 @@ int main(int argc,char **argv)
     err_sys_plus(errno,"unable to fork: ");
   qmail_puts(&qqt,dtline);
   if (buffer_copy(&bout,&bin) != 0)
-    err_sys_plus(EHARD,"unable to read message: ");
+    err_sys_plus(errno,"unable to read message: ");
   buffer_flush(&bout);
 
   strnum[fmt_ulong(strnum,qmail_qp(&qqt))] = 0;

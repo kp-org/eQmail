@@ -9,10 +9,10 @@
 #include "fmt.h"
 #include "str.h"
 #include "stralloc.h"
-#include "error.h"
+#include "errmsg.h"
 #include "buildins.h"
 
-#define WHO "qmail-print: "
+#define WHO "qmail-print"
 
 void myhostname1() {
   char host[1023];  /* */

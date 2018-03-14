@@ -13,13 +13,13 @@
 #include "fd.h"
 #include "wait.h"
 #include "buffer.h"
-#include "error.h"
+#include "errmsg.h"
 #include "ipalloc.h"
 #include "tcpto.h"
 #include "str.h"
 #include "auto_qmail.h"
 
-#define WHO "qmail-rspawn: "
+#define WHO "qmail-rspawn"
 
 void initialize(int argc,char **argv) { tcpto_clean(); }
 int truncreport = 0;
@@ -37,7 +37,7 @@ void report(buffer *b,int wstat,char *s,int len)
     buffer_puts(b,np);
     buffer_puts(b," crashed.\n"); return; }
 
-  switch(wait_exitcode(wstat))
+  switch(wait_exitcode(wstat))   /* see qmail.c */
   {
     case 0: break;
     case 111: buffer_puts(b,"Z111_Unable to run ");

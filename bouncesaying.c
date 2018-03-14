@@ -11,10 +11,10 @@
 #include <unistd.h>
 #include "wait.h"
 #include "sig.h"
-#include "error.h"
+#include "errmsg.h"
 #include "buffer.h"
 
-#define WHO "bouncesaying: "
+#define WHO "bouncesaying"
 
 int main(int argc,char **argv)
 {
@@ -31,7 +31,7 @@ int main(int argc,char **argv)
     if (pid == 0) {
       execvp(argv[2],argv + 2);
 //      if (errno) _exit(111);
-      if (errno) err_sys_plus(EHARD,errstr(errno));
+      if (errno) err_sys(errno);
       _exit(100);
 //      err_sys(ESOFT);
     }
@@ -41,8 +41,8 @@ int main(int argc,char **argv)
       err_sys_plus(EHARD,"child crashed");
     switch(wait_exitcode(wstat)) {
       case 0: break;
-      case 111: err_tmp_plus(ESOFT,"temporary child error");
-      case EHARD: err_tmp_plus(ESOFT,"temporary child error");
+//      case 111: err_tmp_plus(ESOFT,"temporary child error");
+      case ESOFT: err_tmp_plus(ESOFT,"temporary child error");
       default: _exit(0);
     }
   }
@@ -51,5 +51,5 @@ int main(int argc,char **argv)
   buffer_puts(buffer_1,"\n");
   buffer_flush(buffer_1);
   _exit(100);
-  err_sys(ESOFT);
+//  err_sys(ESOFT);
 }
