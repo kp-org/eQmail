@@ -30,6 +30,7 @@ auto_*.c
 ipme2*
 ipalloc2*
 ipmeprint2*
+hassalen.h
 
 autocf-*
 CONTRIBUTORS
