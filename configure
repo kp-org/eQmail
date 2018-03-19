@@ -18,7 +18,6 @@ echo "build on "${ARCH}"!"
 
 #********************************************************************************
 # check for external system tools
-#. cfg/exttools.inc
 . configure.in/exttools.inc
 
 #********************************************************************************
@@ -26,8 +25,8 @@ echo "build on "${ARCH}"!"
 #. cfg/conf-files.inc
 
 #********************************************************************************
-# Check headers
-. cfg/headers.inc
+# Check (open)ssl headers
+. configure.in/sslheaders.inc
 #exit
 
 #********************************************************************************
@@ -36,15 +35,14 @@ echo "build on "${ARCH}"!"
 
 #********************************************************************************
 # Checking for shared libraries
-#. cfg/shared-libs.inc
 . configure.in/systemlibs.inc
 
 #********************************************************************************
-#
+# user/group id's, builtin's and save temporarily
 #. configure.in/compiled-in.inc
 #. configure.in/qmail-ids
 [ -f "configure.in/package.inc" ] && source configure.in/package.inc
-. cfg/save-conf.inc
+. configure.in/save-conf.inc
 #********************************************************************************
 echo
 if [ "$CRITICAL" ] ; then
