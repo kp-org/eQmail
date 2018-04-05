@@ -57,9 +57,9 @@ int main()
 
   if(str_equal(queuedir,"")) {
     stralloc sa = {0};
-    if(!stralloc_copys(&sa,qprfxdir)) err_sys(errno);
-    if(!stralloc_catb(&sa,"/queue",10)) err_sys(errno);
-    if(!stralloc_0(&sa)) err_sys(errno);
+    if(!stralloc_copys(&sa,qprfxdir)) errsys(errno);
+    if(!stralloc_catb(&sa,"/queue",10)) errsys(errno);
+    if(!stralloc_0(&sa)) errsys(errno);
     queuedir = sa.s;
   }
   buffer_puts(buffer_1,"  default queue location: ");

@@ -30,23 +30,23 @@ int main()
   int i;
 
   if (chdir(qprfxdir) == -1) {
-    err_sys_plus(errno,B("unable to chdir to ",qprfxdir,": "));
+    errint(errno,B("unable to chdir to ",qprfxdir,": "));
   }
   if (chdir("var/queue/lock") == -1) {
-	err_sys_plus(errno,B("unable to chdir to ",qprfxdir,"/var/queue/lock: "));
+	errint(errno,B("unable to chdir to ",qprfxdir,"/var/queue/lock: "));
   }
 
   fd = open_write("tcpto");
   if (fd == -1) {
-	err_sys_plus(errno,B("unable to write ",qprfxdir,"/var/queue/lock/tcpto: "));
+	errint(errno,B("unable to write ",qprfxdir,"/var/queue/lock/tcpto: "));
   }
   if (lock_ex(fd) == -1) {
-	err_sys_plus(errno,B("unable to lock ",qprfxdir,"/var/queue/lock/tcpto: "));
+	errint(errno,B("unable to lock ",qprfxdir,"/var/queue/lock/tcpto: "));
   }
   buffer_init(&b,write,fd,(char *)buf,sizeof buf);
   for (i = 0;i < sizeof buf;++i) buffer_put(&b,"",1);
   if (buffer_flush(&b) == -1) {
-	err_sys_plus(errno,B("unable to clear ",qprfxdir,"/var/queue/lock/tcpto: "));
+	errint(errno,B("unable to clear ",qprfxdir,"/var/queue/lock/tcpto: "));
   }
   _exit(0);
 }

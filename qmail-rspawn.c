@@ -105,9 +105,9 @@ int spawn(int fdmess,int fdout,char *s,char *r,int at)
   struct stat st;
   stralloc sa = {0};
 
-  if(!stralloc_copys(&sa,auto_qmail)) err_sys(errno);
-  if(!stralloc_catb(&sa,"/bin/qmail-bfrmt",16)) err_sys(errno); /* len: 16 + \0 */
-  if(!stralloc_0(&sa)) err_sys(errno);
+  if(!stralloc_copys(&sa,auto_qmail)) errsys(errno);
+  if(!stralloc_catb(&sa,"/bin/qmail-bfrmt",16)) errsys(errno); /* len: 16 + \0 */
+  if(!stralloc_0(&sa)) errsys(errno);
   char *x = sa.s;
   if (stat(x,&st) != 0) { np = "qmail-remote"; }
 
@@ -121,11 +121,11 @@ int spawn(int fdmess,int fdout,char *s,char *r,int at)
 
   if (!(f = fork()))
   {
-    if (fd_move(0,fdmess) == -1) err_sys(errno);
-    if (fd_move(1,fdout) == -1) err_sys(errno);
-    if (fd_copy(2,1) == -1) err_sys(errno);
+    if (fd_move(0,fdmess) == -1) errsys(errno);
+    if (fd_move(1,fdout) == -1) errsys(errno);
+    if (fd_copy(2,1) == -1) errsys(errno);
     execvp(*args,args);
-    if (errno) err_sys(errno);
+    if (errno) errsys(errno);
     _exit(100);  /* TODO: check exit code */
   }
   return f;
