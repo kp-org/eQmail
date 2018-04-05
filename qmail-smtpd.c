@@ -1,5 +1,5 @@
 /*
- *	Revision 20171130, Kai Peter
+ *  Revision 20171130, Kai Peter
  *  - changed folder name 'control' to 'etc'
 */
 #include "sig.h"
@@ -124,7 +124,7 @@ void err_authmail() { out("503 no auth during mail transaction (#5.5.0)\r\n"); }
 int err_noauth() { out("504 auth type unimplemented (#5.5.1)\r\n"); return -1; }
 int err_authabrt() { out("501 auth exchange canceled (#5.0.0)\r\n"); return -1; }
 int err_input() { out("501 malformed auth input (#5.5.4)\r\n"); return -1; }
-void err_authfail() { out("535 authentication failed (#5.7.1)\r\n"); }
+void err_authfail(char *a, char *b) { out("535 authentication failed (#5.7.1)\r\n"); }
 void err_submission() { out("530 Authorization required (#5.7.1) \r\n"); }
 
 stralloc greeting = {0};
@@ -909,7 +909,7 @@ const char *ssl_verify_err = 0;
 
 void smtp_tls(char *arg)
 {
-  if (ssl) err_unimpl();
+  if (ssl) err_unimpl("");
   else if (*arg) out("501 Syntax error (no parameters allowed) (#5.5.4)\r\n");
   else tls_init();
 }
@@ -950,12 +950,12 @@ void tls_nogateway()
   /* there may be cases when relayclient is set */
   if (!ssl || relayclient) return;
   out("; no valid cert for gatewaying");
-  if (ssl_verify_err) { out(": "); out(ssl_verify_err); }
+  if (ssl_verify_err) { out(": "); out((char *)ssl_verify_err); }
 }
 void tls_out(const char *s1, const char *s2)
 {
-  out("454 TLS "); out(s1);
-  if (s2) { out(": "); out(s2); }
+  out("454 TLS "); out((char *)s1);
+  if (s2) { out(": "); out((char *)s2); }
   out(" (#4.3.0)\r\n"); flush();
 }
 void tls_err(const char *s) { tls_out(s, ssl_error()); if (smtps) die_read(); }
