@@ -6,7 +6,7 @@
 # 3. multiple tools: use first out of multiple
 #********************************************************************************
 
-function requiredTools() {
+requiredTools() {
   local f
   for f in ${RT}
   do
@@ -17,7 +17,7 @@ function requiredTools() {
 }
 
 # check for optional tools
-function optionalTools() {
+optionalTools() {
   local f
   for f in ${OT}
   do
@@ -28,7 +28,7 @@ function optionalTools() {
   done
 }
 # check for system tools (required) !!!
-RT="sh env bash [ test make perl awk"
+RT="sh env sh [ test make perl awk"
 requiredTools "$RT"
 
 OT="svc start-stop-daemon tcpserver xinetd php"
@@ -37,7 +37,7 @@ optionalTools "$OT"
 # UNUSED at the moment !!!!
 #********************************************************************
 # check for one of multiple tools
-function multis() {
+multis() {
 rm _MISSED.tmp 2>/dev/null
 #AT="\\"ip ifconfig ip\\"\\ \\"nslookup dig\\""
 MT="ip ipconfig"

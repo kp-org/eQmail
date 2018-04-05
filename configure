@@ -39,9 +39,7 @@ echo "build on "${ARCH}"!"
 
 #********************************************************************************
 # user/group id's, builtin's and save temporarily
-#. configure.in/compiled-in.inc
-#. configure.in/qmail-ids
-[ -f "configure.in/package.inc" ] && source configure.in/package.inc
+[ -f "configure.in/package.inc" ] && . configure.in/package.inc
 . configure.in/save-conf.inc
 #********************************************************************************
 echo
