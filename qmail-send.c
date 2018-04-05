@@ -1,4 +1,5 @@
 /*
+ *  - excluded "bounces", "todo"
  *  Revision 20171130, Kai Peter
  *  - changed folder name 'control' to 'etc'
  *  Revision 20160712, Kai Peter
@@ -24,7 +25,7 @@
 #include "getln.h"
 #include "buffer.h"
 #include "alloc.h"
-#include "error.h"
+#include "errmsg.h"
 #include "stralloc.h"
 #include "str.h"
 #include "byte.h"
@@ -42,6 +43,8 @@
 #include "constmap.h"
 #include "readsubdir.h"
 #include <utime.h>
+
+#define WHO "qmail-send"
 
 /* critical timing feature #1: if not triggered, do not busy-loop */
 /* critical timing feature #2: if triggered, respond within fixed time */
@@ -82,12 +85,18 @@ int flagexitasap = 0; void sigterm() { flagexitasap = 1; }
 int flagrunasap = 0; void sigalrm() { flagrunasap = 1; }
 int flagreadasap = 0; void sighup() { flagreadasap = 1; }
 
-void cleandied() { log1("alert: oh no! lost qmail-clean connection! dying...\n");
- flagexitasap = 1; }
+//void cleandied() { log1("alert: oh no! lost qmail-clean connection! dying...\n");
+void cleandied() {
+  log("alert: lost qmail-clean connection! dying ...\n");
+  flagexitasap = 1;
+}
 
 int flagspawnalive[CHANNELS];
-void spawndied(c) int c; { log1("alert: oh no! lost spawn connection! dying...\n");
- flagspawnalive[c] = 0; flagexitasap = 1; }
+//void spawndied(c) int c; { log1("alert: oh no! lost spawn connection! dying...\n");
+void spawndied(int c) {
+  log("alert: lost spawn connection! dying...\n");
+  flagspawnalive[c] = 0; flagexitasap = 1;
+}
 
 #define REPORTMAX 10000
 
@@ -234,8 +243,6 @@ int getinfo(stralloc *sa,datetime_sec *dt,unsigned long id)
 
 /* this file is too long ------------------------------------- COMMUNICATION */
 
-//substdio sstoqc; char sstoqcbuf[1024];
-//substdio ssfromqc; char ssfromqcbuf[1024];
 buffer sstoqc; char sstoqcbuf[1024];
 buffer ssfromqc; char ssfromqcbuf[1024];
 stralloc comm_buf[CHANNELS] = { {0}, {0} };
@@ -244,8 +251,6 @@ int comm_pos[CHANNELS];
 void comm_init()
 {
  int c;
-// substdio_fdbuf(&sstoqc,write,5,sstoqcbuf,sizeof(sstoqcbuf));
-// substdio_fdbuf(&ssfromqc,read,6,ssfromqcbuf,sizeof(ssfromqcbuf));
   buffer_init(&sstoqc,write,5,sstoqcbuf,sizeof(sstoqcbuf));
   buffer_init(&ssfromqc,read,6,ssfromqcbuf,sizeof(ssfromqcbuf));
  for (c = 0;c < CHANNELS;++c)
@@ -299,7 +304,6 @@ fd_set *wfds;
 }
 
 void comm_do(fd_set *wfds)
-//fd_set *wfds;
 {
  int c;
  for (c = 0;c < CHANNELS;++c)
@@ -383,12 +387,10 @@ void cleanup_do()
  if (errno != error_noent) return;
 
   fnmake_foop(id);
-// if (substdio_putflush(&sstoqc,fn.s,fn.len) == -1) { cleandied(); return; }
-// if (substdio_get(&ssfromqc,&ch,1) != 1) { cleandied(); return; }
   if (buffer_putflush(&sstoqc,fn.s,fn.len) == -1) { cleandied(); return; }
   if (buffer_get(&ssfromqc,&ch,1) != 1) { cleandied(); return; }
   if (ch != '+')
-    log3("warning: qmail-clean unable to clean up ",fn.s,"\n");
+    log(B("warning: qmail-clean unable to clean up ",fn.s,"\n"));
 }
 
 
@@ -409,7 +411,7 @@ unsigned long id;
  struct stat st;
  int c;
 
-#define CHECKSTAT if (errno != error_noent) goto fail;
+#define CHECKSTAT if (errno != ENOENT) goto fail;
 
  fnmake_info(id);
  if (stat(fn.s,&st) == -1)
@@ -443,7 +445,7 @@ unsigned long id;
  return;
 
  fail:
- log3("warning: unable to stat ",fn.s,"; will try again later\n");
+ log(B("warning: unable to stat ",fn.s,"; will try again later\n"));
  pe.id = id; pe.dt = now() + SLEEP_SYSFAIL;
  while (!prioq_insert(&pqfail,&pe)) nomem();
 }
@@ -474,7 +476,7 @@ void pqfinish()
      fnmake_chanaddr(pe.id,c);
      ut[0] = ut[1] = pe.dt;
      if (utime(fn.s, (const struct utimbuf *) &ut) == -1)
-       log3("warning: unable to utime ",fn.s,"; message will be retried too soon\n");
+       log(B("warning: unable to utime ",fn.s,"; message will be retried too soon\n"));
     }
 }
 
@@ -556,7 +558,7 @@ int j;
    fnmake_chanaddr(jo[j].id,jo[j].channel);
    if (unlink(fn.s) == -1)
     {
-     log3("warning: unable to unlink ",fn.s,"; will try again later\n");
+     log(B("warning: unable to unlink ",fn.s,"; will try again later\n"));
      pe.dt = now() + SLEEP_SYSFAIL;
     }
    else
@@ -568,7 +570,7 @@ int j;
        if (stat(fn.s,&st) == 0) return; /* more channels going */
        if (errno != error_noent)
     {
-         log3("warning: unable to stat ",fn.s,"\n");
+         log(B("warning: unable to stat ",fn.s,"\n"));
      break; /* this is the only reason for HOPEFULLY */
     }
       }
@@ -583,214 +585,17 @@ int j;
 
 
 /* this file is too long ------------------------------------------- BOUNCES */
-
-char *stripvdomprepend(recip)
-char *recip;
-{
- int i;
- char *domain;
- int domainlen;
- char *prepend;
-
- i = str_rchr(recip,'@');
- if (!recip[i]) return recip;
- domain = recip + i + 1;
- domainlen = str_len(domain);
-
- for (i = 0;i <= domainlen;++i)
-   if ((i == 0) || (i == domainlen) || (domain[i] == '.'))
-     if ((prepend = constmap(&mapvdoms,domain + i,domainlen - i)))
-      {
-       if (!*prepend) break;
-       i = str_len(prepend);
-       if (str_diffn(recip,prepend,i)) break;
-       if (recip[i] != '-') break;
-       return recip + i + 1;
-      }
- return recip;
-}
-
-stralloc bouncetext = {0};
-
-void addbounce(id,recip,report)
-unsigned long id;
-char *recip;
-char *report;
-{
- int fd;
- int pos;
- int w;
- while (!stralloc_copys(&bouncetext,"<")) nomem();
- while (!stralloc_cats(&bouncetext,stripvdomprepend(recip))) nomem();
- for (pos = 0;pos < bouncetext.len;++pos)
-   if (bouncetext.s[pos] == '\n')
-     bouncetext.s[pos] = '_';
- while (!stralloc_cats(&bouncetext,">:\n")) nomem();
- while (!stralloc_cats(&bouncetext,report)) nomem();
- if (report[0])
-   if (report[str_len(report) - 1] != '\n')
-     while (!stralloc_cats(&bouncetext,"\n")) nomem();
- for (pos = bouncetext.len - 2;pos > 0;--pos)
-   if (bouncetext.s[pos] == '\n')
-     if (bouncetext.s[pos - 1] == '\n')
-       bouncetext.s[pos] = '/';
- while (!stralloc_cats(&bouncetext,"\n")) nomem();
- fnmake2_bounce(id);
- for (;;)
-  {
-   fd = open_append(fn2.s);
-   if (fd != -1) break;
-   log1("alert: unable to append to bounce message; HELP! sleeping...\n");
-   sleep(10);
-  }
- pos = 0;
- while (pos < bouncetext.len)
-  {
-   w = write(fd,bouncetext.s + pos,bouncetext.len - pos);
-   if (w <= 0)
-    {
-     log1("alert: unable to append to bounce message; HELP! sleeping...\n");
-     sleep(10);
-    }
-   else
-     pos += w;
-  }
- close(fd);
-}
-
-int injectbounce(unsigned long id)
-{
-  struct qmail qqt;
-  struct stat st;
-  char *bouncesender;
-  char *bouncerecip;
-  int r;
-  int fd;
-//  substdio ssread;
-  buffer ssread;
-  char buf[128];
-  char inbuf[128];
-  static stralloc sender = {0};
-  static stralloc quoted = {0};
-  datetime_sec birth;
-  unsigned long qp;
-
- if (!getinfo(&sender,&birth,id)) return 0; /* XXX: print warning */
-
- /* owner-@host-@[] -> owner-@host */
- if (sender.len >= 5)
-   if (str_equal(sender.s + sender.len - 5,"-@[]"))
-    {
-     sender.len -= 4;
-     sender.s[sender.len - 1] = 0;
-    }
-
- fnmake2_bounce(id);
- fnmake_mess(id);
- if (stat(fn2.s,&st) == -1)
-  {
-   if (errno == error_noent)
-     return 1;
-   log3("warning: unable to stat ",fn2.s,"\n");
-   return 0;
-  }
- if (str_equal(sender.s,"#@[]"))
-   log3("triple bounce: discarding ",fn2.s,"\n");
- else
-  {
-   if (qmail_open(&qqt) == -1)
-    { log1("warning: unable to start qmail-queue, will try later\n"); return 0; }
-   qp = qmail_qp(&qqt);
-
-   if (*sender.s) { bouncesender = ""; bouncerecip = sender.s; }
-   else { bouncesender = "#@[]"; bouncerecip = doublebounceto.s; }
-
-   while (!newfield_datemake(now())) nomem();
-   qmail_put(&qqt,newfield_date.s,newfield_date.len);
-   qmail_puts(&qqt,"From: ");
-   while (!quote(&quoted,&bouncefrom)) nomem();
-   qmail_put(&qqt,quoted.s,quoted.len);
-   qmail_puts(&qqt,"@");
-   qmail_put(&qqt,bouncehost.s,bouncehost.len);
-   qmail_puts(&qqt,"\nTo: ");
-   while (!quote2(&quoted,bouncerecip)) nomem();
-   qmail_put(&qqt,quoted.s,quoted.len);
-   qmail_puts(&qqt,"\n\
-Subject: failure notice\n\
-\n\
-Hi. This is the qmail-send program at ");
-   qmail_put(&qqt,bouncehost.s,bouncehost.len);
-   qmail_puts(&qqt,*sender.s ? ".\n\
-I'm afraid I wasn't able to deliver your message to the following addresses.\n\
-This is a permanent error; I've given up. Sorry it didn't work out.\n\
-\n\
-" : ".\n\
-I tried to deliver a bounce message to this address, but the bounce bounced!\n\
-\n\
-");
-
-   fd = open_read(fn2.s);
-   if (fd == -1)
-     qmail_fail(&qqt);
-   else
-    {
-     buffer_init(&ssread,read,fd,inbuf,sizeof(inbuf));
-     while ((r = buffer_get(&ssread,buf,sizeof(buf))) > 0)
-       qmail_put(&qqt,buf,r);
-     close(fd);
-     if (r == -1)
-       qmail_fail(&qqt);
-    }
-
-   qmail_puts(&qqt,*sender.s ? "--- Below this line is a copy of the message.\n\n" : "--- Below this line is the original bounce.\n\n");
-   qmail_puts(&qqt,"Return-Path: <");
-   while (!quote2(&quoted,sender.s)) nomem();
-   qmail_put(&qqt,quoted.s,quoted.len);
-   qmail_puts(&qqt,">\n");
-
-   fd = open_read(fn.s);
-   if (fd == -1)
-     qmail_fail(&qqt);
-   else
-    {
-     buffer_init(&ssread,read,fd,inbuf,sizeof(inbuf));
-     while ((r = buffer_get(&ssread,buf,sizeof(buf))) > 0)
-       qmail_put(&qqt,buf,r);
-     close(fd);
-     if (r == -1)
-       qmail_fail(&qqt);
-    }
-
-   qmail_from(&qqt,bouncesender);
-   qmail_to(&qqt,bouncerecip);
-   if (*qmail_close(&qqt))
-    { log1("warning: trouble injecting bounce message, will try later\n"); return 0; }
-
-   strnum2[fmt_ulong(strnum2,id)] = 0;
-   o_log2("bounce msg ",strnum2);
-   strnum2[fmt_ulong(strnum2,qp)] = 0;
-   log3(" qp ",strnum2,"\n");
-  }
- if (unlink(fn2.s) == -1)
-  {
-   log3("warning: unable to unlink ",fn2.s,"\n");
-   return 0;
-  }
- return 1;
-}
-
+#include "qmail-send-bounces.c"
 
 /* this file is too long ---------------------------------------- DELIVERIES */
 
-struct del
- {
+struct del {
   int used;
   int j;
   unsigned long delid;
   seek_pos mpos;
   stralloc recip;
- }
-;
+};
 
 unsigned long masterdelid = 1;
 unsigned int concurrency[CHANNELS] = { 10, 20 };
@@ -803,15 +608,17 @@ void del_status()
 {
   int c;
 
-  log1("status:");
+//  log("status:");
   for (c = 0;c < CHANNELS;++c) {
     strnum2[fmt_ulong(strnum2,(unsigned long) concurrencyused[c])] = 0;
     strnum3[fmt_ulong(strnum3,(unsigned long) concurrency[c])] = 0;
-    o_log2(chanstatusmsg[c],strnum2);
-    o_log2("/",strnum3);
+//    o_log2(chanstatusmsg[c],strnum2);
+//    o_log2("/",strnum3);
+    log(B("status:",chanstatusmsg[c],strnum2,"/",strnum3));
+//    log(B("/",strnum3));
   }
-  if (flagexitasap) log1(" exitasap");
-  log1("\n");
+  if (flagexitasap) log(" exitasap\n");
+//  log("\n");
 }
 
 void del_init()
@@ -870,59 +677,57 @@ char *recip;
 
  comm_write(c,i,jo[j].id,jo[j].sender.s,recip);
 
- strnum2[fmt_ulong(strnum2,d[c][i].delid)] = 0;
- strnum3[fmt_ulong(strnum3,jo[j].id)] = 0;
- o_log2("starting delivery ",strnum2);
- log3(": msg ",strnum3,tochan[c]);
+  strnum2[fmt_ulong(strnum2,d[c][i].delid)] = 0;
+  strnum3[fmt_ulong(strnum3,jo[j].id)] = 0;
+  log(B("starting delivery ",strnum2));
+  log(B(": msg ",strnum3,tochan[c]));
  logsafe(recip);
- log1("\n");
- del_status();
+  log("\n");
+  del_status();
 }
 
-void markdone(c,id,pos)
-int c;
-unsigned long id;
-seek_pos pos;
+void markdone(int c,unsigned long id,seek_pos pos)
+//int c;
+//unsigned long id;
+//seek_pos pos;
 {
- struct stat st;
- int fd;
- fnmake_chanaddr(id,c);
- for (;;)
-  {
-   fd = open_write(fn.s);
-   if (fd == -1) break;
-   if (fstat(fd,&st) == -1) { close(fd); break; }
-   if (seek_set(fd,pos) == -1) { close(fd); break; }
-   if (write(fd,"D",1) != 1) { close(fd); break; }
-   /* further errors -> double delivery without us knowing about it, oh well */
-   close(fd);
-   return;
+  struct stat st;
+  int fd;
+  fnmake_chanaddr(id,c);
+  for (;;) {
+    fd = open_write(fn.s);
+    if (fd == -1) break;
+    if (fstat(fd,&st) == -1) { close(fd); break; }
+    if (seek_set(fd,pos) == -1) { close(fd); break; }
+    if (write(fd,"D",1) != 1) { close(fd); break; }
+    /* further errors -> double delivery without us knowing about it, oh well */
+    close(fd);
+    return;
   }
- log3("warning: trouble marking ",fn.s,"; message will be delivered twice!\n");
+ log(B("warning: trouble marking ",fn.s,"; message will be delivered twice!\n"));
 }
 
-void del_dochan(int c)
-{
- int r;
- char ch;
- int i;
- int delnum;
- r = read(chanfdin[c],delbuf,sizeof(delbuf));
- if (r == -1) return;
- if (r == 0) { spawndied(c); return; }
- for (i = 0;i < r;++i)
+void del_dochan(int c) {
+  int r;
+  char ch;
+  int i;
+  int delnum;
+  r = read(chanfdin[c],delbuf,sizeof(delbuf));
+  if (r == -1) return;
+  if (r == 0) { spawndied(c); return; }
+  for (i = 0;i < r;++i)
   {
-   ch = delbuf[i];
-   while (!stralloc_append(&dline[c],&ch)) nomem();
-   if (dline[c].len > REPORTMAX)
-     dline[c].len = REPORTMAX;
-     /* qmail-lspawn and qmail-rspawn are responsible for keeping it short */
-     /* but from a security point of view, we don't trust rspawn */
-   if (!ch && (dline[c].len > 1))
+    ch = delbuf[i];
+    while (!stralloc_append(&dline[c],&ch)) nomem();
+    if (dline[c].len > REPORTMAX)
+      dline[c].len = REPORTMAX;
+      /* qmail-lspawn and qmail-rspawn are responsible for keeping it short */
+      /* but from a security point of view, we don't trust rspawn */
+    if (!ch && (dline[c].len > 1))
     {
      delnum = (unsigned int) (unsigned char) dline[c].s[0];
      if ((delnum < 0) || (delnum >= concurrency[c]) || !d[c][delnum].used)
-       log1("warning: internal error: delivery report out of range\n");
+       log("warning: internal error: delivery report out of range\n");
      else
       {
        strnum3[fmt_ulong(strnum3,d[c][delnum].delid)] = 0;
@@ -937,27 +742,27 @@ void del_dochan(int c)
        switch(dline[c].s[1])
 	{
 	 case 'K':
-	   log3("delivery ",strnum3,": success: ");
+	   log(B("delivery ",strnum3,": success: "));
 	   logsafe(dline[c].s + 2);
-	   log1("\n");
+	   log("\n");
 	   markdone(c,jo[d[c][delnum].j].id,d[c][delnum].mpos);
 	   --jo[d[c][delnum].j].numtodo;
 	   break;
 	 case 'Z':
-	   log3("delivery ",strnum3,": deferral: ");
+	   log(B("delivery ",strnum3,": deferral: "));
 	   logsafe(dline[c].s + 2);
-	   log1("\n");
+	   log("\n");
 	   break;
 	 case 'D':
-	   log3("delivery ",strnum3,": failure: ");
+	   log(B("delivery ",strnum3,": failure: "));
 	   logsafe(dline[c].s + 2);
-	   log1("\n");
+	   log("\n");
 	   addbounce(jo[d[c][delnum].j].id,d[c][delnum].recip.s,dline[c].s + 2);
 	   markdone(c,jo[d[c][delnum].j].id,d[c][delnum].mpos);
        --jo[d[c][delnum].j].numtodo;
        break;
      default:
-       log3("delivery ",strnum3,": report mangled, will defer\n");
+       log(B("delivery ",strnum3,": report mangled, will defer\n"));
     }
        job_close(d[c][delnum].j);
        d[c][delnum].used = 0; --concurrencyused[c];
@@ -1100,7 +905,7 @@ int c;
  if (getln(&pass[c].ss,&line,&match,'\0') == -1)
   {
    fnmake_chanaddr(pass[c].id,c);
-   log3("warning: trouble reading ",fn.s,"; will try again later\n");
+   log(B("warning: trouble reading ",fn.s,"; will try again later\n"));
    close(pass[c].fd);
    job_close(pass[c].j);
    pass[c].id = 0;
@@ -1124,7 +929,7 @@ int c;
      break;
    default:
      fnmake_chanaddr(pass[c].id,c);
-     log3("warning: unknown record type in ",fn.s,"!\n");
+     log(B("warning: unknown record type in ",fn.s,"!\n"));
      close(pass[c].fd);
      job_close(pass[c].j);
      pass[c].id = 0;
@@ -1135,7 +940,7 @@ int c;
  return;
 
  trouble:
- log3("warning: trouble opening ",fn.s,"; will try again later\n");
+ log(B("warning: trouble opening ",fn.s,"; will try again later\n"));
  pe.dt = recent + SLEEP_SYSFAIL;
  while (!prioq_insert(&pqchan[c],&pe)) nomem();
 }
@@ -1154,7 +959,7 @@ unsigned long id;
    if (stat(fn.s,&st) == 0) return; /* false alarm; consequence of HOPEFULLY */
    if (errno != error_noent)
     {
-     log3("warning: unable to stat ",fn.s,"; will try again later\n");
+     log(B("warning: unable to stat ",fn.s,"; will try again later\n"));
      goto fail;
     }
   }
@@ -1163,31 +968,30 @@ unsigned long id;
  if (stat(fn.s,&st) == 0) return;
  if (errno != error_noent)
   {
-   log3("warning: unable to stat ",fn.s,"; will try again later\n");
+   log(B("warning: unable to stat ",fn.s,"; will try again later\n"));
    goto fail;
   }
- 
+
  fnmake_info(id);
  if (stat(fn.s,&st) == -1)
   {
    if (errno == error_noent) return;
-   log3("warning: unable to stat ",fn.s,"; will try again later\n");
+   log(B("warning: unable to stat ",fn.s,"; will try again later\n"));
    goto fail;
   }
- 
- /* -todo +info -local -remote ?bounce */
- if (!injectbounce(id))
-   goto fail; /* injectbounce() produced error message */
 
- strnum3[fmt_ulong(strnum3,id)] = 0;
- log3("end msg ",strnum3,"\n");
+  /* -todo +info -local -remote ?bounce */
+  if (!injectbounce(id))
+    goto fail; /* injectbounce() produced error message */
 
- /* -todo +info -local -remote -bounce */
- fnmake_info(id);
- if (unlink(fn.s) == -1)
-  {
-   log3("warning: unable to unlink ",fn.s,"; will try again later\n");
-   goto fail;
+  strnum3[fmt_ulong(strnum3,id)] = 0;
+  log(B("end msg ",strnum3,"\n"));
+
+  /* -todo +info -local -remote -bounce */
+  fnmake_info(id);
+  if (unlink(fn.s) == -1) {
+    log(B("warning: unable to unlink ",fn.s,"; will try again later\n"));
+    goto fail;
   }
 
   /* -todo -info -local -remote -bounce; we can relax */
@@ -1195,7 +999,7 @@ unsigned long id;
   if (buffer_putflush(&sstoqc,fn.s,fn.len) == -1) { cleandied(); return; }
   if (buffer_get(&ssfromqc,&ch,1) != 1) { cleandied(); return; }
   if (ch != '+')
-    log3("warning: qmail-clean unable to clean up ",fn.s,"\n");
+    log(B("warning: qmail-clean unable to clean up ",fn.s,"\n"));
 
  return;
 
@@ -1225,225 +1029,7 @@ void pass_do()
 }
 
 
-/* this file is too long ---------------------------------------------- TODO */
-
-datetime_sec nexttodorun;
-int flagtododir = 0; /* if 0, have to readsubdir_init again */
-readsubdir todosubdir;
-stralloc todoline = {0};
-char todobuf[BUFFER_INSIZE];
-char todobufinfo[512];
-char todobufchan[CHANNELS][1024];
-
-void todo_init()
-{
- flagtododir = 0;
- nexttodorun = now();
- trigger_set();
-}
-
-void todo_selprep(nfds,rfds,wakeup)
-int *nfds;
-fd_set *rfds;
-datetime_sec *wakeup;
-{
- if (flagexitasap) return;
- trigger_selprep(nfds,rfds);
- if (flagtododir) *wakeup = 0;
- if (*wakeup > nexttodorun) *wakeup = nexttodorun;
-}
-
-void todo_do(fd_set *rfds)
-{
-  struct stat st;
-  buffer ss;
-  int fd;
-  buffer ssinfo; int fdinfo;
-  buffer sschan[CHANNELS];
-  int fdchan[CHANNELS];
-  int flagchan[CHANNELS];
-  struct prioq_elt pe;
-  char ch;
-  int match;
-  unsigned long id;
-// int z;
-  int c;
-  unsigned long uid;
-  unsigned long pid;
-
- fd = -1;
- fdinfo = -1;
- for (c = 0;c < CHANNELS;++c) fdchan[c] = -1;
-
- if (flagexitasap) return;
-
- if (!flagtododir)
-  {
-   if (!trigger_pulled(rfds))
-     if (recent < nexttodorun)
-       return;
-   trigger_set();
-   readsubdir_init(&todosubdir, "todo", pausedir);
-   flagtododir = 1;
-   nexttodorun = recent + SLEEP_TODO;
-  }
-
- switch(readsubdir_next(&todosubdir, &id))
-  {
-    case 1:
-      break;
-    case 0:
-      flagtododir = 0;
-    default:
-      return;
-  }
-
- fnmake_todo(id);
-
- fd = open_read(fn.s);
- if (fd == -1) { log3("warning: unable to open ",fn.s,"\n"); return; }
-
- fnmake_mess(id);
- /* just for the statistics */
- if (stat(fn.s,&st) == -1)
-  { log3("warning: unable to stat ",fn.s,"\n"); goto fail; }
-
- for (c = 0;c < CHANNELS;++c)
-  {
-   fnmake_chanaddr(id,c);
-   if (unlink(fn.s) == -1) if (errno != error_noent)
-    { log3("warning: unable to unlink ",fn.s,"\n"); goto fail; }
-  }
-
- fnmake_info(id);
- if (unlink(fn.s) == -1) if (errno != error_noent)
-  { log3("warning: unable to unlink ",fn.s,"\n"); goto fail; }
-
- fdinfo = open_excl(fn.s);
- if (fdinfo == -1)
-  { log3("warning: unable to create ",fn.s,"\n"); goto fail; }
-
- strnum3[fmt_ulong(strnum3,id)] = 0;
- log3("new msg ",strnum3,"\n");
-
- for (c = 0;c < CHANNELS;++c) flagchan[c] = 0;
-
-  buffer_init(&ss,read,fd,todobuf,sizeof(todobuf));
-  buffer_init(&ssinfo,write,fdinfo,todobufinfo,sizeof(todobufinfo));
-
- uid = 0;
- pid = 0;
-
- for (;;)
-  {
-   if (getln(&ss,&todoline,&match,'\0') == -1)
-    {
-     /* perhaps we're out of memory, perhaps an I/O error */
-     fnmake_todo(id);
-     log3("warning: trouble reading ",fn.s,"\n"); goto fail;
-    }
-   if (!match) break;
-
-   switch(todoline.s[0])
-    {
-     case 'u':
-       scan_ulong(todoline.s + 1,&uid);
-       break;
-     case 'p':
-       scan_ulong(todoline.s + 1,&pid);
-       break;
-     case 'F':
-       if (buffer_putflush(&ssinfo,todoline.s,todoline.len) == -1)
-	{
-	 fnmake_info(id);
-         log3("warning: trouble writing to ",fn.s,"\n"); goto fail;
-	}
-       o_log2("info msg ",strnum3);
-       strnum2[fmt_ulong(strnum2,(unsigned long) st.st_size)] = 0;
-       o_log2(": bytes ",strnum2);
-       log1(" from <"); logsafe(todoline.s + 1);
-       strnum2[fmt_ulong(strnum2,pid)] = 0;
-       o_log2("> qp ",strnum2);
-       strnum2[fmt_ulong(strnum2,uid)] = 0;
-       o_log2(" uid ",strnum2);
-       log1("\n");
-       break;
-     case 'T':
-       switch(rewrite(todoline.s + 1))
-    {
-	 case 0: nomem(); goto fail;
-	 case 2: c = 1; break;
-	 default: c = 0; break;
-        }
-       if (fdchan[c] == -1)
-    {
-	 fnmake_chanaddr(id,c);
-	 fdchan[c] = open_excl(fn.s);
-	 if (fdchan[c] == -1)
-          { log3("warning: unable to create ",fn.s,"\n"); goto fail; }
-	 buffer_init(&sschan[c]
-	   ,write,fdchan[c],todobufchan[c],sizeof(todobufchan[c]));
-	 flagchan[c] = 1;
-	}
-       if (buffer_put(&sschan[c],rwline.s,rwline.len) == -1)
-        {
-     fnmake_chanaddr(id,c);
-         log3("warning: trouble writing to ",fn.s,"\n"); goto fail;
-        }
-       break;
-     default:
-       fnmake_todo(id);
-       log3("warning: unknown record type in ",fn.s,"\n"); goto fail;
-    }
-  }
-
- close(fd); fd = -1;
-
-  fnmake_info(id);
-  if (buffer_flush(&ssinfo) == -1)
-    { log3("warning: trouble writing to ",fn.s,"\n"); goto fail; }
-  if (fsync(fdinfo) == -1)
-    { log3("warning: trouble fsyncing ",fn.s,"\n"); goto fail; }
-  close(fdinfo); fdinfo = -1;
-
- for (c = 0;c < CHANNELS;++c)
-   if (fdchan[c] != -1)
-    {
-     fnmake_chanaddr(id,c);
-     if (buffer_flush(&sschan[c]) == -1)
-      { log3("warning: trouble writing to ",fn.s,"\n"); goto fail; }
-     if (fsync(fdchan[c]) == -1)
-      { log3("warning: trouble fsyncing ",fn.s,"\n"); goto fail; }
-     close(fdchan[c]); fdchan[c] = -1;
-    }
-
- fnmake_todo(id);
- if (buffer_putflush(&sstoqc,fn.s,fn.len) == -1) { cleandied(); return; }
- if (buffer_get(&ssfromqc,&ch,1) != 1) { cleandied(); return; }
- if (ch != '+')
-  {
-   log3("warning: qmail-clean unable to clean up ",fn.s,"\n");
-   return;
-  }
-
- pe.id = id; pe.dt = now();
- for (c = 0;c < CHANNELS;++c)
-   if (flagchan[c])
-     while (!prioq_insert(&pqchan[c],&pe)) nomem();
-
- for (c = 0;c < CHANNELS;++c) if (flagchan[c]) break;
- if (c == CHANNELS)
-   while (!prioq_insert(&pqdone,&pe)) nomem();
-
- return;
-
- fail:
- if (fd != -1) close(fd);
- if (fdinfo != -1) close(fdinfo);
- for (c = 0;c < CHANNELS;++c)
-   if (fdchan[c] != -1) close(fdchan[c]);
-}
-
+#include "qmail-send-todo.c"
 
 /* this file is too long ---------------------------------------------- MAIN */
 
@@ -1483,10 +1069,10 @@ void regetcontrols()
  int r;
 
  if (control_readfile(&newlocals,"etc/locals",1) != 1)
-  { log1("alert: unable to reread etc/locals\n"); return; }
+  { log("alert: unable to reread etc/locals\n"); return; }
  r = control_readfile(&newvdoms,"etc/virtualdomains",0);
  if (r == -1)
-  { log1("alert: unable to reread etc/virtualdomains\n"); return; }
+  { log("alert: unable to reread etc/virtualdomains\n"); return; }
 
  constmap_free(&maplocals);
  constmap_free(&mapvdoms);
@@ -1507,13 +1093,13 @@ void reread()
 {
  if (chdir(auto_qmail) == -1)
   {
-   log1("alert: unable to reread controls: unable to switch to home directory\n");
+   log("alert: unable to reread controls: unable to switch to home directory\n");
    return;
   }
  regetcontrols();
  while (chdir("queue") == -1)
   {
-   log1("alert: unable to switch back to queue directory; HELP! sleeping...\n");
+   log("alert: unable to switch back to queue directory; HELP! sleeping...\n");
    sleep(10);
   }
 }
@@ -1529,11 +1115,11 @@ int main()
  int c;
 
  if (chdir(auto_qmail) == -1)
-  { log1("alert: cannot start: unable to switch to home directory\n"); _exit(111); }
+  { errhard("alert: cannot start: unable to switch to home directory\n"); } //_exit(111); }
  if (!getcontrols())
-  { log1("alert: cannot start: unable to read controls\n"); _exit(111); }
+  { errhard("alert: cannot start: unable to read controls\n"); } //_exit(111); }
  if (chdir("queue") == -1)
-  { log1("alert: cannot start: unable to switch to queue directory\n"); _exit(111); }
+  { errhard("alert: cannot start: unable to switch to queue directory\n"); } //_exit(111); }
  sig_pipeignore();
  sig_termcatch(sigterm);
  sig_alarmcatch(sigalrm);
@@ -1543,9 +1129,11 @@ int main()
 
  fd = open_write("lock/sendmutex");
  if (fd == -1)
-  { log1("alert: cannot start: unable to open mutex\n"); _exit(111); }
+//  { log1("alert: cannot start: unable to open mutex\n"); _exit(111); }
+  { errhard("alert: cannot start: unable to open mutex\n"); }
  if (lock_exnb(fd) == -1)
-  { log1("alert: cannot start: qmail-send is already running\n"); _exit(111); }
+//  { log1("alert: cannot start: qmail-send is already running\n"); _exit(111); }
+  { errhard("alert: cannot start: qmail-send is already running\n"); }
 
  numjobs = 0;
  for (c = 0;c < CHANNELS;++c)
@@ -1557,7 +1145,7 @@ int main()
      r = read(chanfdin[c],&ch,1);
    while ((r == -1) && (errno == error_intr));
    if (r < 1)
-    { log1("alert: cannot start: hath the daemon spawn no fire?\n"); _exit(111); }
+    { errhard("alert: cannot start: hath the daemon spawn no fire?\n"); } //_exit(111); }
    u = (unsigned int) (unsigned char) ch;
    if (concurrency[c] > u) concurrency[c] = u;
    numjobs += concurrency[c];
@@ -1597,10 +1185,10 @@ int main()
    tv.tv_usec = 0;
 
    if (select(nfds,&rfds,&wfds,(fd_set *) 0,&tv) == -1)
-     if (errno == error_intr)
+     if (errno == EINTR)
        ;
      else
-       log1("warning: trouble in select\n");
+       log("warning: trouble in select\n");
    else
     {
      recent = now();
@@ -1613,7 +1201,7 @@ int main()
     }
   }
  pqfinish();
- log1("status: exiting\n");
- _exit(0);
- return(0);  /* never reached */
+  log("status: exiting\n");
+  _exit(0);
+// return(0);  /* never reached */
 }
