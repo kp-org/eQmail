@@ -39,16 +39,16 @@ int main(int argc,char **argv)
 
   sender = env_get("NEWSENDER");
   if (!sender)
-    err_tmp_plus(ESOFT,"NEWSENDER not set");
+    errint(ESOFT,"NEWSENDER not set");
   dtline = env_get("DTLINE");
   if (!dtline)
-    err_tmp_plus(ESOFT,"DTLINE not set");
+    errint(ESOFT,"DTLINE not set");
 
   if (qmail_open(&qqt) == -1)
-    err_sys_plus(errno,"unable to fork: ");
+    errint(errno,"unable to fork: ");
   qmail_puts(&qqt,dtline);
   if (buffer_copy(&bout,&bin) != 0)
-    err_sys_plus(errno,"unable to read message: ");
+    errint(errno,"unable to read message: ");
   buffer_flush(&bout);
 
   strnum[fmt_ulong(strnum,qmail_qp(&qqt))] = 0;
@@ -57,7 +57,7 @@ int main(int argc,char **argv)
   while (*++argv) qmail_to(&qqt,*argv);
   qqx = qmail_close(&qqt);
   if (*qqx) {
-    err_sys_plus(*qqx == 'D' ? ESOFT : EHARD,qqx +1); }
+    errint(*qqx == 'D' ? ESOFT : EHARD,qqx +1); }
 
 //  strerr_die2x(0,"forward: qp ",num);
   buffer_puts(buffer_1,"forward: qp ");

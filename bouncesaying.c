@@ -22,27 +22,24 @@ int main(int argc,char **argv)
   int wstat;
 
   if (!argv[1])
-      err_tmp_plus(EINVAL,"usage: bouncesaying error [ program [ arg ... ] ]");
+      errint(EINVAL,"usage: bouncesaying error [ program [ arg ... ] ]");
 
   if (argv[2]) {
     pid = fork();
     if (pid == -1)
-      err_sys_plus(EHARD,"unable to fork");
+      errint(EHARD,"unable to fork");
     if (pid == 0) {
       execvp(argv[2],argv + 2);
-//      if (errno) _exit(111);
-      if (errno) err_sys(errno);
+      if (errno) _exit(111);
       _exit(100);
-//      err_sys(ESOFT);
     }
     if (wait_pid(&wstat,pid) == -1)
-      err_sys_plus(EHARD,"wait failed");
+      errint(EHARD,"wait failed");
     if (wait_crashed(wstat))
-      err_sys_plus(EHARD,"child crashed");
+      errhard("child crashed");
     switch(wait_exitcode(wstat)) {
       case 0: break;
-//      case 111: err_tmp_plus(ESOFT,"temporary child error");
-      case ESOFT: err_tmp_plus(ESOFT,"temporary child error");
+      case 111: errsoft("temporary child error");
       default: _exit(0);
     }
   }
@@ -51,5 +48,4 @@ int main(int argc,char **argv)
   buffer_puts(buffer_1,"\n");
   buffer_flush(buffer_1);
   _exit(100);
-//  err_sys(ESOFT);
 }

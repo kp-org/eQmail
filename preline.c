@@ -20,7 +20,7 @@
 
 void die_usage()
 {
-  err_tmp_plus(EINVAL,"usage: preline cmd [ arg ... ]");
+  errint(EINVAL,"usage: preline cmd [ arg ... ]");
 }
 
 int flagufline = 1; char *ufline;
@@ -61,36 +61,36 @@ int main(int argc,char **argv)
   if (!*argv) die_usage();
 
   if (pipe(pi) == -1)
-	err_sys_plus(EHARD,"unable to create pipe: ");
+	errint(errno,"unable to create pipe: ");
 
   pid = fork();
   if (pid == -1)
-    err_sys_plus(EHARD,"unable to fork: ");
+    errint(errno,"unable to fork: ");
 
   if (pid == 0) {
     close(pi[1]);
     if (fd_move(0,pi[0]) == -1)
-      err_sys_plus(EHARD,"unable to set up fds: ");
+      errint(EHARD,"unable to set up fds: ");
     sig_pipedefault();
     execvp(*argv,argv);
-    err_sys_plus((errno),B("unable to run ",*argv,": "));
+    errint((errno),B("unable to run ",*argv,": "));
   }
   close(pi[0]);
   if (fd_move(1,pi[1]) == -1)
-    err_sys_plus(EHARD,"unable to set up fds: ");
+    errint(EHARD,"unable to set up fds: ");
 
   if (flagufline) buffer_puts(&bout,ufline);
   if (flagrpline) buffer_puts(&bout,rpline);
   if (flagdtline) buffer_puts(&bout,dtline);
   if (buffer_copy(&bout,&bin) != 0)
-    err_sys_plus(EHARD,"unable to copy input: ");
+    errint(EHARD,"unable to copy input: ");
   buffer_flush(&bout);
   close(1);
 
   if (wait_pid(&wstat,pid) == -1)
-    err_sys_plus(EHARD,"wait failed: ");
+    errint(EHARD,"wait failed: ");
   if (wait_crashed(wstat))
-    err_sys_plus(EHARD,"child crashed");
+    errint(EHARD,"child crashed");
   _exit(wait_exitcode(wstat));
   return(0);  /* never reached */
 }
