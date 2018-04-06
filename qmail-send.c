@@ -1097,7 +1097,8 @@ void reread()
    return;
   }
  regetcontrols();
- while (chdir("queue") == -1)
+// while (chdir("queue") == -1)
+ while (chdir("var/queue") == -1)
   {
    log("alert: unable to switch back to queue directory; HELP! sleeping...\n");
    sleep(10);
@@ -1118,7 +1119,8 @@ int main()
   { errhard("alert: cannot start: unable to switch to home directory\n"); } //_exit(111); }
  if (!getcontrols())
   { errhard("alert: cannot start: unable to read controls\n"); } //_exit(111); }
- if (chdir("queue") == -1)
+// if (chdir("queue") == -1)
+ if (chdir("var/queue") == -1)
   { errhard("alert: cannot start: unable to switch to queue directory\n"); } //_exit(111); }
  sig_pipeignore();
  sig_termcatch(sigterm);
