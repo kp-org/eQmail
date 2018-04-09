@@ -84,8 +84,8 @@ chown root:qmail QPRFX/etc/beforemote QPRFX/etc/beforequeue
 chmod 644 QPRFX/etc/beforemote QPRFX/etc/beforequeue
 
 #********************************************************************************
-WITHTLS=$(cat conf.tmp | grep ^TLS=\"Yes\")
-if [ "$WITHTLS" = "TLS=\"Yes\"" ] ; then
+if [ "$TLS" = "Yes" ] ; then
+   echo "TLS is enabled ..."
    # create servercert.cnf and TLS/SSL keys and certificates
    [ -f QPRFX/etc/servercert.cnf ] || (
      cat servercert.cnf | sed s{localhost{"$FQDN"{g \

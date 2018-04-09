@@ -1,6 +1,7 @@
 
 QMAILDIR="QPRFX"
-TLS="Yes"	# we define this static here for now
+# get it from qmail-print shouldn't give an error
+TLS=`qmail-print | grep TLS | cut -d\  -f3`
 
 # some escape sequences to format output
 OFF=$'\e[0m'   # all attributes off
