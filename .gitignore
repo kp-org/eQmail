@@ -25,13 +25,13 @@ tcpserver
 boot
 test-it
 conf-build
-ext
 qlibs
 auto_*.c
 ipme2*
 ipalloc2*
 ipmeprint2*
 hassalen.h
+qmail-send-*
 
 autocf-*
 buildins.c
