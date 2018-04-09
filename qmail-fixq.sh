@@ -48,12 +48,12 @@ echo "  echo \"done!\"" >> "$OUTFILE"
 echo "}"                >> "$OUTFILE"
 echo "chkqueue() {
   echo \"Checking queue for issues ...\"
-  SPLITMESS=\`find \$QMAILDIR/queue/mess/*   -type d -print | wc -l\`
-  SPLITINFO=\`find \$QMAILDIR/queue/info/*   -type d -print | wc -l\`
-  SPLITINTD=\`find \$QMAILDIR/queue/intd/*   -type d -print | wc -l\`
-  SPLITLOCL=\`find \$QMAILDIR/queue/local/*  -type d -print | wc -l\`
-  SPLITREMT=\`find \$QMAILDIR/queue/remote/* -type d -print | wc -l\`
-  SPLITTODO=\`find \$QMAILDIR/queue/todo/*   -type d -print | wc -l\`
+  SPLITMESS=\`find \$VARDIR/queue/mess/*   -type d -print | wc -l\`
+  SPLITINFO=\`find \$VARDIR/queue/info/*   -type d -print | wc -l\`
+  SPLITINTD=\`find \$VARDIR/queue/intd/*   -type d -print | wc -l\`
+  SPLITLOCL=\`find \$VARDIR/queue/local/*  -type d -print | wc -l\`
+  SPLITREMT=\`find \$VARDIR/queue/remote/* -type d -print | wc -l\`
+  SPLITTODO=\`find \$VARDIR/queue/todo/*   -type d -print | wc -l\`
   if [ \"\$SPLIT\" -ne \"\$SPLITMESS\" ]; then SPLITERR=1 ; fi
   if [ \"\$SPLIT\" -ne \"\$SPLITINFO\" ]; then SPLITERR=1 ; fi
   if [ \"\$SPLIT\" -ne \"\$SPLITINTD\" ]; then SPLITERR=1 ; fi
@@ -69,7 +69,7 @@ echo "chkqueue() {
   # check the directory structure
   # group have to be \'qmail\' always (recursive)
   GRPNAME=\`getent group \$GIDQ | awk -F: '{print \$1}'\`
-  find \$QMAILDIR/queue/* -type d -print | xargs ls -ld | awk '{print \$4}' | grep -v \$GRPNAME >/dev/null
+  find \$VARDIR/queue/* -type d -print | xargs ls -ld | awk '{print \$4}' | grep -v \$GRPNAME >/dev/null
   if [ \$? -eq 0 ] ; then GRPERR=1 ; fi
 
   # check for uid qmailq/qmails on splitted directories
@@ -79,33 +79,33 @@ echo "chkqueue() {
     if [ \"\$f\" = \"local\" ] ; then USRNAME=\`id -un \$UIDS\` ; fi
 
 #echo \$f
-    ls -ld \$QMAILDIR/queue/\$f | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
+    ls -ld \$VARDIR/queue/\$f | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
     if [ \$? -eq 0 ] ; then USRERR=1 ; fi
-#find \$QMAILDIR/queue/\$f/*
-    find \$QMAILDIR/queue/\$f/* | xargs ls -ld | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
+#find \$VARDIR/queue/\$f/*
+    find \$VARDIR/queue/\$f/* | xargs ls -ld | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
     if [ \$? -eq 0 ] ; then USRERR=1 ; fi
   done
   # check pid, bounce
-  ls -ld \$QMAILDIR/queue/bounce | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
+  ls -ld \$VARDIR/queue/bounce | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
     if [ \$? -eq 0 ] ; then USRERR=1 ; fi
   USRNAME=\`id -un \$UIDQ\`   # until now USRNAME was 'qmails'
-  ls -ld \$QMAILDIR/queue/pid    | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
+  ls -ld \$VARDIR/queue/pid    | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
     if [ \$? -eq 0 ] ; then USRERR=1 ; fi
 
   # special: lock
 #echo U: \$USRNAME
-  ls -ld \$QMAILDIR/queue/lock   | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
+  ls -ld \$VARDIR/queue/lock   | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
   if [ \$? -eq 0 ] ; then USRERR=1 ; fi
   USRNAME=\`id -un \$UIDS\`   # ... back to USRNAME was 'qmails'
-  ls -l \$QMAILDIR/queue/lock/trigger   | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
+  ls -l \$VARDIR/queue/lock/trigger   | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
   if [ \$? -eq 0 ] ; then USRERR=1 ; fi
 #echo U: \$USRNAME
-  ls -l \$QMAILDIR/queue/lock/sendmutex | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
+  ls -l \$VARDIR/queue/lock/sendmutex | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
   if [ \$? -eq 0 ] ; then USRERR=1 ; fi
 
   USRNAME=\`id -un \$UIDR\`   # ... and now we need USRNAME 'qmailr'
 #echo U: \$USRNAME
-  ls -l \$QMAILDIR/queue/lock/tcpto | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
+  ls -l \$VARDIR/queue/lock/tcpto | awk '{print \$3}' | grep -v \$USRNAME >/dev/null
   if [ \$? -eq 0 ] ; then USRERR=1 ; fi
 
   if [ \"\$USRERR\" ] || [ \"\$GRPERR\" ] ; then
@@ -115,29 +115,29 @@ echo "chkqueue() {
   fi
 
   # check permissions w/ and w/o subdirectories
-  stat $STATOPTS \`ls -d \$QMAILDIR/queue/mess\`     | grep -v 750 >/dev/null
+  stat $STATOPTS \`ls -d \$VARDIR/queue/mess\`     | grep -v 750 >/dev/null
   if [ \$? -eq 0 ] ; then PRMERR=1 ; fi
-  stat $STATOPTS \`ls -d \$QMAILDIR/queue/mess/*\`   | grep -v 750 >/dev/null
+  stat $STATOPTS \`ls -d \$VARDIR/queue/mess/*\`   | grep -v 750 >/dev/null
   if [ \$? -eq 0 ] ; then PRMERR=1 ; fi
-  stat $STATOPTS \`ls -d \$QMAILDIR/queue/todo\`     | grep -v 750 >/dev/null
+  stat $STATOPTS \`ls -d \$VARDIR/queue/todo\`     | grep -v 750 >/dev/null
   if [ \$? -eq 0 ] ; then PRMERR=1 ; fi
-  stat $STATOPTS \`ls -d \$QMAILDIR/queue/todo/*\`   | grep -v 750 >/dev/null
+  stat $STATOPTS \`ls -d \$VARDIR/queue/todo/*\`   | grep -v 750 >/dev/null
   if [ \$? -eq 0 ] ; then PRMERR=1 ; fi
-  stat $STATOPTS \`ls -d \$QMAILDIR/queue/info\`     | grep -v 700 >/dev/null
+  stat $STATOPTS \`ls -d \$VARDIR/queue/info\`     | grep -v 700 >/dev/null
   if [ \$? -eq 0 ] ; then PRMERR=1 ; fi
-  stat $STATOPTS \`ls -d \$QMAILDIR/queue/info/*\`   | grep -v 700 >/dev/null
+  stat $STATOPTS \`ls -d \$VARDIR/queue/info/*\`   | grep -v 700 >/dev/null
   if [ \$? -eq 0 ] ; then PRMERR=1 ; fi
-  stat $STATOPTS \`ls -d \$QMAILDIR/queue/intd\`     | grep -v 700 >/dev/null
+  stat $STATOPTS \`ls -d \$VARDIR/queue/intd\`     | grep -v 700 >/dev/null
   if [ \$? -eq 0 ] ; then PRMERR=1 ; fi
-  stat $STATOPTS \`ls -d \$QMAILDIR/queue/intd/*\`   | grep -v 700 >/dev/null
+  stat $STATOPTS \`ls -d \$VARDIR/queue/intd/*\`   | grep -v 700 >/dev/null
   if [ \$? -eq 0 ] ; then PRMERR=1 ; fi
-  stat $STATOPTS \`ls -d \$QMAILDIR/queue/local\`    | grep -v 700 >/dev/null
+  stat $STATOPTS \`ls -d \$VARDIR/queue/local\`    | grep -v 700 >/dev/null
   if [ \$? -eq 0 ] ; then PRMERR=1 ; fi
-  stat $STATOPTS \`ls -d \$QMAILDIR/queue/local/*\`  | grep -v 700 >/dev/null
+  stat $STATOPTS \`ls -d \$VARDIR/queue/local/*\`  | grep -v 700 >/dev/null
   if [ \$? -eq 0 ] ; then PRMERR=1 ; fi
-  stat $STATOPTS \`ls -d \$QMAILDIR/queue/remote\`   | grep -v 700 >/dev/null
+  stat $STATOPTS \`ls -d \$VARDIR/queue/remote\`   | grep -v 700 >/dev/null
   if [ \$? -eq 0 ] ; then PRMERR=1 ; fi
-  stat $STATOPTS \`ls -d \$QMAILDIR/queue/remote/*\` | grep -v 700 >/dev/null
+  stat $STATOPTS \`ls -d \$VARDIR/queue/remote/*\` | grep -v 700 >/dev/null
   if [ \$? -eq 0 ] ; then PRMERR=1 ; fi
 
   if [ \"\$PRMERR\" ] ; then
