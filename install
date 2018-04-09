@@ -78,7 +78,7 @@ chown $UIDS:$GIDQ  $VARDIR/queue/lock/trigger
 chmod 0622         $VARDIR/queue/lock/trigger
 
 #
-[ -L "$PKGDIR/queue" ] || ln -sf $VARDIR/queue $PKGDIR/queue    # as long not changed in code
+#[ -L "$PKGDIR/queue" ] || ln -sf $VARDIR/queue $PKGDIR/queue    # as long not changed in code
 
 
 # bin

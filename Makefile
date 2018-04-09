@@ -2,12 +2,12 @@
 
 SHELL=/bin/sh
 
-COMPILE=./compile
-MAKELIB=./makelib
-LOADBIN=./load
-LOAD=$(LOADBIN)
-CCFLAGS=-Iqlibs/include
+CCFLAGS=-Iqlibs/include -DTLS=20160918 -DINET6
 LDFLAGS=-Lqlibs
+COMPILE=./compile $(CCFLAGS)
+LOADBIN=./load
+MAKELIB=./makelib
+LOAD=$(LOADBIN)
 
 QPRFX = `head -1 autocf-qprfx`
 QLIBS = $(LDFLAGS) -lqlibs
@@ -159,9 +159,6 @@ maildir2mbox:
 	$(COMPILE) maildir2mbox.c
 	$(LOAD) maildir2mbox  maildir.o prioq.o now.o myctime.o gfrom.o \
 	 qlibs/strerr.a datetime.a $(LDFLAGS) -lqlibs
-#	$(LOAD) maildir2mbox maildir.o prioq.o now.o myctime.o \
-#	gfrom.o lock.a getln.a env.a open.a strerr.a stralloc.a \
-#	alloc.a buffer.a error.a str.a fs.a datetime.a
 
 maildirmake: compile \
 load maildirmake.c strerr.a substdio.a error.a str.a
@@ -188,11 +185,7 @@ predate:
 
 preline:
 	$(COMPILE) preline.c
-	$(LOAD) preline $(LDFLAGS) -lqlibs
-#	$(LOAD) preline fd.a fmt.o wait.a sig.a env.a \
-#	getopt.a buffer.a errmsg.a str.a alloc.a
-#	$(LOAD) preline strerr.a fd.a wait.a sig.a env.a \
-#	getopt.a buffer.a error.a str.a alloc.a
+	$(LOADBIN) preline $(QLIBS)
 
 prioq.o: compile prioq.c
 	./compile prioq.c
@@ -234,13 +227,13 @@ qmail-inject: compile load qmail-inject.c headerbody.o hfield.o token822.o
 
 qmail-local: compile load qmail-local.c qmail.o quote.o now.o gfrom.o \
 myctime.o slurpclose.o  datetime.a auto_qmail.o auto_patrn.o
-	$(COMPILE) qmail-local.c
+	$(COMPILE) $(CCFLAGS) qmail-local.c
 	./load qmail-local qmail.o quote.o now.o gfrom.o myctime.o \
 	slurpclose.o case.a getln.a getopt.a sig.a open.a seek.a lock.a \
 	buffer.a \
 	fd.a wait.a env.a stralloc.a alloc.a strerr.a \
 	error.a str.a fs.a datetime.a auto_qmail.o auto_patrn.o \
-	substdio.a
+	substdio.a $(QLIBS)
 
 qmail-lspawn: compile load qmail-lspawn.c spawn.o prot.o slurpclose.o \
 sig.a wait.a case.a cdb.a fd.a open.a stralloc.a alloc.a \
@@ -248,7 +241,7 @@ substdio.a error.a str.a fs.a auto_qmail.o auto_uids.o auto_spawn.o
 	./compile qmail-lspawn.c
 	./load qmail-lspawn spawn.o prot.o slurpclose.o sig.a wait.a \
 	case.a cdb.a fd.a open.a stralloc.a alloc.a substdio.a error.a \
-	str.a fs.a auto_qmail.o auto_uids.o auto_spawn.o
+	str.a fs.a auto_qmail.o auto_uids.o auto_spawn.o $(QLIBS)
 
 qmail-newmrh:
 	$(COMPILE) qmail-newmrh.c
@@ -319,11 +312,10 @@ qmail-qstat: warn-auto.sh qmail-qstat.sh
 	cat warn-auto.sh qmail-qstat.sh | sed s}QPRFX}"$(QPRFX)"}g > qmail-qstat
 	chmod 755 qmail-qstat
 
-qmail-queue: compile load qmail-queue.c triggerpull.o fmtqfn.o now.o \
-date822fmt.o datetime.a seek.a ndelay.a open.a sig.a alloc.a substdio.a \
-error.a str.a fs.a auto_qmail.o auto_split.o auto_uids.o
-	./compile qmail-queue.c
-	./load qmail-queue triggerpull.o fmtqfn.o now.o date822fmt.o \
+qmail-queue: qmail-queue.c trigger.o fmtqfn.o now.o \
+date822fmt.o datetime.a
+	$(COMPILE) qmail-queue.c
+	./load qmail-queue trigger.o fmtqfn.o now.o date822fmt.o \
 	datetime.a seek.a ndelay.a open.a sig.a alloc.a substdio.a \
 	error.a str.a fs.a auto_qmail.o auto_split.o auto_uids.o 
 
@@ -346,26 +338,20 @@ qmail-rspawn: spawn.o tcpto_clean.o now.o
 	./compile qmail-rspawn.c
 	./load qmail-rspawn spawn.o tcpto_clean.o now.o $(QLIBS) substdio.a \
 	auto_qmail.o auto_uids.o auto_spawn.o
-#	sig.a open.a seek.a lock.a wait.a fd.a stralloc.a \
-#	errmsg.a buffer.a qlibs.a substdio.a \
-#	error.a stralloc.a auto_qmail.o auto_uids.o auto_spawn.o
 
 qmail-send: obj auto_split.o date822fmt.o newfield.o prioq.o qsutil.o readsubdir.o trigger.o
 	./compile qmail-send.c
 	./load qmail-send qsutil.o control.o constmap.o newfield.o \
 	prioq.o trigger.o fmtqfn.o quote.o now.o readsubdir.o \
-	qmail.o date822fmt.o datetime.a case.a ndelay.a getln.a \
-	wait.a seek.a fd.a sig.a open.a lock.a stralloc.a alloc.a \
-	buffer.a error.a str.a fs.a auto_qmail.o auto_split.o env.a \
-	substdio.a
+	qmail.o date822fmt.o datetime.a auto_qmail.o auto_split.o $(QLIBS) substdio.a
 
 qmail-shcfg: qmail-shcfg.sh warn-auto.sh
-	@echo build $@
+	@echo Creating $@
 	@cat warn-auto.sh qmail-shcfg.sh | sed s}QPRFX}"$(QPRFX)"}g > qmail-shcfg
 	@chmod 0755 qmail-shcfg
 
-qmail-spp.o: compile qmail-spp.c
-	./compile qmail-spp.c
+qmail-spp.o:
+	$(COMPILE) qmail-spp.c
 
 qmail-smtpd: compile load qmail-smtpd.c rcpthosts.o commands.o \
 timeoutread.o timeoutwrite.o ip.a ipme.o ipalloc.o control.o constmap.o \
@@ -389,7 +375,7 @@ qmail-start: compile load qmail-start.c prot.o fd.a auto_uids.o
 
 qmail-tcpok:
 	$(COMPILE) qmail-tcpok.c
-	$(LOADBIN) qmail-tcpok $(LDFLAGS) -lqlibs buildins.o
+	$(LOADBIN) qmail-tcpok buildins.o $(QLIBS)
 
 qmail-tcpto: compile load qmail-tcpto.c ip.a now.o open.a lock.a \
 substdio.a error.a str.a fs.a auto_qmail.o
@@ -401,13 +387,10 @@ substdio.a error.a str.a fs.a auto_qmail.o
 qmail.o: compile qmail.c
 	./compile qmail.c
 
-qreceipt: compile load qreceipt.c headerbody.o hfield.o quote.o \
-token822.o qmail.o getln.a fd.a wait.a sig.a env.a stralloc.a \
-alloc.a substdio.a error.a str.a auto_qmail.o
-	./compile qreceipt.c
-	./load qreceipt headerbody.o hfield.o quote.o token822.o \
-	qmail.o getln.a fd.a wait.a sig.a env.a stralloc.a alloc.a \
-	substdio.a error.a str.a auto_qmail.o buffer.a
+qreceipt: headerbody.o hfield.o quote.o token822.o qmail.o auto_qmail.o
+	$(COMPILE) qreceipt.c
+	$(LOADBIN) qreceipt headerbody.o hfield.o quote.o token822.o \
+	qmail.o auto_qmail.o substdio.a $(QLIBS)
 
 qsutil.o: compile qsutil.c
 	./compile qsutil.c
@@ -429,15 +412,14 @@ remoteinfo.o: compile remoteinfo.c
 
 sendmail:
 	$(COMPILE) sendmail.c
-	$(LOAD) sendmail env.a getopt.a alloc.a buffer.a \
-	error.a str.a auto_qmail.o
+	$(LOADBIN) sendmail auto_qmail.o $(QLIBS)
 
 spawn.o:
 	$(COMPILE) spawn.c
 
-splogger: compile load splogger.c substdio.a error.a str.a fs.a
-	./compile splogger.c
-	./load splogger substdio.a error.a str.a fs.a
+splogger:
+	$(COMPILE) splogger.c
+	$(LOADBIN) splogger $(QLIBS)
 
 tcp-env: compile load tcp-env.c dns.o remoteinfo.o timeoutread.o \
 timeoutwrite.o timeoutconn.o ip.a ipalloc.o case.a ndelay.a sig.a \
@@ -473,11 +455,8 @@ ssl_timeoutio.o: compile ssl_timeoutio.c
 token822.o: compile token822.c
 	./compile token822.c
 
-trigger.o: compile trigger.c
-	./compile trigger.c
-
-triggerpull.o: compile triggerpull.c
-	./compile triggerpull.c
+trigger.o:
+	$(COMPILE) trigger.c
 
 mkrsadhkeys: \
 conf-users conf-groups mkrsadhkeys.sh warn-auto.sh
@@ -509,10 +488,7 @@ rules.o:
 
 tcprules: rules.o
 	$(COMPILE) tcprules.c
-	$(LOAD) tcprules rules.o fmt.o strerr.a qlibs/scan.o \
-	alloc.a buffer.a case.a cdb.a error.a getln.a open.a \
-	str.a stralloc.a \
-	buffer.a
+	$(LOADBIN) tcprules rules.o strerr.a $(QLIBS)
 
 qmail-tcpsrv: rules.o remoteinfo6.o
 	$(COMPILE) qmail-tcpsrv.c

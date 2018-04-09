@@ -1,5 +1,5 @@
 /*
-  rules.c - read config from cdb
+  rules.c - read qmail-tcpsrv config from cdb
 */
 
 #include <alloc.h>

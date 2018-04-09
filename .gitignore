@@ -34,6 +34,7 @@ ipmeprint2*
 hassalen.h
 
 autocf-*
+buildins.c
 CONTRIBUTORS
 c-tests
 ssl.bin
