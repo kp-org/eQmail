@@ -1,6 +1,6 @@
 QMAILDIR="QPRFX"
 cd $QMAILDIR
-DIRS=`ls queue/mess/ | wc -l | xargs`   # check and count queue split
+DIRS=`ls var/queue/mess/ | wc -l | xargs`   # check and count queue split
 # simple try to check out the 'service start' process
 for s in eqmaild qmail svscan    # xinetd ???
 do
@@ -23,24 +23,24 @@ showHelp() {
 }
 
 countBounces() {
-  bouncefiles=`ls queue/bounce | wc -w | xargs`
+  bouncefiles=`ls var/queue/bounce | wc -w | xargs`
   echo "           messages with bounces: "$bouncefiles
 }
 countLocal() {
-  localfiles=`find queue/local/* -print | wc -w`
+  localfiles=`find var/queue/local/* -print | wc -w`
   echo " messages with local receipients: "`expr $localfiles - $DIRS`
 }
 countRemote() {
-  remotefiles=`find queue/remote/* -print | wc -w`
+  remotefiles=`find var/queue/remote/* -print | wc -w`
   echo "messages with remote receipients: "`expr $remotefiles - $DIRS`
 }
 countTodo() {
-  todofiles=`find queue/todo/* -print | wc -w`
+  todofiles=`find var/queue/todo/* -print | wc -w`
   echo "  messages not pre-processed yet: "`expr $todofiles - $DIRS`
 }
 default() {
   echo -e "\nSummary:"
-  messfiles=`find queue/mess/* -print | wc -w`
+  messfiles=`find var/queue/mess/* -print | wc -w`
   echo "         total messages in queue: "`expr $messfiles - $DIRS`
   countLocal
   countRemote
@@ -51,13 +51,13 @@ default() {
 listMessages() {
   [ "$QSUBDIR" ] || QSUBDIR="mess"
   [ "$N" ] && FARGS="-name $N"
-  for M in $(find queue/$QSUBDIR/*/* $FARGS -print 2>/dev/null)
+  for M in $(find var/queue/$QSUBDIR/*/* $FARGS -print 2>/dev/null)
   do echo -e "\nMessage-Id: `basename $M`" ; cat $M ; done
 }
 listMsgIDs() {
   echo "ID's of messages in queue:"
   [ "$QSUBDIR" ] || QSUBDIR="mess"
-  for ID in $(find queue/$QSUBDIR/*/* -print 2>/dev/null)
+  for ID in $(find var/queue/$QSUBDIR/*/* -print 2>/dev/null)
   do echo `basename "$ID"` ; done
 }
 stopServices() {
@@ -80,7 +80,7 @@ deleteMessage() {
   echo -n "deleting message"
   [ "$N" ] && echo -n " $N" || echo -n "s"	# be a bit verbose ...
   # find and delete message(s)
-  for M in $(find queue/*/*/* $FARGS 2>/dev/null | xargs)
+  for M in $(find var/queue/*/*/* $FARGS 2>/dev/null | xargs)
   do
     Q=`echo $M | cut -d/ -f2`
     rm -f "$M"
