@@ -25,7 +25,6 @@ dev
 tcpserver
 boot
 test-it
-conf-build
 qlibs
 auto_*.c
 ipme2*

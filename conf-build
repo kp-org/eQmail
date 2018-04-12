@@ -1,0 +1,69 @@
+#!/bin/sh
+#********************************************************************************
+
+
+#********************************************************************************
+# This is the qmail home directory.
+PKGDIR="/usr/local/qmail"
+QMAILDIR="$PKGDIR"		# backwards compat (temp)
+
+#********************************************************************************
+# This is the  qmail queue directory.  It must be a local directory,  not  shared
+# among machines. This is where qmail queues all mail messages.
+# The queue (except for bounce message contents) is crashproof, if the filesystem
+# guarantees that single-byte writes are atomic and that directory operations are
+# synchronous.  These guarantees are provided by fixed-block filesystems  such as
+# UFS and by journaling filesystems.  Under Linux, make sure that all filesystems
+# which do mail-handling are mounted with synchronous metadata.
+#
+QUEUEDIR="$PKGDIR/var/queue"
+
+#********************************************************************************
+# *qmail users and groups
+#
+# The qmail system is heavily partitioned for security; it does almost nothing as
+# root. The users are the alias user, the daemon user, the log user, the owner of
+# miscellaneous files  such  as binaries,  the passwd user,  the queue user,  the
+# remote user, and the send user. The values (names) can be changed.
+USRA=alias
+USRD=qmaild
+USRL=qmaill
+USRM=root
+USRP=qmailp
+USRQ=qmailq
+USRR=qmailr
+USRS=qmails
+
+# These are the qmail groups.  The process group (GRPP) should not have access to
+# any files, but it must be usable for processes;  this requirement  excludes the
+# 'nogroup' and 'nobody' groups on many systems.  The other group is the standard
+# group.
+GRPS=qmail
+GRPP=nofiles
+#
+#********************************************************************************
+# Compiled-in options
+#
+# This character is the user-ext delimiter. The default delimiter is '+', meaning
+# that user "joe" controls "joe+anything".  Some system administrators prefer '-'
+# (minus sign) or '=' (equal sign).
+# You can override this choice at run time with the qmail-users mechanism. Multi-
+# character delimiters are not permitted.
+BREAK="+"
+#
+# This is the queue subdirectory split. It have to be a prime number.
+SPLIT="23"
+#
+# These stat bits are not allowed in ~ and ~/.qmail. On most systems, the default
+# umask is 022 or 077, so 022 will work here. The value have to be given octal.
+# Note that ~ftp, ~www, ~uucp, etc. should be owned by root.
+PATRN="002"
+#
+# This is a silent concurrency limit.  It can't be greater than the value of  the
+# command 'ulimit -n'. On some (older) systems it can't set it above 125. eQqmail
+# will correct (decrease) it if the limit is too high.
+SPAWN="120"
+
+#
+DISABLE_TLS=
+DISABLE_IPV6=
