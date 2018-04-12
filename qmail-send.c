@@ -1,5 +1,5 @@
 /*
- *
+ *  -
  *  - changed 'queue' -> 'var/queue'
  *  Revision 20160712, Kai Peter
  *  - switched to 'buffer'
@@ -27,11 +27,7 @@
 #include "getln.h"
 #include "buffer.h"
 #include "alloc.h"
-#include "error.h"
-#include "stralloc.h"
-#include "str.h"
-#include "byte.h"
-#include "fmt.h"
+#include "errmsg.h"
 #include "scan.h"
 #include "case.h"
 #include "fmtqfn.h"
@@ -50,14 +46,14 @@
 /* critical timing feature #1: if not triggered, do not busy-loop */
 /* critical timing feature #2: if triggered, respond within fixed time */
 /* important timing feature: when triggered, respond instantly */
-#define SLEEP_TODO 1500 /* check todo/ every 25 minutes in any case */
-#define SLEEP_FUZZ 1 /* slop a bit on sleeps to avoid zeno effect */
+#define SLEEP_TODO 1500     /* check todo/ every 25 minutes in any case */
+#define SLEEP_FUZZ 1        /* slop a bit on sleeps to avoid zeno effect */
 #define SLEEP_FOREVER 86400 /* absolute maximum time spent in select() */
 #define SLEEP_CLEANUP 76431 /* time between cleanups */
 #define SLEEP_SYSFAIL 123
-#define OSSIFIED 129600 /* 36 hours; _must_ exceed q-q's DEATH (24 hours) */
+#define OSSIFIED 129600     /* 36 hours; _must_ exceed q-q's DEATH (24 hours) */
 
-#define WHO NULL  //"qmail-send"
+#define WHO "qmail-send"
 
 int lifetime = 604800;
 
@@ -429,17 +425,15 @@ void pqadd(unsigned long id) {
   while (!prioq_insert(&pqfail,&pe)) nomem();
 }
 
-void pqstart()
-{
- readsubdir rs;
- int x;
- unsigned long id;
+void pqstart() {
+  readsubdir rs;
+  int x;
+  unsigned long id;
 
- readsubdir_init(&rs,"info",pausedir);
+  readsubdir_init(&rs,"info",pausedir);
 
- while ((x = readsubdir_next(&rs,&id)))
-   if (x > 0)
-     pqadd(id);
+  while ((x = readsubdir_next(&rs,&id)))
+    if (x > 0) pqadd(id);
 }
 
 void pqfinish()
@@ -979,7 +973,7 @@ struct
   int fd; /* defined if id; reading from {local,remote} */
   seek_pos mpos; /* defined if id; mark position */
 //  substdio ss;
-  buffer ss;
+  buffer b;
   char buf[128];
 }
 pass[CHANNELS];
@@ -1065,7 +1059,7 @@ int c;
    if (pass[c].fd == -1) goto trouble;
    if (!getinfo(&line,&birth,pe.id)) { close(pass[c].fd); goto trouble; }
    pass[c].id = pe.id;
-   buffer_init(&pass[c].ss,read,pass[c].fd,pass[c].buf,sizeof(pass[c].buf));
+   buffer_init(&pass[c].b,read,pass[c].fd,pass[c].buf,sizeof(pass[c].buf));
    pass[c].j = job_open(pe.id,c);
    jo[pass[c].j].retry = nextretry(birth,c);
    jo[pass[c].j].flagdying = (recent > birth + lifetime);
@@ -1074,7 +1068,7 @@ int c;
 
  if (!del_avail(c)) return;
 
- if (getln(&pass[c].ss,&line,&match,'\0') == -1)
+ if (getln(&pass[c].b,&line,&match,'\0') == -1)
   {
    fnmake_chanaddr(pass[c].id,c);
    qslog(B("warning: trouble reading ",fn.s,"; will try again later\n"));
