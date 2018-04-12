@@ -8,6 +8,7 @@ extras
 *.bck
 *.diff
 *.lib
+*.patch
 *.ok
 *.orig
 *.rej
