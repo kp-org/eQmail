@@ -119,7 +119,8 @@ int main()
   int x;
 
   if (chdir(auto_qmail) == -1) die_chdir();
-  if (chdir("queue") == -1) die_chdir();
+//  if (chdir("queue") == -1) die_chdir();
+  if (chdir("var/queue") == -1) die_chdir();
   readsubdir_init(&rs,"info",die_opendir);
 
   while ((x = readsubdir_next(&rs,&id)))

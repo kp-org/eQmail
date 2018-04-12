@@ -12,7 +12,7 @@
 #include "scan.h"
 #include "rename.h"
 
-#define FATAL "tcprules: fatal: "
+#define FATL "tcprules: fatal: "
 
 unsigned long linenum = 0;
 char *fntemp;
@@ -29,7 +29,7 @@ struct cdb_make c;
 
 void nomem(void)
 {
-  strerr_die2x(111,FATAL,"out of memory");
+  strerr_die2x(111,FATL,"out of memory");
 }
 void usage(void)
 {
@@ -38,11 +38,11 @@ void usage(void)
 void die_bad(void)
 {
   if (!stralloc_0(&line)) nomem();
-  strerr_die3x(100,FATAL,"unable to parse this line: ",line.s);
+  strerr_die3x(100,FATL,"unable to parse this line: ",line.s);
 }
 void die_write(void)
 {
-  strerr_die4sys(111,FATAL,"unable to write to ",fntemp,": ");
+  strerr_die4sys(111,FATL,"unable to write to ",fntemp,": ");
 }
 
 char strnum[FMT_ULONG];
@@ -108,12 +108,12 @@ int main(int argc,char **argv)
 
   fd = open_trunc(fntemp);
   if (fd == -1)
-    strerr_die4sys(111,FATAL,"unable to create ",fntemp,": ");
+    strerr_die4sys(111,FATL,"unable to create ",fntemp,": ");
   if (cdb_make_start(&c,fd) == -1) die_write();
 
   while (match) {
     if (getln(buffer_0,&line,&match,'\n') == -1)
-      strerr_die2sys(111,FATAL,"unable to read input: ");
+      strerr_die2sys(111,FATL,"unable to read input: ");
 
     x = line.s; len = line.len;
 
@@ -181,7 +181,7 @@ int main(int argc,char **argv)
   if (fsync(fd) == -1) die_write();
   if (close(fd) == -1) die_write(); /* NFS stupidity */
   if (rename(fntemp,fn))
-    strerr_die6sys(111,FATAL,"unable to move ",fntemp," to ",fn,": ");
+    strerr_die6sys(111,FATL,"unable to move ",fntemp," to ",fn,": ");
 
   _exit(0);
 }

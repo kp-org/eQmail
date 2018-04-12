@@ -1,4 +1,6 @@
 /*
+ *  Revision 20170428, Kai Peter
+ *  - switched to 'errmsg', removed 'strerr'
  *  Revision 20160712, Kai Peter
  *  - switched to 'buffer' (strerr)
  *  - changed parameter declarations
@@ -7,12 +9,12 @@
  *  - added 'unistd.h' to prevent compiler warnings, removed 'exit.h'
  */
 #include <unistd.h>
-#include "strerr.h"
-#include "error.h"
 #include "wait.h"
 #include "sig.h"
+#include "errmsg.h"
+#include "buffer.h"
 
-#define FATAL "bouncesaying: fatal: "
+#define WHO "bouncesaying"
 
 int main(int argc,char **argv)
 {
@@ -20,28 +22,30 @@ int main(int argc,char **argv)
   int wstat;
 
   if (!argv[1])
-    strerr_die1x(100,"bouncesaying: usage: bouncesaying error [ program [ arg ... ] ]");
+      errint(EINVAL,"usage: bouncesaying error [ program [ arg ... ] ]");
 
   if (argv[2]) {
     pid = fork();
     if (pid == -1)
-      strerr_die2sys(111,FATAL,"unable to fork: ");
+      errint(EHARD,"unable to fork");
     if (pid == 0) {
       execvp(argv[2],argv + 2);
-      if (error_temp(errno)) _exit(111);
+      if (errno) _exit(111);
       _exit(100);
     }
     if (wait_pid(&wstat,pid) == -1)
-      strerr_die2x(111,FATAL,"wait failed");
+      errint(EHARD,"wait failed");
     if (wait_crashed(wstat))
-      strerr_die2x(111,FATAL,"child crashed");
+      errhard("child crashed");
     switch(wait_exitcode(wstat)) {
       case 0: break;
-      case 111: strerr_die2x(111,FATAL,"temporary child error");
+      case 111: errsoft("temporary child error");
       default: _exit(0);
     }
   }
 
-  strerr_die1x(100,argv[1]);
-  return(0);  /* never reached */
+  buffer_puts(buffer_1,argv[1]);
+  buffer_puts(buffer_1,"\n");
+  buffer_flush(buffer_1);
+  _exit(100);
 }

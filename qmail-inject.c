@@ -1,7 +1,10 @@
 /*
+ *  Revision 20180123, Kai Peter
+ *  - prevented 'misleading-indentation' warning
+ *  Revision 20171130, Kai Peter
+ *  - changed folder name 'control' to 'etc'
  *  Revision 20160711, Kai Peter
  *  - switched to 'buffer', 'unistd.h'
- *
  *  Revision 20160509, Kai Peter
  *  - changed return type of main to int
  *  - added parentheses to outer if
@@ -82,7 +85,7 @@ void die_read() {
   buffer_putsflush(buffer_2,"qmail-inject: fatal: read error\n"); temp(); }
 
 void doordie(sa,r) stralloc *sa; int r; {
- if (r == 1) return; if (r == -1) die_nomem();
+ if (r == 1) { return; } if (r == -1) die_nomem();
   buffer_putsflush(buffer_2,"qmail-inject: fatal: unable to parse this line:\n");
   buffer_putflush(buffer_2,sa->s,sa->len); perm();
 }
@@ -657,7 +660,7 @@ void getcontrols() {
   if (chdir(auto_qmail) == -1) die_chdir();
   if (control_init() == -1) die_read();
 
-  if (control_rldef(&control_defaultdomain,"control/defaultdomain",1,"defaultdomain") != 1)
+  if (control_rldef(&control_defaultdomain,"etc/defaultdomain",1,"defaultdomain") != 1)
     die_read();
   x = env_get("QMAILDEFAULTDOMAIN");
   if (x) if (!stralloc_copys(&control_defaultdomain,x)) die_nomem();
@@ -665,7 +668,7 @@ void getcontrols() {
   if (!stralloc_cat(&sa,&control_defaultdomain)) die_nomem();
   doordie(&sa,token822_parse(&defaultdomain,&sa,&defaultdomainbuf));
 
-  if (control_rldef(&control_defaulthost,"control/defaulthost",1,"defaulthost") != 1)
+  if (control_rldef(&control_defaulthost,"etc/defaulthost",1,"defaulthost") != 1)
     die_read();
   x = env_get("QMAILDEFAULTHOST");
   if (x) if (!stralloc_copys(&control_defaulthost,x)) die_nomem();
@@ -673,7 +676,7 @@ void getcontrols() {
   if (!stralloc_cat(&sa,&control_defaulthost)) die_nomem();
   doordie(&sa,token822_parse(&defaulthost,&sa,&defaulthostbuf));
 
-  if (control_rldef(&control_plusdomain,"control/plusdomain",1,"plusdomain") != 1)
+  if (control_rldef(&control_plusdomain,"etc/plusdomain",1,"plusdomain") != 1)
     die_read();
   x = env_get("QMAILPLUSDOMAIN");
   if (x) if (!stralloc_copys(&control_plusdomain,x)) die_nomem();
@@ -681,7 +684,7 @@ void getcontrols() {
   if (!stralloc_cat(&sa,&control_plusdomain)) die_nomem();
   doordie(&sa,token822_parse(&plusdomain,&sa,&plusdomainbuf));
 
-  if (control_rldef(&control_idhost,"control/idhost",1,"idhost") != 1)
+  if (control_rldef(&control_idhost,"etc/idhost",1,"idhost") != 1)
     die_read();
   x = env_get("QMAILIDHOST");
   if (x) if (!stralloc_copys(&control_idhost,x)) die_nomem();

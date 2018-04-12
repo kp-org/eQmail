@@ -6,23 +6,23 @@ qmail-newu \- prepare address assignments for qmail-lspawn
 .SH DESCRIPTION
 .B qmail-newu
 reads the assignments in
-.B QMAILHOME/users/assign
+.B QPRFX/var/users/assign
 and writes them into
-.B QMAILHOME/users/cdb
+.B QPRFX/var/users/cdb
 in a binary format suited
 for quick access by
 .BR qmail-lspawn .
 
 If there is a problem with
-.BR users/assign ,
+.BR var/users/assign ,
 .B qmail-newu
 complains and leaves
-.B users/cdb
+.B var/users/cdb
 alone.
 
 .B qmail-newu
 ensures that
-.B users/cdb
+.B var/users/cdb
 is updated atomically,
 so
 .B qmail-lspawn
@@ -32,10 +32,10 @@ to finish.
 However,
 .B qmail-newu
 makes no attempt to protect against two simultaneous updates of
-.BR users/cdb .
+.BR var/users/cdb .
 
 The binary
-.B users/cdb
+.B var/users/cdb
 format is portable across machines.
 .SH "SEE ALSO"
 qmail-users(5),

@@ -12,9 +12,9 @@
 //#include "hassalen.h"
 #include "byte.h"
 #include "ip.h"
-#include "ipalloc.h"
 #include "stralloc.h"
 #include "ipme.h"
+#include "ipalloc.h"
 
 /** @file ipme.c
     @brief ipme_is4, ipme_is6, ipme_is46, ipme_init

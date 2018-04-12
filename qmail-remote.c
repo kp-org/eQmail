@@ -1,3 +1,14 @@
+/*
+ *  Revision 20171130, Kai Peter
+ *  - changed folder name 'control' to 'etc'
+ *  - prevented 'misleading-indentation' warning
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - casting pointers (char *)
+ *  - added some parenthesis to condition '(relayhost = constmap('
+ *  - added 'close.h', 'chdir.h', 'base64,h', 'getpid.h'
+ *  - initialize var 'code' in function smtp()
+*/
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -111,10 +122,10 @@ void outhost()
 #ifdef INET6
   if (partner.af == AF_INET) {
 #endif
-  if (substdio_put(subfdoutsmall,x,ip_fmt(x,&partner.addr.ip)) == -1) _exit(0);
+  if (substdio_put(subfdoutsmall,x,ip_fmt(x,(char *)&partner.addr.ip)) == -1) _exit(0);
 #ifdef INET6
   } else {
-  if (substdio_put(subfdoutsmall,x,ip6_fmt(x,&partner.addr.ip6)) == -1) _exit(0);
+  if (substdio_put(subfdoutsmall,x,ip6_fmt(x,(char *)&partner.addr.ip6)) == -1) _exit(0);
   }
 #endif
 }
@@ -127,7 +138,7 @@ void dropped() {
   out(" but connection died. ");
   if (flagcritical) out("Possible duplicate! ");
 #ifdef TLS
-  if (ssl_err_str) { out(ssl_err_str); out(" "); }
+  if (ssl_err_str) { out((char *)ssl_err_str); out(" "); }
 #endif
   out("(#4.4.2)\n");
   zerodie();
@@ -189,18 +200,18 @@ unsigned long smtpcode()
 
   if (!stralloc_copys(&smtptext,"")) temp_nomem();
 
-  get(&ch); code = ch - '0';
-  get(&ch); code = code * 10 + (ch - '0');
-  get(&ch); code = code * 10 + (ch - '0');
+  get((char *)&ch); code = ch - '0';
+  get((char *)&ch); code = code * 10 + (ch - '0');
+  get((char *)&ch); code = code * 10 + (ch - '0');
   for (;;) {
-    get(&ch);
+    get((char *)&ch);
     if (ch != '-') break;
-    while (ch != '\n') get(&ch);
-    get(&ch);
-    get(&ch);
-    get(&ch);
+    while (ch != '\n') get((char *)&ch);
+    get((char *)&ch);
+    get((char *)&ch);
+    get((char *)&ch);
   }
-  while (ch != '\n') get(&ch);
+  while (ch != '\n') get((char *)&ch);
 
   return code;
 }
@@ -293,7 +304,7 @@ char *append;
   out(".\n");
   outsmtptext();
 
-#if defined(TLS) && defined(DEBUG)
+#if defined(TLS) && defined(DEBUG_TLS)
   if (ssl) {
     X509 *peercert;
 
@@ -350,17 +361,17 @@ char *partner_fqdn = 0;
 # define TLS_QUIT quit(ssl ? "; connected to " : "; connecting to ", "")
 void tls_quit(const char *s1, const char *s2)
 {
-  out(s1); if (s2) { out(": "); out(s2); } TLS_QUIT;
+  out((char *)s1); if (s2) { out(": "); out((char *)s2); } TLS_QUIT;
 }
 # define tls_quit_error(s) tls_quit(s, ssl_error())
 
 int match_partner(const char *s, int len)
 {
-  if (!case_diffb(partner_fqdn, len, s) && !partner_fqdn[len]) return 1;
+  if (!case_diffb(partner_fqdn, len,(char *) s) && !partner_fqdn[len]) return 1;
   /* we also match if the name is *.domainname */
   if (*s == '*') {
     const char *domain = partner_fqdn + str_chr(partner_fqdn, '.');
-    if (!case_diffb(domain, --len, ++s) && !domain[len]) return 1;
+    if (!case_diffb((char *)domain, --len,(char *) ++s) && !domain[len]) return 1;
   }
   return 0;
 }
@@ -379,16 +390,16 @@ int tls_init()
   if (partner_fqdn) {
     struct stat st;
     stralloc tmp = {0};
-    if (!stralloc_copys(&tmp, "control/tlshosts/")
+    if (!stralloc_copys(&tmp, "etc/tlshosts/")
       || !stralloc_catb(&tmp, partner_fqdn, str_len(partner_fqdn))
       || !stralloc_catb(&tmp, ".pem", 5)) temp_nomem();
     if (stat(tmp.s, &st) == 0) 
       servercert = tmp.s;
     else {
-      if (!stralloc_copys(&tmp, "control/notlshosts/")
+      if (!stralloc_copys(&tmp, "etc/notlshosts/")
         || !stralloc_catb(&tmp, partner_fqdn, str_len(partner_fqdn)+1))
         temp_nomem();
-      if ((stat("control/tlshosts/exhaustivelist", &st) == 0) ||
+      if ((stat("etc/tlshosts/exhaustivelist", &st) == 0) ||
       (stat(tmp.s, &st) == 0)) {
          alloc_free(tmp.s);
          return 0;
@@ -404,7 +415,7 @@ int tls_init()
     for ( ; len && case_diffs(sa->s, "STARTTLS"); ++sa, --len) ;
     if (!len) {
       if (!servercert) return 0;
-      out("ZNo TLS achieved while "); out(servercert);
+      out("ZNo TLS achieved while "); out((char *)servercert);
       out(" exists"); smtptext.len = 0; TLS_QUIT;
     }
   }
@@ -430,10 +441,10 @@ int tls_init()
   }
 
   /* let the other side complain if it needs a cert and we don't have one */
-# define CLIENTCERT "control/clientcert.pem"
+#define CLIENTCERT "etc/clientcert.pem"
   if (SSL_CTX_use_certificate_chain_file(ctx, CLIENTCERT))
     SSL_CTX_use_RSAPrivateKey_file(ctx, CLIENTCERT, SSL_FILETYPE_PEM);
-# undef CLIENTCERT
+#undef CLIENTCERT
 
   myssl = SSL_new(ctx);
   SSL_CTX_free(ctx);
@@ -446,7 +457,7 @@ int tls_init()
   if (!smtps) substdio_putsflush(&smtpto, "STARTTLS\r\n");
 
   /* while the server is preparing a response, do something else */
-  if (control_readfile(&saciphers, "control/tlsclientciphers", 0) == -1)
+  if (control_readfile(&saciphers, "etc/tlsclientciphers", 0) == -1)
     { SSL_free(myssl); temp_control(); }
   if (saciphers.len) {
     for (i = 0; i < saciphers.len - 1; ++i)
@@ -465,7 +476,7 @@ int tls_init()
       SSL_free(myssl);
       if (!servercert) return 0;
       out("ZSTARTTLS rejected while ");
-      out(servercert); out(" exists"); TLS_QUIT;
+      out((char *)servercert); out(" exists"); TLS_QUIT;
     }
     smtptext.len = 0;
   }
@@ -502,7 +513,7 @@ int tls_init()
         const GENERAL_NAME *gn = sk_GENERAL_NAME_value(gens, i);
         if (gn->type == GEN_DNS){
           found_gen_dns = 1;
-          if (match_partner(gn->d.ia5->data, gn->d.ia5->length)) {
+          if (match_partner((char *)gn->d.ia5->data, gn->d.ia5->length)) {
             matched_gen_dns = 1;
             break;
           }
@@ -518,7 +529,7 @@ int tls_init()
       i = X509_NAME_get_index_by_NID(subj, NID_commonName, -1);
       if (i >= 0) {
         const ASN1_STRING *s = X509_NAME_get_entry(subj, i)->value;
-        if (s) { (peer.len = s->length); (peer.s = s->data); }
+        if (s) { (peer.len = s->length); (peer.s = (char *)s->data); }
       }
       if (peer.len <= 0) {
         out("ZTLS unable to verify server ");
@@ -716,18 +727,18 @@ int flagcname;
 void getcontrols()
 {
   if (control_init() == -1) temp_control();
-  if (control_readint(&timeout,"control/timeoutremote") == -1) temp_control();
-  if (control_readint(&timeoutconnect,"control/timeoutconnect") == -1)
+  if (control_readint(&timeout,"etc/timeoutremote") == -1) temp_control();
+  if (control_readint(&timeoutconnect,"etc/timeoutconnect") == -1)
     temp_control();
-  if (control_rldef(&helohost,"control/helohost",1,(char *) 0) != 1)
+  if (control_rldef(&helohost,"etc/helohost",1,(char *) 0) != 1)
     temp_control();
-  switch(control_readfile(&routes,"control/smtproutes",0)) {
+  switch(control_readfile(&routes,"etc/smtproutes",0)) {
     case -1:
       temp_control();
     case 0:
-      if (!constmap_init(&maproutes,"",0,1)) temp_nomem(); break;
+      if (!constmap_init(&maproutes,"",0,1)) { temp_nomem(); } break;
     case 1:
-      if (!constmap_init(&maproutes,routes.s,routes.len,1)) temp_nomem(); break;
+      if (!constmap_init(&maproutes,routes.s,routes.len,1)) { temp_nomem(); } break;
   }
 }
 
@@ -782,6 +793,7 @@ int main(int argc,char **argv)
   if (!stralloc_copys(&auth_smtp_user,"")) temp_nomem();
   if (!stralloc_copys(&auth_smtp_pass,"")) temp_nomem();
 
+  /* relayhost comes from smtproutes */
   relayhost = 0;
   for (i = 0;i <= host.len;++i)
     if ((i == 0) || (i == host.len) || (host.s[i] == '.'))

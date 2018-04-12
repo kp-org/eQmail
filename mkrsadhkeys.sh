@@ -11,13 +11,13 @@ OPENSSL=$(which openssl 2>/dev/null)
 if [ $? -ne 0 ] ; then
    echo "Couldn't find openssl! Aborting!" ; exit 0 ; fi
 
-"$OPENSSL" genrsa -out QMAIL/control/rsa2048.new 2048 &&
-chmod 600 QMAIL/control/rsa2048.new &&
-chown UID:GID QMAIL/control/rsa2048.new &&
-mv -f QMAIL/control/rsa2048.new QMAIL/control/rsa2048.pem
+"$OPENSSL" genrsa -out QPRFX/etc/rsa2048.new 2048 &&
+chmod 600 QPRFX/etc/rsa2048.new &&
+chown UID:GID QPRFX/etc/rsa2048.new &&
+mv -f QPRFX/etc/rsa2048.new QPRFX/etc/rsa2048.pem
 echo
 
-"$OPENSSL" dhparam -2 -out QMAIL/control/dh2048.new 2048 &&
-chmod 600 QMAIL/control/dh2048.new &&
-chown UID:GID QMAIL/control/dh2048.new &&
-mv -f QMAIL/control/dh2048.new QMAIL/control/dh2048.pem
+"$OPENSSL" dhparam -2 -out QPRFX/etc/dh2048.new 2048 &&
+chmod 600 QPRFX/etc/dh2048.new &&
+chown UID:GID QPRFX/etc/dh2048.new &&
+mv -f QPRFX/etc/dh2048.new QPRFX/etc/dh2048.pem

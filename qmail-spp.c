@@ -1,4 +1,13 @@
 /*
+ *  Revision 20170412, Kai Peter
+ *  - changed dir 'control' to 'etc'
+ *  Revision 20160708, Kai Peter
+ *  - switched to 'buffer'
+ *  Revision 20160608, Kai Peter
+ *  - replaced 'vfork' with 'fork'
+ */
+
+/*
  * Copyright (C) 2004-2005 Pawel Foremski <pjf@asn.pl>
  *
  * This program is free software; you can redistribute it and/or
@@ -29,9 +38,9 @@
  *
  */
 
-#include <unistd.h>		/* replace "readwrite.h" "exit.h" */
+#include <unistd.h>
 #include "stralloc.h"
-#include "substdio.h"
+#include "buffer.h"
 #include "control.h"
 #include "str.h"
 #include "byte.h"
@@ -41,7 +50,7 @@
 #include "fmt.h"
 #include "getln.h"
 
-#include <sys/stat.h>	/* check for config file */
+#include <sys/stat.h>    /* check for config file */
 
 /* stuff needed from qmail-smtpd */
 extern void flush();
@@ -62,7 +71,7 @@ static stralloc sppmsg = {0};
 static char rcptcountstr[FMT_ULONG];
 static unsigned long rcptcount;
 static unsigned long rcptcountall;
-static substdio ssdown;
+static buffer ssdown;
 static char downbuf[128];
 
 static void err_spp(s1, s2) char *s1, *s2; { out("451 qmail-spp failure: "); out(s1); out(": "); out(s2); out(" (#4.3.0)\r\n"); }
@@ -71,7 +80,7 @@ int spp_init()
 {
   int i, len = 0;
   stralloc *plugins_to;
-  char *x, *conffile = "control/smtpplugins";
+  char *x, *conffile = "etc/smtpplugins";
   struct stat st;	/* needed by stat of config file */
 
   if (!env_get("NOSPP")) {
@@ -79,10 +88,10 @@ int spp_init()
     plugins_to = &plugins_dummy;
     x = env_get("SPPCONFFILE");
     if (x && *x) conffile = x;
-	/* if config file couldn't be found ignore qmail-spp stuff */
-	if (stat(conffile,&st) != 0) return 0;
+    /* if config file couldn't be found ignore qmail-spp stuff */
+    if (stat(conffile,&st) != 0) return 0;
     sppfok = control_readfile(&sppf, conffile, 0);
-    if (sppfok != 1) return -1;		// better?: log and continue (return 0;)
+    if (sppfok != 1) return -1;     // better?: log and continue (return 0;)
     for (i = 0; i < sppf.len; i += len) {
       len = str_len(sppf.s + i) + 1;
       if (sppf.s[i] == '[')
@@ -115,7 +124,7 @@ int spp(plugins, addrenv) stralloc *plugins; char *addrenv;
   static stralloc *errors_to;
 
   if (!spprun) return 1;
-  if (addrenv) if (!env_put2(addrenv, addr.s)) die_nomem();
+  if (addrenv) if (!env_put(addrenv, addr.s)) die_nomem();
   last = 0;
 
   for (i = 0; i < plugins->len; i += str_len(plugins->s + i) + 1) {
@@ -138,9 +147,9 @@ int spp(plugins, addrenv) stralloc *plugins; char *addrenv;
     }
 
     close(pipes[1]);
-    substdio_fdbuf(&ssdown, read, pipes[0], downbuf, sizeof(downbuf));
+    buffer_init(&ssdown, read, pipes[0], downbuf, sizeof(downbuf));
     do {
-      if (getln((struct buffer *)&ssdown, &data, &match, '\n') == -1) die_nomem();
+      if (getln(&ssdown, &data, &match, '\n') == -1) die_nomem();
       if (data.len > 1) {
         data.s[data.len - 1] = 0;
         switch (data.s[0]) {
@@ -151,10 +160,10 @@ int spp(plugins, addrenv) stralloc *plugins; char *addrenv;
           case 'C':
             if (addrenv) {
               if (!stralloc_copyb(&addr, data.s + 1, data.len - 1)) die_nomem();
-              if (!env_put2(addrenv, addr.s)) die_nomem();
+              if (!env_put(addrenv, addr.s)) die_nomem();
             }
             break;
-          case 'S': if (!env_put(data.s + 1)) die_nomem(); break;
+          case 'S': if (!env_puts(data.s + 1)) die_nomem(); break;
           case 'U': if (!env_unset(data.s + 1)) die_nomem(); break;
           case 'A': spprun = 0;
           case 'O':
@@ -211,7 +220,7 @@ int spp_connect() { return spp(&plugins_connect, 0); }
 
 int spp_helo(arg) char *arg;
 {
-  if (!env_put2("SMTPHELOHOST", arg)) die_nomem();
+  if (!env_put("SMTPHELOHOST", arg)) die_nomem();
   return spp(&plugins_helo, 0);
 }
 
@@ -236,10 +245,10 @@ int spp_rcpt(allowed) int allowed;
 {
   if (!spp_errors(&error_rcpt)) return 0;
   rcptcountstr[fmt_ulong(rcptcountstr, rcptcount)] = 0;
-  if (!env_put2("SMTPRCPTCOUNT", rcptcountstr)) die_nomem();
+  if (!env_put("SMTPRCPTCOUNT", rcptcountstr)) die_nomem();
   rcptcountstr[fmt_ulong(rcptcountstr, ++rcptcountall)] = 0;
-  if (!env_put2("SMTPRCPTCOUNTALL", rcptcountstr)) die_nomem();
-  if (!env_put2("SMTPRCPTHOSTSOK", allowed ? "1" : "0")) die_nomem();
+  if (!env_put("SMTPRCPTCOUNTALL", rcptcountstr)) die_nomem();
+  if (!env_put("SMTPRCPTHOSTSOK", allowed ? "1" : "0")) die_nomem();
   sppret = spp(&plugins_rcpt, "SMTPRCPTTO");
   return sppret;
 }
@@ -254,8 +263,8 @@ int spp_data()
 
 int spp_auth(method, user) char *method, *user;
 {
-  if (!env_put2("SMTPAUTHMETHOD", method)) die_nomem();
-  if (!env_put2("SMTPAUTHUSER", user)) die_nomem();
+  if (!env_put("SMTPAUTHMETHOD", method)) die_nomem();
+  if (!env_put("SMTPAUTHUSER", user)) die_nomem();
   return spp(&plugins_auth, 0);
 }
 

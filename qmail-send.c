@@ -1,6 +1,11 @@
 /*
+ *  -
+ *  - changed 'queue' -> 'var/queue'
  *  Revision 20160712, Kai Peter
  *  - switched to 'buffer'
+ *  Revision 20160608, Kai Peter
+ *  - removed '#include "fmtqfn.h"'
+ *  - renamed function 'fmtqfn' --> 'fmt_qfn'
  *  Revision 20160509, Kai Peter
  *  - changed return type of main to int
  *  - added parentheses to conditions
@@ -9,7 +14,7 @@
  */
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#include <unistd.h>		/* replace "readwrite.h" "exit.h" */
 #include "sig.h"
 #include "direntry.h"
 #include "control.h"
@@ -22,11 +27,7 @@
 #include "getln.h"
 #include "buffer.h"
 #include "alloc.h"
-#include "error.h"
-#include "stralloc.h"
-#include "str.h"
-#include "byte.h"
-#include "fmt.h"
+#include "errmsg.h"
 #include "scan.h"
 #include "case.h"
 #include "fmtqfn.h"
@@ -40,16 +41,19 @@
 #include "constmap.h"
 #include "readsubdir.h"
 #include <utime.h>
+#include "qstrings.h"
 
 /* critical timing feature #1: if not triggered, do not busy-loop */
 /* critical timing feature #2: if triggered, respond within fixed time */
 /* important timing feature: when triggered, respond instantly */
-#define SLEEP_TODO 1500 /* check todo/ every 25 minutes in any case */
-#define SLEEP_FUZZ 1 /* slop a bit on sleeps to avoid zeno effect */
+#define SLEEP_TODO 1500     /* check todo/ every 25 minutes in any case */
+#define SLEEP_FUZZ 1        /* slop a bit on sleeps to avoid zeno effect */
 #define SLEEP_FOREVER 86400 /* absolute maximum time spent in select() */
 #define SLEEP_CLEANUP 76431 /* time between cleanups */
 #define SLEEP_SYSFAIL 123
-#define OSSIFIED 129600 /* 36 hours; _must_ exceed q-q's DEATH (24 hours) */
+#define OSSIFIED 129600     /* 36 hours; _must_ exceed q-q's DEATH (24 hours) */
+
+#define WHO "qmail-send"
 
 int lifetime = 604800;
 
@@ -80,12 +84,13 @@ int flagexitasap = 0; void sigterm() { flagexitasap = 1; }
 int flagrunasap = 0; void sigalrm() { flagrunasap = 1; }
 int flagreadasap = 0; void sighup() { flagreadasap = 1; }
 
-void cleandied() { log1("alert: oh no! lost qmail-clean connection! dying...\n");
- flagexitasap = 1; }
+void cleandied() { qslog("alert: lost qmail-clean connection! dying...\n");
+  flagexitasap = 1; }
 
 int flagspawnalive[CHANNELS];
-void spawndied(c) int c; { log1("alert: oh no! lost spawn connection! dying...\n");
- flagspawnalive[c] = 0; flagexitasap = 1; }
+void spawndied(int c) { 
+  qslog("alert: lost spawn connection! dying...\n");
+  flagspawnalive[c] = 0; flagexitasap = 1; }
 
 #define REPORTMAX 10000
 
@@ -103,15 +108,15 @@ void fnmake_init() {
   while (!stralloc_ready(&fn2,FMTQFN)) nomem();
 }
 
-void fnmake_info(id) unsigned long id; { fn.len = fmt_qfn(fn.s,"info/",id,1); }
+void fnmake_info(unsigned long id) { fn.len = fmt_qfn(fn.s,"info/",id,1); }
 void fnmake_todo(id) unsigned long id; { fn.len = fmt_qfn(fn.s,"todo/",id,1); }
 void fnmake_mess(id) unsigned long id; { fn.len = fmt_qfn(fn.s,"mess/",id,1); }
 void fnmake_foop(id) unsigned long id; { fn.len = fmt_qfn(fn.s,"foop/",id,0); }
 void fnmake_split(id) unsigned long id; { fn.len = fmt_qfn(fn.s,"",id,1); }
 void fnmake2_bounce(id) unsigned long id;
-{ fn2.len = fmt_qfn(fn2.s,"bounce/",id,0); }
+  { fn2.len = fmt_qfn(fn2.s,"bounce/",id,0); }
 void fnmake_chanaddr(id,c) unsigned long id; int c;
-{ fn.len = fmt_qfn(fn.s,chanaddr[c],id,1); }
+  { fn.len = fmt_qfn(fn.s,chanaddr[c],id,1); }
 
 
 /* this file is too long ----------------------------------------- REWRITING */
@@ -163,62 +168,55 @@ int rewrite(char *recip)
         if (!stralloc_0(&rwline)) return 0;
         return 1;
       }
- 
+
   if (!stralloc_cat(&rwline,&addr)) return 0;
   if (!stralloc_0(&rwline)) return 0;
   return 2;
 }
 
-void senderadd(sa,sender,recip)
-stralloc *sa;
-char *sender;
-char *recip;
-{
- int i;
- int j;
- int k;
+void senderadd(stralloc *sa, char *sender, char *recip) {
+  int i;
+  int j;
+  int k;
 
- i = str_len(sender);
- if (i >= 4)
-   if (str_equal(sender + i - 4,"-@[]"))
-    {
-     j = byte_rchr(sender,i - 4,'@');
-     k = str_rchr(recip,'@');
-     if (recip[k] && (j + 5 <= i))
-      {
-       /* owner-@host-@[] -> owner-recipbox=reciphost@host */
-       while (!stralloc_catb(sa,sender,j)) nomem();
-       while (!stralloc_catb(sa,recip,k)) nomem();
-       while (!stralloc_cats(sa,"=")) nomem();
-       while (!stralloc_cats(sa,recip + k + 1)) nomem();
-       while (!stralloc_cats(sa,"@")) nomem();
-       while (!stralloc_catb(sa,sender + j + 1,i - 5 - j)) nomem();
-       return;
+  i = str_len(sender);
+  if (i >= 4) {
+    if (str_equal(sender + i - 4,"-@[]")) {
+      j = byte_rchr(sender,i - 4,'@');
+      k = str_rchr(recip,'@');
+      if (recip[k] && (j + 5 <= i)) {
+        /* owner-@host-@[] -> owner-recipbox=reciphost@host */
+        while (!stralloc_catb(sa,sender,j)) nomem();
+        while (!stralloc_catb(sa,recip,k)) nomem();
+        while (!stralloc_cats(sa,"=")) nomem();
+        while (!stralloc_cats(sa,recip + k + 1)) nomem();
+        while (!stralloc_cats(sa,"@")) nomem();
+        while (!stralloc_catb(sa,sender + j + 1,i - 5 - j)) nomem();
+        return;
       }
     }
- while (!stralloc_cats(sa,sender)) nomem();
+  }
+  while (!stralloc_cats(sa,sender)) nomem();
 }
 
 
 /* this file is too long ---------------------------------------------- INFO */
 
-int getinfo(stralloc *sa,datetime_sec *dt,unsigned long id)
+int getinfo(stralloc *sa, datetime_sec *dt, unsigned long id)
 {
   int fdinfo;
   struct stat st;
   static stralloc line = {0};
   int match;
-//  substdio ss;
-  buffer ss;
+  buffer b;
   char buf[128];
 
   fnmake_info(id);
   fdinfo = open_read(fn.s);
   if (fdinfo == -1) return 0;
   if (fstat(fdinfo,&st) == -1) { close(fdinfo); return 0; }
-//  substdio_fdbuf(&ss,read,fdinfo,buf,sizeof(buf));
-  buffer_init(&ss,read,fdinfo,buf,sizeof(buf));
-  if (getln(&ss,&line,&match,'\0') == -1) { close(fdinfo); return 0; }
+  buffer_init(&b,read,fdinfo,buf,sizeof(buf));
+  if (getln(&b,&line,&match,'\0') == -1) { close(fdinfo); return 0; }
   close(fdinfo);
   if (!match) return 0;
   if (line.s[0] != 'F') return 0;
@@ -232,31 +230,25 @@ int getinfo(stralloc *sa,datetime_sec *dt,unsigned long id)
 
 /* this file is too long ------------------------------------- COMMUNICATION */
 
-//substdio sstoqc; char sstoqcbuf[1024];
-//substdio ssfromqc; char ssfromqcbuf[1024];
-buffer sstoqc; char sstoqcbuf[1024];
-buffer ssfromqc; char ssfromqcbuf[1024];
+buffer btoqc; char sstoqcbuf[1024];
+buffer bfromqc; char ssfromqcbuf[1024];
 stralloc comm_buf[CHANNELS] = { {0}, {0} };
 int comm_pos[CHANNELS];
 
-void comm_init()
-{
- int c;
-// substdio_fdbuf(&sstoqc,write,5,sstoqcbuf,sizeof(sstoqcbuf));
-// substdio_fdbuf(&ssfromqc,read,6,ssfromqcbuf,sizeof(ssfromqcbuf));
-  buffer_init(&sstoqc,write,5,sstoqcbuf,sizeof(sstoqcbuf));
-  buffer_init(&ssfromqc,read,6,ssfromqcbuf,sizeof(ssfromqcbuf));
- for (c = 0;c < CHANNELS;++c)
-   if (ndelay_on(chanfdout[c]) == -1)
-   /* this is so stupid: NDELAY semantics should be default on write */
-     spawndied(c); /* drastic, but better than risking deadlock */
+void comm_init() {
+  int c;
+  buffer_init(&btoqc,write,5,sstoqcbuf,sizeof(sstoqcbuf));
+  buffer_init(&bfromqc,read,6,ssfromqcbuf,sizeof(ssfromqcbuf));
+  for (c = 0;c < CHANNELS;++c)
+    if (ndelay_on(chanfdout[c]) == -1)
+    /* this is so stupid: NDELAY semantics should be default on write */
+      spawndied(c);      /* drastic, but better than risking deadlock */
 }
 
-int comm_canwrite(int c)
-{
- /* XXX: could allow a bigger buffer; say 10 recipients */
- if (comm_buf[c].s && comm_buf[c].len) return 0;
- return 1;
+int comm_canwrite(int c) {
+  /* XXX: could allow a bigger buffer; say 10 recipients */
+  if (comm_buf[c].s && comm_buf[c].len) return 0;
+  return 1;
 }
 
 void comm_write(c,delnum,id,sender,recip)
@@ -296,8 +288,8 @@ fd_set *wfds;
       }
 }
 
-void comm_do(fd_set *wfds)
-//fd_set *wfds;
+void comm_do(wfds)
+fd_set *wfds;
 {
  int c;
  for (c = 0;c < CHANNELS;++c)
@@ -310,18 +302,18 @@ void comm_do(fd_set *wfds)
          len = comm_buf[c].len;
          w = write(chanfdout[c],comm_buf[c].s + comm_pos[c],len - comm_pos[c]);
          if (w <= 0)
-      {
-       if ((w == -1) && (errno == error_pipe))
-         spawndied(c);
-       else
-         continue; /* kernel select() bug; can't avoid busy-looping */
-      }
-     else
-      {
-       comm_pos[c] += w;
-       if (comm_pos[c] == len)
-         comm_buf[c].len = 0;
-      }
+	  {
+	   if ((w == -1) && (errno == error_pipe))
+	     spawndied(c);
+	   else
+	     continue; /* kernel select() bug; can't avoid busy-looping */
+	  }
+	 else
+	  {
+	   comm_pos[c] += w;
+	   if (comm_pos[c] == len)
+	     comm_buf[c].len = 0;
+	  }
         }
 }
 
@@ -332,61 +324,53 @@ int flagcleanup; /* if 1, cleanupdir is initialized and ready */
 readsubdir cleanupdir;
 datetime_sec cleanuptime;
 
-void cleanup_init()
-{
- flagcleanup = 0;
- cleanuptime = now();
+void cleanup_init() {
+  flagcleanup = 0;
+  cleanuptime = now();
 }
 
-void cleanup_selprep(wakeup)
-datetime_sec *wakeup;
-{
- if (flagcleanup) *wakeup = 0;
- if (*wakeup > cleanuptime) *wakeup = cleanuptime;
+void cleanup_selprep(datetime_sec *wakeup) {
+  if (flagcleanup) *wakeup = 0;
+  if (*wakeup > cleanuptime) *wakeup = cleanuptime;
 }
 
-void cleanup_do()
-{
- char ch;
- struct stat st;
- unsigned long id;
+void cleanup_do() {
+  char ch;
+  struct stat st;
+  unsigned long id;
 
- if (!flagcleanup)
-  {
-   if (recent < cleanuptime) return;
-   readsubdir_init(&cleanupdir,"mess",pausedir);
-   flagcleanup = 1;
+  if (!flagcleanup) {
+    if (recent < cleanuptime) return;
+    readsubdir_init(&cleanupdir,"mess",pausedir);
+    flagcleanup = 1;
   }
 
- switch(readsubdir_next(&cleanupdir,&id))
-  {
-   case 1:
-     break;
-   case 0:
-     flagcleanup = 0;
-     cleanuptime = recent + SLEEP_CLEANUP;
-   default:
-     return;
+  switch(readsubdir_next(&cleanupdir,&id)) {
+    case 1:
+      break;
+    case 0:
+      flagcleanup = 0;
+      cleanuptime = recent + SLEEP_CLEANUP;
+    default:
+      return;
   }
 
- fnmake_mess(id);
- if (stat(fn.s,&st) == -1) return; /* probably qmail-queue deleted it */
- if (recent <= st.st_atime + OSSIFIED) return;
+  fnmake_mess(id);
+  if (stat(fn.s,&st) == -1) return; /* probably qmail-queue deleted it */
+  if (recent <= st.st_atime + OSSIFIED) return;
 
- fnmake_info(id);
- if (stat(fn.s,&st) == 0) return;
- if (errno != error_noent) return;
- fnmake_todo(id);
- if (stat(fn.s,&st) == 0) return;
- if (errno != error_noent) return;
+  fnmake_info(id);
+  if (stat(fn.s,&st) == 0) return;
+  if (errno != ENOENT) return;
+  fnmake_todo(id);
+  if (stat(fn.s,&st) == 0) return;
+  if (errno != ENOENT) return;
 
   fnmake_foop(id);
-// if (substdio_putflush(&sstoqc,fn.s,fn.len) == -1) { cleandied(); return; }
-// if (substdio_get(&ssfromqc,&ch,1) != 1) { cleandied(); return; }
-  if (buffer_putflush(&sstoqc,fn.s,fn.len) == -1) { cleandied(); return; }
-  if (buffer_get(&ssfromqc,&ch,1) != 1) { cleandied(); return; }
+  if (buffer_putflush(&btoqc,fn.s,fn.len) == -1) { cleandied(); return; }
+  if (buffer_get(&bfromqc,&ch,1) != 1) { cleandied(); return; }
   if (ch != '+')
-    log3("warning: qmail-clean unable to clean up ",fn.s,"\n");
+    qslog(B("warning: qmail-clean unable to clean up ",fn.s,"\n"));
 }
 
 
@@ -398,65 +382,58 @@ prioq pqchan[CHANNELS] = { {0}, {0} };
 /* pqchan 1: -todo +info ?local +remote */
 prioq pqfail = {0}; /* stat() failure; has to be pqadded again */
 
-void pqadd(id)
-unsigned long id;
-{
- struct prioq_elt pe;
- struct prioq_elt pechan[CHANNELS];
- int flagchan[CHANNELS];
- struct stat st;
- int c;
+void pqadd(unsigned long id) {
+  struct prioq_elt pe;
+  struct prioq_elt pechan[CHANNELS];
+  int flagchan[CHANNELS];
+  struct stat st;
+  int c;
 
 #define CHECKSTAT if (errno != error_noent) goto fail;
 
- fnmake_info(id);
- if (stat(fn.s,&st) == -1)
-  {
-   CHECKSTAT
-   return; /* someone yanking our chain */
+  fnmake_info(id);
+  if (stat(fn.s,&st) == -1) {
+    CHECKSTAT
+    return; /* someone yanking our chain */
   }
 
- fnmake_todo(id);
- if (stat(fn.s,&st) != -1) return; /* look, ma, dad crashed writing info! */
- CHECKSTAT
+  fnmake_todo(id);
+  if (stat(fn.s,&st) != -1) return; /* look, ma, dad crashed writing info! */
+  CHECKSTAT
 
- for (c = 0;c < CHANNELS;++c)
-  {
-   fnmake_chanaddr(id,c);
-   if (stat(fn.s,&st) == -1) { flagchan[c] = 0; CHECKSTAT }
-   else { flagchan[c] = 1; pechan[c].id = id; pechan[c].dt = st.st_mtime; }
+  for (c = 0;c < CHANNELS;++c) {
+    fnmake_chanaddr(id,c);
+    if (stat(fn.s,&st) == -1) { flagchan[c] = 0; CHECKSTAT }
+    else { flagchan[c] = 1; pechan[c].id = id; pechan[c].dt = st.st_mtime; }
   }
 
- for (c = 0;c < CHANNELS;++c)
-   if (flagchan[c])
-     while (!prioq_insert(&pqchan[c],&pechan[c])) nomem();
+  for (c = 0;c < CHANNELS;++c)
+    if (flagchan[c])
+      while (!prioq_insert(&pqchan[c],&pechan[c])) nomem();
 
- for (c = 0;c < CHANNELS;++c) if (flagchan[c]) break;
- if (c == CHANNELS)
-  {
-   pe.id = id; pe.dt = now();
-   while (!prioq_insert(&pqdone,&pe)) nomem();
+  for (c = 0;c < CHANNELS;++c) if (flagchan[c]) break;
+  if (c == CHANNELS) {
+    pe.id = id; pe.dt = now();
+    while (!prioq_insert(&pqdone,&pe)) nomem();
   }
 
- return;
+  return;
 
- fail:
- log3("warning: unable to stat ",fn.s,"; will try again later\n");
- pe.id = id; pe.dt = now() + SLEEP_SYSFAIL;
- while (!prioq_insert(&pqfail,&pe)) nomem();
+  fail:
+  qslog(B("warning: unable to stat ",fn.s,"; will try again later\n"));
+  pe.id = id; pe.dt = now() + SLEEP_SYSFAIL;
+  while (!prioq_insert(&pqfail,&pe)) nomem();
 }
 
-void pqstart()
-{
- readsubdir rs;
- int x;
- unsigned long id;
+void pqstart() {
+  readsubdir rs;
+  int x;
+  unsigned long id;
 
- readsubdir_init(&rs,"info",pausedir);
+  readsubdir_init(&rs,"info",pausedir);
 
- while ((x = readsubdir_next(&rs,&id)))
-   if (x > 0)
-     pqadd(id);
+  while ((x = readsubdir_next(&rs,&id)))
+    if (x > 0) pqadd(id);
 }
 
 void pqfinish()
@@ -472,7 +449,7 @@ void pqfinish()
      fnmake_chanaddr(pe.id,c);
      ut[0] = ut[1] = pe.dt;
      if (utime(fn.s, (const struct utimbuf *) &ut) == -1)
-       log3("warning: unable to utime ",fn.s,"; message will be retried too soon\n");
+       qslog(B("warning: unable to utime ",fn.s,"; message will be retried too soon\n"));
     }
 }
 
@@ -554,7 +531,7 @@ int j;
    fnmake_chanaddr(jo[j].id,jo[j].channel);
    if (unlink(fn.s) == -1)
     {
-     log3("warning: unable to unlink ",fn.s,"; will try again later\n");
+     qslog(B("warning: unable to unlink ",fn.s,"; will try again later\n"));
      pe.dt = now() + SLEEP_SYSFAIL;
     }
    else
@@ -565,10 +542,10 @@ int j;
        fnmake_chanaddr(jo[j].id,c);
        if (stat(fn.s,&st) == 0) return; /* more channels going */
        if (errno != error_noent)
-    {
-         log3("warning: unable to stat ",fn.s,"\n");
-     break; /* this is the only reason for HOPEFULLY */
-    }
+	{
+         qslog(B("warning: unable to stat ",fn.s,"\n"));
+	 break; /* this is the only reason for HOPEFULLY */
+	}
       }
      pe.dt = now();
      while (!prioq_insert(&pqdone,&pe)) nomem();
@@ -634,12 +611,11 @@ char *report;
        bouncetext.s[pos] = '/';
  while (!stralloc_cats(&bouncetext,"\n")) nomem();
  fnmake2_bounce(id);
- for (;;)
-  {
-   fd = open_append(fn2.s);
-   if (fd != -1) break;
-   log1("alert: unable to append to bounce message; HELP! sleeping...\n");
-   sleep(10);
+  for (;;) {
+    fd = open_append(fn2.s);
+    if (fd != -1) break;
+    qslog("alert: unable to append to bounce message; HELP! sleeping...\n");
+    sleep(10);
   }
  pos = 0;
  while (pos < bouncetext.len)
@@ -647,7 +623,7 @@ char *report;
    w = write(fd,bouncetext.s + pos,bouncetext.len - pos);
    if (w <= 0)
     {
-     log1("alert: unable to append to bounce message; HELP! sleeping...\n");
+     qslog("alert: unable to append to bounce message; HELP! sleeping...\n");
      sleep(10);
     }
    else
@@ -656,16 +632,14 @@ char *report;
  close(fd);
 }
 
-int injectbounce(unsigned long id)
-{
+int injectbounce(unsigned long id) {
   struct qmail qqt;
   struct stat st;
   char *bouncesender;
   char *bouncerecip;
   int r;
   int fd;
-//  substdio ssread;
-  buffer ssread;
+  buffer bread;
   char buf[128];
   char inbuf[128];
   static stralloc sender = {0};
@@ -673,7 +647,7 @@ int injectbounce(unsigned long id)
   datetime_sec birth;
   unsigned long qp;
 
- if (!getinfo(&sender,&birth,id)) return 0; /* XXX: print warning */
+  if (!getinfo(&sender,&birth,id)) return 0; /* XXX: print warning */
 
  /* owner-@host-@[] -> owner-@host */
  if (sender.len >= 5)
@@ -689,15 +663,15 @@ int injectbounce(unsigned long id)
   {
    if (errno == error_noent)
      return 1;
-   log3("warning: unable to stat ",fn2.s,"\n");
+   qslog(B("warning: unable to stat ",fn2.s,"\n"));
    return 0;
   }
  if (str_equal(sender.s,"#@[]"))
-   log3("triple bounce: discarding ",fn2.s,"\n");
+   qslog(B("triple bounce: discarding ",fn2.s,"\n"));
  else
   {
    if (qmail_open(&qqt) == -1)
-    { log1("warning: unable to start qmail-queue, will try later\n"); return 0; }
+     { qslog("warning: unable to start qmail-queue, will try later\n"); return 0; }
    qp = qmail_qp(&qqt);
 
    if (*sender.s) { bouncesender = ""; bouncerecip = sender.s; }
@@ -732,10 +706,8 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
      qmail_fail(&qqt);
    else
     {
-//     substdio_fdbuf(&ssread,read,fd,inbuf,sizeof(inbuf));
-     buffer_init(&ssread,read,fd,inbuf,sizeof(inbuf));
-//     while ((r = substdio_get(&ssread,buf,sizeof(buf))) > 0)
-     while ((r = buffer_get(&ssread,buf,sizeof(buf))) > 0)
+     buffer_init(&bread,read,fd,inbuf,sizeof(inbuf));
+     while ((r = buffer_get(&bread,buf,sizeof(buf))) > 0)
        qmail_put(&qqt,buf,r);
      close(fd);
      if (r == -1)
@@ -753,10 +725,8 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
      qmail_fail(&qqt);
    else
     {
-//     substdio_fdbuf(&ssread,read,fd,inbuf,sizeof(inbuf));
-     buffer_init(&ssread,read,fd,inbuf,sizeof(inbuf));
-//     while ((r = substdio_get(&ssread,buf,sizeof(buf))) > 0)
-     while ((r = buffer_get(&ssread,buf,sizeof(buf))) > 0)
+     buffer_init(&bread,read,fd,inbuf,sizeof(inbuf));
+     while ((r = buffer_get(&bread,buf,sizeof(buf))) > 0)
        qmail_put(&qqt,buf,r);
      close(fd);
      if (r == -1)
@@ -766,16 +736,18 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
    qmail_from(&qqt,bouncesender);
    qmail_to(&qqt,bouncerecip);
    if (*qmail_close(&qqt))
-    { log1("warning: trouble injecting bounce message, will try later\n"); return 0; }
+    { qslog("warning: trouble injecting bounce message, will try later\n"); return 0; }
 
-   strnum2[fmt_ulong(strnum2,id)] = 0;
-   o_log2("bounce msg ",strnum2);
-   strnum2[fmt_ulong(strnum2,qp)] = 0;
-   log3(" qp ",strnum2,"\n");
+//   strnum2[fmt_ulong(strnum2,id)] = 0;
+//   o_log2("bounce msg ",strnum2);
+//   qslog(B("bounce msg ",fmtnum(id)));
+//   strnum2[fmt_ulong(strnum2,qp)] = 0;
+//   log3(" qp ",strnum2,"\n");
+   qslog(B("bounce msg ",fmtnum(id), " qp ",fmtnum(qp)));
   }
  if (unlink(fn2.s) == -1)
   {
-   log3("warning: unable to unlink ",fn2.s,"\n");
+   qslog(B("warning: unable to unlink ",fn2.s,"\n"));
    return 0;
   }
  return 1;
@@ -805,15 +777,17 @@ void del_status()
 {
   int c;
 
-  log1("status:");
+  qslog("status:");
   for (c = 0;c < CHANNELS;++c) {
-    strnum2[fmt_ulong(strnum2,(unsigned long) concurrencyused[c])] = 0;
-    strnum3[fmt_ulong(strnum3,(unsigned long) concurrency[c])] = 0;
-    o_log2(chanstatusmsg[c],strnum2);
-    o_log2("/",strnum3);
+//    strnum2[fmt_ulong(strnum2,(unsigned long) concurrencyused[c])] = 0;
+//    strnum3[fmt_ulong(strnum3,(unsigned long) concurrency[c])] = 0;
+//    o_log2(chanstatusmsg[c],strnum2);
+    qslog(B(chanstatusmsg[c],fmtnum((unsigned long) concurrencyused[c])));
+//    o_log2("/",strnum3);
+    qslog(B("/",fmtnum((unsigned long) concurrency[c])));
   }
-  if (flagexitasap) log1(" exitasap");
-  log1("\n");
+  if (flagexitasap) qslog(" exitasap");
+  qslog("\n");
 }
 
 void del_init()
@@ -842,76 +816,71 @@ int del_canexit()
  return 1;
 }
 
-int del_avail(c)
-int c;
-{
+int del_avail(int c) {
   return flagspawnalive[c] && comm_canwrite(c) && (concurrencyused[c] < concurrency[c]);
 }
 
-void del_start(j,mpos,recip)
-int j;
-seek_pos mpos;
-char *recip;
-{
- int i;
- int c;
+/* begin delivery */
+void del_start(int j,seek_pos mpos,char *recip) {
+  int i;
+  int c;
 
- c = jo[j].channel;
- if (!flagspawnalive[c]) return;
- if (!comm_canwrite(c)) return;
+  c = jo[j].channel;
+  if (!flagspawnalive[c]) return;
+  if (!comm_canwrite(c)) return;
 
- for (i = 0;i < concurrency[c];++i) if (!d[c][i].used) break;
- if (i == concurrency[c]) return;
+  for (i = 0;i < concurrency[c];++i) if (!d[c][i].used) break;
+  if (i == concurrency[c]) return;
 
- if (!stralloc_copys(&d[c][i].recip,recip)) { nomem(); return; }
- if (!stralloc_0(&d[c][i].recip)) { nomem(); return; }
- d[c][i].j = j; ++jo[j].refs;
- d[c][i].delid = masterdelid++;
- d[c][i].mpos = mpos;
- d[c][i].used = 1; ++concurrencyused[c];
+  if (!stralloc_copys(&d[c][i].recip,recip)) { nomem(); return; }
+  if (!stralloc_0(&d[c][i].recip)) { nomem(); return; }
+  d[c][i].j = j; ++jo[j].refs;
+  d[c][i].delid = masterdelid++;
+  d[c][i].mpos = mpos;
+  d[c][i].used = 1; ++concurrencyused[c];
 
- comm_write(c,i,jo[j].id,jo[j].sender.s,recip);
+  comm_write(c,i,jo[j].id,jo[j].sender.s,recip);
 
+/*
  strnum2[fmt_ulong(strnum2,d[c][i].delid)] = 0;
  strnum3[fmt_ulong(strnum3,jo[j].id)] = 0;
- o_log2("starting delivery ",strnum2);
+ o_log2("111starting delivery ",strnum2);
  log3(": msg ",strnum3,tochan[c]);
  logsafe(recip);
  log1("\n");
- del_status();
+*/
+  qslog(B("starting delivery ",fmtnum(d[c][i].delid),": msg ",fmtnum(jo[j].id),tochan[c],recip,"\n"));
+  del_status();
 }
 
-void markdone(c,id,pos)
-int c;
-unsigned long id;
-seek_pos pos;
-{
- struct stat st;
- int fd;
- fnmake_chanaddr(id,c);
- for (;;)
-  {
-   fd = open_write(fn.s);
-   if (fd == -1) break;
-   if (fstat(fd,&st) == -1) { close(fd); break; }
-   if (seek_set(fd,pos) == -1) { close(fd); break; }
-   if (write(fd,"D",1) != 1) { close(fd); break; }
+void markdone(int c, unsigned long id, seek_pos pos) {
+  struct stat st;
+  int fd;
+
+  fnmake_chanaddr(id,c);
+  for (;;) {
+    fd = open_write(fn.s);
+    if (fd == -1) break;
+    if (fstat(fd,&st) == -1) { close(fd); break; }
+    if (seek_set(fd,pos) == -1) { close(fd); break; }
+    if (write(fd,"D",1) != 1) { close(fd); break; }
    /* further errors -> double delivery without us knowing about it, oh well */
-   close(fd);
-   return;
+    close(fd);
+    return;
   }
- log3("warning: trouble marking ",fn.s,"; message will be delivered twice!\n");
+// log3("warning: trouble marking ",fn.s,"; message will be delivered twice!\n");
+  qslog(B("warning: trouble marking ",fn.s,"; message will be delivered twice!\n"));
 }
 
-void del_dochan(int c)
-{
- int r;
- char ch;
- int i;
- int delnum;
- r = read(chanfdin[c],delbuf,sizeof(delbuf));
- if (r == -1) return;
- if (r == 0) { spawndied(c); return; }
+void del_dochan(int c) {
+  int r;
+  char ch;
+  int i;
+  int delnum;
+
+  r = read(chanfdin[c],delbuf,sizeof(delbuf));
+  if (r == -1) return;
+  if (r == 0) { spawndied(c); return; }
  for (i = 0;i < r;++i)
   {
    ch = delbuf[i];
@@ -924,43 +893,43 @@ void del_dochan(int c)
     {
      delnum = (unsigned int) (unsigned char) dline[c].s[0];
      if ((delnum < 0) || (delnum >= concurrency[c]) || !d[c][delnum].used)
-       log1("warning: internal error: delivery report out of range\n");
+       qslog("warning: internal error: delivery report out of range\n");
      else
       {
        strnum3[fmt_ulong(strnum3,d[c][delnum].delid)] = 0;
        if (dline[c].s[1] == 'Z')
-     if (jo[d[c][delnum].j].flagdying)
-      {
-       dline[c].s[1] = 'D';
-       --dline[c].len;
-       while (!stralloc_cats(&dline[c],"I'm not going to try again; this message has been in the queue too long.\n")) nomem();
-       while (!stralloc_0(&dline[c])) nomem();
-      }
-       switch(dline[c].s[1])
-	{
+	 if (jo[d[c][delnum].j].flagdying)
+	  {
+	   dline[c].s[1] = 'D';
+	   --dline[c].len;
+	   while (!stralloc_cats(&dline[c],"I'm not going to try again; this message has been in the queue too long.\n")) nomem();
+	   while (!stralloc_0(&dline[c])) nomem();
+	  }
+       switch(dline[c].s[1]) 
+    {
 	 case 'K':
-	   log3("delivery ",strnum3,": success: ");
+	   qslog(B("delivery ",strnum3,": success: "));
 	   logsafe(dline[c].s + 2);
-	   log1("\n");
+	   qslog("\n");
 	   markdone(c,jo[d[c][delnum].j].id,d[c][delnum].mpos);
 	   --jo[d[c][delnum].j].numtodo;
 	   break;
 	 case 'Z':
-	   log3("delivery ",strnum3,": deferral: ");
+	   qslog(B("delivery ",strnum3,": deferral: "));
 	   logsafe(dline[c].s + 2);
-	   log1("\n");
+	   qslog("\n");
 	   break;
 	 case 'D':
-	   log3("delivery ",strnum3,": failure: ");
+	   qslog(B("delivery ",strnum3,": failure: "));
 	   logsafe(dline[c].s + 2);
-	   log1("\n");
+	   qslog("\n");
 	   addbounce(jo[d[c][delnum].j].id,d[c][delnum].recip.s,dline[c].s + 2);
 	   markdone(c,jo[d[c][delnum].j].id,d[c][delnum].mpos);
-       --jo[d[c][delnum].j].numtodo;
-       break;
-     default:
-       log3("delivery ",strnum3,": report mangled, will defer\n");
-    }
+	   --jo[d[c][delnum].j].numtodo;
+	   break;
+	 default:
+	   qslog(B("delivery ",strnum3,": report mangled, will defer\n"));
+	}
        job_close(d[c][delnum].j);
        d[c][delnum].used = 0; --concurrencyused[c];
        del_status();
@@ -1004,15 +973,14 @@ struct
   int fd; /* defined if id; reading from {local,remote} */
   seek_pos mpos; /* defined if id; mark position */
 //  substdio ss;
-  buffer ss;
+  buffer b;
   char buf[128];
 }
 pass[CHANNELS];
 
-void pass_init()
-{
- int c;
- for (c = 0;c < CHANNELS;++c) pass[c].id = 0;
+void pass_init() {
+  int c;
+  for (c = 0;c < CHANNELS;++c) pass[c].id = 0;
 }
 
 void pass_selprep(wakeup)
@@ -1091,8 +1059,7 @@ int c;
    if (pass[c].fd == -1) goto trouble;
    if (!getinfo(&line,&birth,pe.id)) { close(pass[c].fd); goto trouble; }
    pass[c].id = pe.id;
-//   substdio_fdbuf(&pass[c].ss,read,pass[c].fd,pass[c].buf,sizeof(pass[c].buf));
-   buffer_init(&pass[c].ss,read,pass[c].fd,pass[c].buf,sizeof(pass[c].buf));
+   buffer_init(&pass[c].b,read,pass[c].fd,pass[c].buf,sizeof(pass[c].buf));
    pass[c].j = job_open(pe.id,c);
    jo[pass[c].j].retry = nextretry(birth,c);
    jo[pass[c].j].flagdying = (recent > birth + lifetime);
@@ -1101,10 +1068,10 @@ int c;
 
  if (!del_avail(c)) return;
 
- if (getln(&pass[c].ss,&line,&match,'\0') == -1)
+ if (getln(&pass[c].b,&line,&match,'\0') == -1)
   {
    fnmake_chanaddr(pass[c].id,c);
-   log3("warning: trouble reading ",fn.s,"; will try again later\n");
+   qslog(B("warning: trouble reading ",fn.s,"; will try again later\n"));
    close(pass[c].fd);
    job_close(pass[c].j);
    pass[c].id = 0;
@@ -1128,18 +1095,18 @@ int c;
      break;
    default:
      fnmake_chanaddr(pass[c].id,c);
-     log3("warning: unknown record type in ",fn.s,"!\n");
+     qslog(B("warning: unknown record type in ",fn.s,"!\n"));
      close(pass[c].fd);
      job_close(pass[c].j);
      pass[c].id = 0;
      return;
   }
 
- pass[c].mpos += line.len;
- return;
+  pass[c].mpos += line.len;
+  return;
 
- trouble:
- log3("warning: trouble opening ",fn.s,"; will try again later\n");
+  trouble:
+  qslog(B("warning: trouble opening ",fn.s,"; will try again later\n"));
  pe.dt = recent + SLEEP_SYSFAIL;
  while (!prioq_insert(&pqchan[c],&pe)) nomem();
 }
@@ -1158,7 +1125,7 @@ unsigned long id;
    if (stat(fn.s,&st) == 0) return; /* false alarm; consequence of HOPEFULLY */
    if (errno != error_noent)
     {
-     log3("warning: unable to stat ",fn.s,"; will try again later\n");
+     qslog(B("warning: unable to stat ",fn.s,"; will try again later\n"));
      goto fail;
     }
   }
@@ -1167,15 +1134,15 @@ unsigned long id;
  if (stat(fn.s,&st) == 0) return;
  if (errno != error_noent)
   {
-   log3("warning: unable to stat ",fn.s,"; will try again later\n");
+   qslog(B("warning: unable to stat ",fn.s,"; will try again later\n"));
    goto fail;
   }
- 
+
  fnmake_info(id);
  if (stat(fn.s,&st) == -1)
   {
    if (errno == error_noent) return;
-   log3("warning: unable to stat ",fn.s,"; will try again later\n");
+   qslog(B("warning: unable to stat ",fn.s,"; will try again later\n"));
    goto fail;
   }
  
@@ -1183,31 +1150,29 @@ unsigned long id;
  if (!injectbounce(id))
    goto fail; /* injectbounce() produced error message */
 
- strnum3[fmt_ulong(strnum3,id)] = 0;
- log3("end msg ",strnum3,"\n");
+// strnum3[fmt_ulong(strnum3,id)] = 0;
+// log3("end msg ",strnum3,"\n");
+  qslog(B("end msg ",fmtnum(id),"\n"));
 
- /* -todo +info -local -remote -bounce */
- fnmake_info(id);
- if (unlink(fn.s) == -1)
-  {
-   log3("warning: unable to unlink ",fn.s,"; will try again later\n");
-   goto fail;
+  /* -todo +info -local -remote -bounce */
+  fnmake_info(id);
+  if (unlink(fn.s) == -1) {
+    qslog(B("warning: unable to unlink ",fn.s,"; will try again later\n"));
+    goto fail;
   }
 
   /* -todo -info -local -remote -bounce; we can relax */
   fnmake_foop(id);
-// if (substdio_putflush(&sstoqc,fn.s,fn.len) == -1) { cleandied(); return; }
-  if (buffer_putflush(&sstoqc,fn.s,fn.len) == -1) { cleandied(); return; }
-//  if (substdio_get(&ssfromqc,&ch,1) != 1) { cleandied(); return; }
-  if (buffer_get(&ssfromqc,&ch,1) != 1) { cleandied(); return; }
+  if (buffer_putflush(&btoqc,fn.s,fn.len) == -1) { cleandied(); return; }
+  if (buffer_get(&bfromqc,&ch,1) != 1) { cleandied(); return; }
   if (ch != '+')
-    log3("warning: qmail-clean unable to clean up ",fn.s,"\n");
+    qslog(B("warning: qmail-clean unable to clean up ",fn.s,"\n"));
 
- return;
+  return;
 
- fail:
- pe.id = id; pe.dt = now() + SLEEP_SYSFAIL;
- while (!prioq_insert(&pqdone,&pe)) nomem();
+  fail:
+  pe.id = id; pe.dt = now() + SLEEP_SYSFAIL;
+  while (!prioq_insert(&pqdone,&pe)) nomem();
 }
 
 void pass_do()
@@ -1234,42 +1199,32 @@ void pass_do()
 /* this file is too long ---------------------------------------------- TODO */
 
 datetime_sec nexttodorun;
-int flagtododir = 0; /* if 0, have to readsubdir_init again */
+int flagtododir = 0;    /* if 0, have to readsubdir_init again */
 readsubdir todosubdir;
 stralloc todoline = {0};
-//char todobuf[SUBSTDIO_INSIZE];
 char todobuf[BUFFER_INSIZE];
 char todobufinfo[512];
 char todobufchan[CHANNELS][1024];
 
-void todo_init()
-{
- flagtododir = 0;
- nexttodorun = now();
- trigger_set();
+void todo_init() {
+  flagtododir = 0;
+  nexttodorun = now();
+  trigger_set();
 }
 
-void todo_selprep(nfds,rfds,wakeup)
-int *nfds;
-fd_set *rfds;
-datetime_sec *wakeup;
-{
- if (flagexitasap) return;
- trigger_selprep(nfds,rfds);
- if (flagtododir) *wakeup = 0;
- if (*wakeup > nexttodorun) *wakeup = nexttodorun;
+void todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup) {
+  if (flagexitasap) return;
+  trigger_selprep(nfds,rfds);
+  if (flagtododir) *wakeup = 0;
+  if (*wakeup > nexttodorun) *wakeup = nexttodorun;
 }
 
-void todo_do(fd_set *rfds)
-{
+void todo_do(fd_set *rfds) {
   struct stat st;
-// substdio ss;
-  buffer ss;
+  buffer b;
   int fd;
-//  substdio ssinfo; int fdinfo;
-//  substdio sschan[CHANNELS];
-  buffer ssinfo; int fdinfo;
-  buffer sschan[CHANNELS];
+  buffer binfo; int fdinfo;
+  buffer bchan[CHANNELS];
   int fdchan[CHANNELS];
   int flagchan[CHANNELS];
   struct prioq_elt pe;
@@ -1280,26 +1235,25 @@ void todo_do(fd_set *rfds)
   int c;
   unsigned long uid;
   unsigned long pid;
+  char strnum[FMT_ULONG];
 
- fd = -1;
- fdinfo = -1;
- for (c = 0;c < CHANNELS;++c) fdchan[c] = -1;
+  fd = -1;
+  fdinfo = -1;
+  for (c = 0;c < CHANNELS;++c) fdchan[c] = -1;
 
- if (flagexitasap) return;
+  if (flagexitasap) return;
 
- if (!flagtododir)
-  {
-   if (!trigger_pulled(rfds))
-     if (recent < nexttodorun)
-       return;
-   trigger_set();
-   readsubdir_init(&todosubdir, "todo", pausedir);
-   flagtododir = 1;
-   nexttodorun = recent + SLEEP_TODO;
+  if (!flagtododir) {
+    if (!trigger_pulled(rfds))
+      if (recent < nexttodorun)
+        return;
+    trigger_set();
+    readsubdir_init(&todosubdir, "todo", pausedir);
+    flagtododir = 1;
+    nexttodorun = recent + SLEEP_TODO;
   }
 
- switch(readsubdir_next(&todosubdir, &id))
-  {
+  switch(readsubdir_next(&todosubdir, &id)) {
     case 1:
       break;
     case 0:
@@ -1308,331 +1262,306 @@ void todo_do(fd_set *rfds)
       return;
   }
 
- fnmake_todo(id);
+  fnmake_todo(id);
 
- fd = open_read(fn.s);
- if (fd == -1) { log3("warning: unable to open ",fn.s,"\n"); return; }
+  fd = open_read(fn.s);
+  if (fd == -1) { qslog(B("warning: unable to open ",fn.s,"\n")); return; }
 
- fnmake_mess(id);
- /* just for the statistics */
- if (stat(fn.s,&st) == -1)
-  { log3("warning: unable to stat ",fn.s,"\n"); goto fail; }
+  fnmake_mess(id);
+  /* just for the statistics */
+  if (stat(fn.s,&st) == -1)
+    { qslog(B("warning: unable to stat ",fn.s,"\n")); goto fail; }
 
- for (c = 0;c < CHANNELS;++c)
+  for (c = 0;c < CHANNELS;++c)
   {
-   fnmake_chanaddr(id,c);
-   if (unlink(fn.s) == -1) if (errno != error_noent)
-    { log3("warning: unable to unlink ",fn.s,"\n"); goto fail; }
+    fnmake_chanaddr(id,c);
+    if (unlink(fn.s) == -1) if (errno != error_noent)
+      { qslog(B("warning: unable to unlink ",fn.s,"\n")); goto fail; }
   }
-
- fnmake_info(id);
- if (unlink(fn.s) == -1) if (errno != error_noent)
-  { log3("warning: unable to unlink ",fn.s,"\n"); goto fail; }
-
- fdinfo = open_excl(fn.s);
- if (fdinfo == -1)
-  { log3("warning: unable to create ",fn.s,"\n"); goto fail; }
-
- strnum3[fmt_ulong(strnum3,id)] = 0;
- log3("new msg ",strnum3,"\n");
-
- for (c = 0;c < CHANNELS;++c) flagchan[c] = 0;
-
-// substdio_fdbuf(&ss,read,fd,todobuf,sizeof(todobuf));
-// substdio_fdbuf(&ssinfo,write,fdinfo,todobufinfo,sizeof(todobufinfo));
-  buffer_init(&ss,read,fd,todobuf,sizeof(todobuf));
-  buffer_init(&ssinfo,write,fdinfo,todobufinfo,sizeof(todobufinfo));
-
- uid = 0;
- pid = 0;
-
- for (;;)
-  {
-   if (getln(&ss,&todoline,&match,'\0') == -1)
-    {
-     /* perhaps we're out of memory, perhaps an I/O error */
-     fnmake_todo(id);
-     log3("warning: trouble reading ",fn.s,"\n"); goto fail;
-    }
-   if (!match) break;
-
-   switch(todoline.s[0])
-    {
-     case 'u':
-       scan_ulong(todoline.s + 1,&uid);
-       break;
-     case 'p':
-       scan_ulong(todoline.s + 1,&pid);
-       break;
-     case 'F':
-//       if (substdio_putflush(&ssinfo,todoline.s,todoline.len) == -1)
-       if (buffer_putflush(&ssinfo,todoline.s,todoline.len) == -1)
-	{
-	 fnmake_info(id);
-         log3("warning: trouble writing to ",fn.s,"\n"); goto fail;
-	}
-       o_log2("info msg ",strnum3);
-       strnum2[fmt_ulong(strnum2,(unsigned long) st.st_size)] = 0;
-       o_log2(": bytes ",strnum2);
-       log1(" from <"); logsafe(todoline.s + 1);
-       strnum2[fmt_ulong(strnum2,pid)] = 0;
-       o_log2("> qp ",strnum2);
-       strnum2[fmt_ulong(strnum2,uid)] = 0;
-       o_log2(" uid ",strnum2);
-       log1("\n");
-       break;
-     case 'T':
-       switch(rewrite(todoline.s + 1))
-    {
-	 case 0: nomem(); goto fail;
-	 case 2: c = 1; break;
-	 default: c = 0; break;
-        }
-       if (fdchan[c] == -1)
-    {
-	 fnmake_chanaddr(id,c);
-	 fdchan[c] = open_excl(fn.s);
-	 if (fdchan[c] == -1)
-          { log3("warning: unable to create ",fn.s,"\n"); goto fail; }
-//	 substdio_fdbuf(&sschan[c]
-	 buffer_init(&sschan[c]
-	   ,write,fdchan[c],todobufchan[c],sizeof(todobufchan[c]));
-	 flagchan[c] = 1;
-	}
-//       if (substdio_bput(&sschan[c],rwline.s,rwline.len) == -1)
-       if (buffer_put(&sschan[c],rwline.s,rwline.len) == -1)
-        {
-     fnmake_chanaddr(id,c);
-         log3("warning: trouble writing to ",fn.s,"\n"); goto fail;
-        }
-       break;
-     default:
-       fnmake_todo(id);
-       log3("warning: unknown record type in ",fn.s,"\n"); goto fail;
-    }
-  }
-
- close(fd); fd = -1;
 
   fnmake_info(id);
-// if (substdio_flush(&ssinfo) == -1)
-  if (buffer_flush(&ssinfo) == -1)
-    { log3("warning: trouble writing to ",fn.s,"\n"); goto fail; }
+  if (unlink(fn.s) == -1) if (errno != error_noent)
+    { qslog(B("warning: unable to unlink ",fn.s,"\n")); goto fail; }
+
+  fdinfo = open_excl(fn.s);
+  if (fdinfo == -1)
+    { qslog(B("warning: unable to create ",fn.s,"\n")); goto fail; }
+
+  strnum[fmt_ulong(strnum,id)] = 0;  /* required below later on too */
+//log3("new msg ",strnum3,"\n");
+  qslog(B("new msg ",strnum,"\n"));
+
+  for (c = 0;c < CHANNELS;++c) flagchan[c] = 0;
+
+  buffer_init(&b,read,fd,todobuf,sizeof(todobuf));
+  buffer_init(&binfo,write,fdinfo,todobufinfo,sizeof(todobufinfo));
+
+  uid = 0;
+  pid = 0;
+
+  for (;;)
+  {
+    if (getln(&b,&todoline,&match,'\0') == -1) {
+      /* perhaps we're out of memory, perhaps an I/O error */
+      fnmake_todo(id);
+      qslog(B("warning: trouble reading ",fn.s,"\n")); goto fail;
+    }
+    if (!match) break;
+
+    switch(todoline.s[0]) {
+      case 'u':
+        scan_ulong(todoline.s + 1,&uid);
+        break;
+      case 'p':
+        scan_ulong(todoline.s + 1,&pid);
+        break;
+      case 'F':
+        if (buffer_putflush(&binfo,todoline.s,todoline.len) == -1) {
+	      fnmake_info(id);
+          qslog(B("warning: trouble writing to ",fn.s,"\n")); goto fail;
+	    }
+//       o_log2("info msg ",strnum3);
+        qslog(B("info msg ",strnum));
+//        strnum2[fmt_ulong(strnum2,(unsigned long) st.st_size)] = 0;
+//       o_log2(": bytes ",strnum2);
+        qslog(B(": bytes ",fmtnum((unsigned long) st.st_size)," from <"));
+        //log1(" from <"); 
+        logsafe(todoline.s + 1);
+//       strnum2[fmt_ulong(strnum2,pid)] = 0;
+//       o_log2("> qp ",strnum2);
+        qslog(B("> qp ",fmtnum(pid)," uid ",fmtnum(uid),"\n"));
+//       strnum2[fmt_ulong(strnum2,uid)] = 0;
+//       o_log2(" uid ",strnum2);
+//       qslog(B(" uid ",fmtnum(uid),"\n"));
+//       log1("\n");
+        break;
+      case 'T':
+        switch(rewrite(todoline.s + 1)) {
+	      case 0: nomem(); goto fail;
+	      case 2: c = 1; break;
+	      default: c = 0; break;
+        }
+        if (fdchan[c] == -1) {
+	      fnmake_chanaddr(id,c);
+	      fdchan[c] = open_excl(fn.s);
+	      if (fdchan[c] == -1)
+            { qslog(B("warning: unable to create ",fn.s,"\n")); goto fail; }
+	      buffer_init(&bchan[c],write,fdchan[c],todobufchan[c],sizeof(todobufchan[c]));
+	      flagchan[c] = 1;
+	    }
+        if (buffer_put(&bchan[c],rwline.s,rwline.len) == -1) {
+	      fnmake_chanaddr(id,c);
+          qslog(B("warning: trouble writing to ",fn.s,"\n")); goto fail;
+        }
+        break;
+      default:
+        fnmake_todo(id);
+        qslog(B("warning: unknown record type in ",fn.s,"\n")); goto fail;
+    }  /* end 'switch(todoline.s[0])' */
+  }
+
+  close(fd); fd = -1;
+
+  fnmake_info(id);
+  if (buffer_flush(&binfo) == -1)
+    { qslog(B("warning: trouble writing to ",fn.s,"\n")); goto fail; }
   if (fsync(fdinfo) == -1)
-    { log3("warning: trouble fsyncing ",fn.s,"\n"); goto fail; }
+    { qslog(B("warning: trouble fsyncing ",fn.s,"\n")); goto fail; }
   close(fdinfo); fdinfo = -1;
 
- for (c = 0;c < CHANNELS;++c)
-   if (fdchan[c] != -1)
-    {
+  for (c = 0;c < CHANNELS;++c)
+    if (fdchan[c] != -1) {
      fnmake_chanaddr(id,c);
-//     if (substdio_flush(&sschan[c]) == -1)
-     if (buffer_flush(&sschan[c]) == -1)
-      { log3("warning: trouble writing to ",fn.s,"\n"); goto fail; }
+     if (buffer_flush(&bchan[c]) == -1)
+       { qslog(B("warning: trouble writing to ",fn.s,"\n")); goto fail; }
      if (fsync(fdchan[c]) == -1)
-      { log3("warning: trouble fsyncing ",fn.s,"\n"); goto fail; }
+       { qslog(B("warning: trouble fsyncing ",fn.s,"\n")); goto fail; }
      close(fdchan[c]); fdchan[c] = -1;
     }
 
- fnmake_todo(id);
-// if (substdio_putflush(&sstoqc,fn.s,fn.len) == -1) { cleandied(); return; }
- if (buffer_putflush(&sstoqc,fn.s,fn.len) == -1) { cleandied(); return; }
-// if (substdio_get(&ssfromqc,&ch,1) != 1) { cleandied(); return; }
- if (buffer_get(&ssfromqc,&ch,1) != 1) { cleandied(); return; }
- if (ch != '+')
-  {
-   log3("warning: qmail-clean unable to clean up ",fn.s,"\n");
-   return;
+  fnmake_todo(id);
+  if (buffer_putflush(&btoqc,fn.s,fn.len) == -1) { cleandied(); return; }
+  if (buffer_get(&bfromqc,&ch,1) != 1) { cleandied(); return; }
+  if (ch != '+') {
+    qslog(B("warning: qmail-clean unable to clean up ",fn.s,"\n"));
+    return;
   }
 
- pe.id = id; pe.dt = now();
- for (c = 0;c < CHANNELS;++c)
-   if (flagchan[c])
-     while (!prioq_insert(&pqchan[c],&pe)) nomem();
+  pe.id = id; pe.dt = now();
+  for (c = 0;c < CHANNELS;++c)
+    if (flagchan[c])
+      while (!prioq_insert(&pqchan[c],&pe)) nomem();
 
- for (c = 0;c < CHANNELS;++c) if (flagchan[c]) break;
- if (c == CHANNELS)
-   while (!prioq_insert(&pqdone,&pe)) nomem();
+  for (c = 0;c < CHANNELS;++c) if (flagchan[c]) break;
+  if (c == CHANNELS)
+    while (!prioq_insert(&pqdone,&pe)) nomem();
 
- return;
+  return;
 
- fail:
- if (fd != -1) close(fd);
- if (fdinfo != -1) close(fdinfo);
- for (c = 0;c < CHANNELS;++c)
-   if (fdchan[c] != -1) close(fdchan[c]);
+  fail:
+  if (fd != -1) close(fd);
+  if (fdinfo != -1) close(fdinfo);
+  for (c = 0;c < CHANNELS;++c)
+    if (fdchan[c] != -1) close(fdchan[c]);
 }
 
 
 /* this file is too long ---------------------------------------------- MAIN */
 
-int getcontrols() { if (control_init() == -1) return 0;
- if (control_readint(&lifetime,"control/queuelifetime") == -1) return 0;
- if (control_readint((int *)&concurrency[0],"control/concurrencylocal") == -1) return 0;
- if (control_readint((int *)&concurrency[1],"control/concurrencyremote") == -1) return 0;
- if (control_rldef(&envnoathost,"control/envnoathost",1,"envnoathost") != 1) return 0;
- if (control_rldef(&bouncefrom,"control/bouncefrom",0,"MAILER-DAEMON") != 1) return 0;
- if (control_rldef(&bouncehost,"control/bouncehost",1,"bouncehost") != 1) return 0;
- if (control_rldef(&doublebouncehost,"control/doublebouncehost",1,"doublebouncehost") != 1) return 0;
- if (control_rldef(&doublebounceto,"control/doublebounceto",0,"postmaster") != 1) return 0;
- if (!stralloc_cats(&doublebounceto,"@")) return 0;
- if (!stralloc_cat(&doublebounceto,&doublebouncehost)) return 0;
- if (!stralloc_0(&doublebounceto)) return 0;
- if (control_readfile(&locals,"control/locals",1) != 1) return 0;
- if (!constmap_init(&maplocals,locals.s,locals.len,0)) return 0;
- switch(control_readfile(&percenthack,"control/percenthack",0))
-  {
-   case -1: return 0;
-   case 0: if (!constmap_init(&mappercenthack,"",0,0)) return 0; break;
-   case 1: if (!constmap_init(&mappercenthack,percenthack.s,percenthack.len,0)) return 0; break;
+int getcontrols() {
+  if (control_init() == -1) return 0;
+  if (control_readint(&lifetime,"etc/queuelifetime") == -1) return 0;
+  if (control_readint((int *)&concurrency[0],"etc/concurrencylocal") == -1) return 0;
+  if (control_readint((int *)&concurrency[1],"etc/concurrencyremote") == -1) return 0;
+  if (control_rldef(&envnoathost,"etc/envnoathost",1,"envnoathost") != 1) return 0;
+  if (control_rldef(&bouncefrom,"etc/bouncefrom",0,"MAILER-DAEMON") != 1) return 0;
+  if (control_rldef(&bouncehost,"etc/bouncehost",1,"bouncehost") != 1) return 0;
+  if (control_rldef(&doublebouncehost,"etc/doublebouncehost",1,"doublebouncehost") != 1) return 0;
+  if (control_rldef(&doublebounceto,"etc/doublebounceto",0,"postmaster") != 1) return 0;
+  if (!stralloc_cats(&doublebounceto,"@")) return 0;
+  if (!stralloc_cat(&doublebounceto,&doublebouncehost)) return 0;
+  if (!stralloc_0(&doublebounceto)) return 0;
+  if (control_readfile(&locals,"etc/locals",1) != 1) return 0;
+  if (!constmap_init(&maplocals,locals.s,locals.len,0)) return 0;
+
+  switch(control_readfile(&percenthack,"etc/percenthack",0)) {
+    case -1: return 0;
+    case 0: if (!constmap_init(&mappercenthack,"",0,0)) return 0; break;
+    case 1: if (!constmap_init(&mappercenthack,percenthack.s,percenthack.len,0)) return 0; break;
   }
- switch(control_readfile(&vdoms,"control/virtualdomains",0))
-  {
-   case -1: return 0;
-   case 0: if (!constmap_init(&mapvdoms,"",0,1)) return 0; break;
-   case 1: if (!constmap_init(&mapvdoms,vdoms.s,vdoms.len,1)) return 0; break;
+  switch(control_readfile(&vdoms,"etc/virtualdomains",0)) {
+    case -1: return 0;
+    case 0: if (!constmap_init(&mapvdoms,"",0,1)) return 0; break;
+    case 1: if (!constmap_init(&mapvdoms,vdoms.s,vdoms.len,1)) return 0; break;
   }
- return 1; }
+  return 1; }
 
 stralloc newlocals = {0};
 stralloc newvdoms = {0};
 
-void regetcontrols()
-{
- int r;
+void regetcontrols() {
+  int r;
 
- if (control_readfile(&newlocals,"control/locals",1) != 1)
-  { log1("alert: unable to reread control/locals\n"); return; }
- r = control_readfile(&newvdoms,"control/virtualdomains",0);
- if (r == -1)
-  { log1("alert: unable to reread control/virtualdomains\n"); return; }
+  if (control_readfile(&newlocals,"etc/locals",1) != 1)
+    { qslog("alert: unable to reread etc/locals\n"); return; }
+  r = control_readfile(&newvdoms,"etc/virtualdomains",0);
+  if (r == -1)
+    { qslog("alert: unable to reread etc/virtualdomains\n"); return; }
 
- constmap_free(&maplocals);
- constmap_free(&mapvdoms);
+  constmap_free(&maplocals);
+  constmap_free(&mapvdoms);
 
- while (!stralloc_copy(&locals,&newlocals)) nomem();
- while (!constmap_init(&maplocals,locals.s,locals.len,0)) nomem();
+  while (!stralloc_copy(&locals,&newlocals)) nomem();
+  while (!constmap_init(&maplocals,locals.s,locals.len,0)) nomem();
 
- if (r)
-  {
-   while (!stralloc_copy(&vdoms,&newvdoms)) nomem();
-   while (!constmap_init(&mapvdoms,vdoms.s,vdoms.len,1)) nomem();
-  }
- else
-   while (!constmap_init(&mapvdoms,"",0,1)) nomem();
-}
-
-void reread()
-{
- if (chdir(auto_qmail) == -1)
-  {
-   log1("alert: unable to reread controls: unable to switch to home directory\n");
-   return;
-  }
- regetcontrols();
- while (chdir("queue") == -1)
-  {
-   log1("alert: unable to switch back to queue directory; HELP! sleeping...\n");
-   sleep(10);
+  if (r) {
+    while (!stralloc_copy(&vdoms,&newvdoms)) nomem();
+    while (!constmap_init(&mapvdoms,vdoms.s,vdoms.len,1)) nomem();
+  } else {
+    while (!constmap_init(&mapvdoms,"",0,1)) nomem();
   }
 }
 
-int main()
-{
- int fd;
- datetime_sec wakeup;
- fd_set rfds;
- fd_set wfds;
- int nfds;
- struct timeval tv;
- int c;
+void reread() {
+  if (chdir(auto_qmail) == -1) {
+    qslog("alert: unable to reread etcs: unable to switch to home directory\n");
+    return;
+  }
+  regetcontrols();
+  while (chdir("var/queue") == -1) {
+    qslog("alert: unable to switch back to queue directory; HELP! sleeping...\n");
+    sleep(10);
+  }
+}
 
- if (chdir(auto_qmail) == -1)
-  { log1("alert: cannot start: unable to switch to home directory\n"); _exit(111); }
- if (!getcontrols())
-  { log1("alert: cannot start: unable to read controls\n"); _exit(111); }
- if (chdir("queue") == -1)
-  { log1("alert: cannot start: unable to switch to queue directory\n"); _exit(111); }
- sig_pipeignore();
- sig_termcatch(sigterm);
- sig_alarmcatch(sigalrm);
- sig_hangupcatch(sighup);
- sig_childdefault();
- umask(077);
+int main() {
+  int fd;
+  datetime_sec wakeup;
+  fd_set rfds;
+  fd_set wfds;
+  int nfds;
+  struct timeval tv;
+  int c;
 
- fd = open_write("lock/sendmutex");
- if (fd == -1)
-  { log1("alert: cannot start: unable to open mutex\n"); _exit(111); }
- if (lock_exnb(fd) == -1)
-  { log1("alert: cannot start: qmail-send is already running\n"); _exit(111); }
+  if (chdir(auto_qmail) == -1)
+    { qslog("alert: cannot start: unable to switch to home directory\n"); _exit(111); }
+  if (!getcontrols())
+    { qslog("alert: cannot start: unable to read config\n"); _exit(111); }
+  if (chdir("var/queue") == -1)
+    { qslog("alert: cannot start: unable to switch to queue directory\n"); _exit(111); }
+  sig_pipeignore();
+  sig_termcatch(sigterm);
+  sig_alarmcatch(sigalrm);
+  sig_hangupcatch(sighup);
+  sig_childdefault();
+  umask(077);
 
- numjobs = 0;
- for (c = 0;c < CHANNELS;++c)
-  {
-   char ch;
-   int u;
-   int r;
-   do
-     r = read(chanfdin[c],&ch,1);
-   while ((r == -1) && (errno == error_intr));
-   if (r < 1)
-    { log1("alert: cannot start: hath the daemon spawn no fire?\n"); _exit(111); }
-   u = (unsigned int) (unsigned char) ch;
-   if (concurrency[c] > u) concurrency[c] = u;
-   numjobs += concurrency[c];
+  fd = open_write("lock/sendmutex");
+  if (fd == -1)
+    { qslog("alert: cannot start: unable to open mutex\n"); _exit(111); }
+  if (lock_exnb(fd) == -1)
+    { qslog("alert: cannot start: qmail-send is already running\n"); _exit(111); }
+
+  numjobs = 0;
+  for (c = 0;c < CHANNELS;++c) {
+    char ch;
+    int u;
+    int r;
+    do
+      r = read(chanfdin[c],&ch,1);
+    while ((r == -1) && (errno == EINTR));
+    if (r < 1)
+      { qslog("alert: cannot start: hath the daemon spawn no fire?\n"); _exit(111); }
+    u = (unsigned int) (unsigned char) ch;
+    if (concurrency[c] > u) concurrency[c] = u;
+    numjobs += concurrency[c];
   }
 
- fnmake_init();
+  fnmake_init();
+  comm_init();
 
- comm_init();
+  pqstart();
+  job_init();
+  del_init();
+  pass_init();
+  todo_init();
+  cleanup_init();
 
- pqstart();
- job_init();
- del_init();
- pass_init();
- todo_init();
- cleanup_init();
+  while (!flagexitasap || !del_canexit()) {
+    recent = now();
 
- while (!flagexitasap || !del_canexit())
-  {
-   recent = now();
+    if (flagrunasap) { flagrunasap = 0; pqrun(); }
+    if (flagreadasap) { flagreadasap = 0; reread(); }
 
-   if (flagrunasap) { flagrunasap = 0; pqrun(); }
-   if (flagreadasap) { flagreadasap = 0; reread(); }
+    wakeup = recent + SLEEP_FOREVER;
+    FD_ZERO(&rfds);
+    FD_ZERO(&wfds);
+    nfds = 1;
 
-   wakeup = recent + SLEEP_FOREVER;
-   FD_ZERO(&rfds);
-   FD_ZERO(&wfds);
-   nfds = 1;
+    comm_selprep(&nfds,&wfds);
+    del_selprep(&nfds,&rfds);
+    pass_selprep(&wakeup);
+    todo_selprep(&nfds,&rfds,&wakeup);
+    cleanup_selprep(&wakeup);
 
-   comm_selprep(&nfds,&wfds);
-   del_selprep(&nfds,&rfds);
-   pass_selprep(&wakeup);
-   todo_selprep(&nfds,&rfds,&wakeup);
-   cleanup_selprep(&wakeup);
+    if (wakeup <= recent) tv.tv_sec = 0;
+    else tv.tv_sec = wakeup - recent + SLEEP_FUZZ;
+    tv.tv_usec = 0;
 
-   if (wakeup <= recent) tv.tv_sec = 0;
-   else tv.tv_sec = wakeup - recent + SLEEP_FUZZ;
-   tv.tv_usec = 0;
-
-   if (select(nfds,&rfds,&wfds,(fd_set *) 0,&tv) == -1)
-     if (errno == error_intr)
-       ;
-     else
-       log1("warning: trouble in select\n");
-   else
-    {
-     recent = now();
-
-     comm_do(&wfds);
-     del_do(&rfds);
-     todo_do(&rfds);
-     pass_do();
-     cleanup_do();
+    if (select(nfds,&rfds,&wfds,(fd_set *) 0,&tv) == -1) {
+      if (errno == EINTR) /* nothing ?! */ ;
+      else qslog("warning: trouble in select\n");
+    } else {
+      recent = now();
+      comm_do(&wfds);
+      del_do(&rfds);
+      todo_do(&rfds);
+      pass_do();
+      cleanup_do();
     }
   }
- pqfinish();
- log1("status: exiting\n");
- _exit(0);
- return(0);  /* never reached */
+  pqfinish();
+  qslog("status: exiting\n");
+  _exit(0);
+  return(0);  /* never reached */
 }

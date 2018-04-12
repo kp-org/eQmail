@@ -1,3 +1,8 @@
+/*
+ *  Revision 20171130, Kai Peter
+ *  - changed folder name 'control' to 'etc'
+ *  - code clean up
+*/
 #include "cdbread.h"
 #include "byte.h"
 #include "open.h"
@@ -17,19 +22,17 @@ static struct cdb c;
 
 int rcpthosts_init()
 {
-  flagrh = control_readfile(&rh,"control/rcpthosts",0);
+  flagrh = control_readfile(&rh,"etc/rcpthosts",0);
   if (flagrh != 1) return flagrh;
   if (!constmap_init(&maprh,rh.s,rh.len,0)) return flagrh = -1;
-  fdmrh = open_read("control/morercpthosts.cdb");
+  fdmrh = open_read("etc/morercpthosts.cdb");
   if (fdmrh == -1) if (errno != error_noent) return flagrh = -1;
   return 0;
 }
 
 static stralloc host = {0};
 
-int rcpthosts(buf,len)
-char *buf;
-int len;
+int rcpthosts(char *buf,int len)
 {
   int j;
 
@@ -49,13 +52,7 @@ int len;
       if (constmap(&maprh,buf + j,len - j)) return 1;
 
   if (fdmrh != -1) {
-//    uint32 dlen;
     int r;
-
-//    for (j = 0;j < len;++j)
-//      if (!j || (buf[j] == '.')) {
-//      r = cdb_seek(fdmrh,buf + j,len - j,&dlen);
-//      }
     cdb_init(&c,fdmrh);
     r = cdb_find(&c,buf,len);
     cdb_free(&c);

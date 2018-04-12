@@ -23,6 +23,7 @@ struct ip_mx {
 };
 
 GEN_ALLOC_typedef(ipalloc,struct ip_mx,ix,len,a)
+
 extern int ipalloc_readyplus();
 extern int ipalloc_append();
 

@@ -1,5 +1,6 @@
 /*
- *
+ *  Revision 20171130, Kai Peter
+ *  - changed folder name 'control' to 'etc'
 */
 #include "sig.h"
 #include "readwrite.h"		/* the original definitions */
@@ -123,7 +124,7 @@ void err_authmail() { out("503 no auth during mail transaction (#5.5.0)\r\n"); }
 int err_noauth() { out("504 auth type unimplemented (#5.5.1)\r\n"); return -1; }
 int err_authabrt() { out("501 auth exchange canceled (#5.0.0)\r\n"); return -1; }
 int err_input() { out("501 malformed auth input (#5.5.4)\r\n"); return -1; }
-void err_authfail() { out("535 authentication failed (#5.7.1)\r\n"); }
+void err_authfail(char *a, char *b) { out("535 authentication failed (#5.7.1)\r\n"); }
 void err_submission() { out("530 Authorization required (#5.7.1) \r\n"); }
 
 stralloc greeting = {0};
@@ -172,25 +173,25 @@ void setup()
   unsigned long u;
 
   if (control_init() == -1) die_control();
-  if (control_rldef(&greeting,"control/smtpgreeting",1,(char *) 0) != 1)
+  if (control_rldef(&greeting,"etc/smtpgreeting",1,(char *) 0) != 1)
     die_control();
-  liphostok = control_rldef(&liphost,"control/localiphost",1,(char *) 0);
+  liphostok = control_rldef(&liphost,"etc/localiphost",1,(char *) 0);
   if (liphostok == -1) die_control();
-  if (control_readint(&timeout,"control/timeoutsmtpd") == -1) die_control();
+  if (control_readint(&timeout,"etc/timeoutsmtpd") == -1) die_control();
   if (timeout <= 0) timeout = 1;
   if (rcpthosts_init() == -1) die_control();
   if (spp_init() == -1) die_control();
 
-  bmfok = control_readfile(&bmf,"control/badmailfrom",0);
+  bmfok = control_readfile(&bmf,"etc/badmailfrom",0);
   if (bmfok == -1) die_control();
   if (bmfok)
     if (!constmap_init(&mapbmf,bmf.s,bmf.len,0)) die_nomem();
- 
-  if (control_readint(&databytes,"control/databytes") == -1) die_control();
+
+  if (control_readint(&databytes,"etc/databytes") == -1) die_control();
   x = env_get("DATABYTES");
   if (x) { scan_ulong(x,&u); databytes = u; }
   if (!(databytes + 1)) --databytes;
- 
+
   protocol = "SMTP";
   remoteip = env_get("TCPREMOTEIP");
   if (!remoteip) remoteip = "unknown";
@@ -260,13 +261,13 @@ char *arg;
   /* could check for termination failure here, but why bother? */
   if (!stralloc_append(&addr,"")) die_nomem();
 
-  /* if address is in "control/localiphost" */
+  /* if address is in "localiphost" */
   if (liphostok) {
     i = byte_rchr(addr.s,addr.len,'@');
     if (i < addr.len) /* if not, partner should go read rfc 821 */
       if (addr.s[i + 1] == '[')
 //        if (byte_rchr(addr.s + 1 + 2,addr.len - 1 - 2,":")) {  /* @Kai ??? (obsolete?) @[IPv6::] */
-          if (!addr.s[i + 1 + ip_scanbracket(addr.s + i + 1,&ip)])
+          if (!addr.s[i + 1 + ip_scanbracket(addr.s + i + 1,(char *)&ip)])
             if ( (ipme_is4(&ip)) || (ipme_is6(&ip)) ) {
               addr.len = i + 1;
               if (!stralloc_cat(&addr,&liphost)) die_nomem();
@@ -445,7 +446,7 @@ void smtp_ehlo(arg) char *arg;
   if(!spp_helo(arg)) return;
   smtp_greet("250-"); 
 #ifdef TLS
-  if (!ssl && (stat("control/servercert.pem",&st) == 0))
+  if (!ssl && (stat("etc/servercert.pem",&st) == 0))
     out("\r\n250-STARTTLS");
 #endif
   size[fmt_ulong(size,(unsigned int) databytes)] = 0;
@@ -908,7 +909,7 @@ const char *ssl_verify_err = 0;
 
 void smtp_tls(char *arg)
 {
-  if (ssl) err_unimpl();
+  if (ssl) err_unimpl("");
   else if (*arg) out("501 Syntax error (no parameters allowed) (#5.5.4)\r\n");
   else tls_init();
 }
@@ -917,7 +918,7 @@ RSA *tmp_rsa_cb(SSL *ssl, int export, int keylen)
 {
   if (!export) keylen = 2048;
   if (keylen == 2048) {
-    FILE *in = fopen("control/rsa2048.pem", "r");
+    FILE *in = fopen("etc/rsa2048.pem", "r");
     if (in) {
       RSA *rsa = PEM_read_RSAPrivateKey(in, NULL, NULL, NULL);
       fclose(in);
@@ -931,7 +932,7 @@ DH *tmp_dh_cb(SSL *ssl, int export, int keylen)
 {
   if (!export) keylen = 2048;
   if (keylen == 2048) {
-    FILE *in = fopen("control/dh2048.pem", "r");
+    FILE *in = fopen("etc/dh2048.pem", "r");
     if (in) {
       DH *dh = PEM_read_DHparams(in, NULL, NULL, NULL);
       fclose(in);
@@ -949,19 +950,19 @@ void tls_nogateway()
   /* there may be cases when relayclient is set */
   if (!ssl || relayclient) return;
   out("; no valid cert for gatewaying");
-  if (ssl_verify_err) { out(": "); out(ssl_verify_err); }
+  if (ssl_verify_err) { out(": "); out((char *)ssl_verify_err); }
 }
 void tls_out(const char *s1, const char *s2)
 {
-  out("454 TLS "); out(s1);
-  if (s2) { out(": "); out(s2); }
+  out("454 TLS "); out((char *)s1);
+  if (s2) { out(": "); out((char *)s2); }
   out(" (#4.3.0)\r\n"); flush();
 }
 void tls_err(const char *s) { tls_out(s, ssl_error()); if (smtps) die_read(); }
 
-# define CLIENTCA "control/clientca.pem"
-# define CLIENTCRL "control/clientcrl.pem"
-# define SERVERCERT "control/servercert.pem"
+#define CLIENTCA "etc/clientca.pem"
+#define CLIENTCRL "etc/clientcrl.pem"
+#define SERVERCERT "etc/servercert.pem"
 
 int tls_verify()
 {
@@ -973,7 +974,7 @@ int tls_verify()
 
   /* request client cert to see if it can be verified by one of our CAs
    * and the associated email address matches an entry in tlsclients */
-  switch (control_readfile(&clients, "control/tlsclients", 0))
+  switch (control_readfile(&clients, "etc/tlsclients", 0))
   {
   case 1:
     if (constmap_init(&mapclients, clients.s, clients.len, 0)) {
@@ -1030,7 +1031,7 @@ int tls_verify()
       protocol = proto.s;
       relayclient = "";
       /* also inform qmail-queue */
-      if (!env_put("RELAYCLIENT=")) die_nomem();
+      if (!env_puts("RELAYCLIENT=")) die_nomem();
     }
 
     X509_free(peercert);
@@ -1093,7 +1094,7 @@ void tls_init()
 
   ciphers = env_get("TLSCIPHERS");
   if (!ciphers) {
-    if (control_readfile(&saciphers, "control/tlsserverciphers", 0) == -1)
+    if (control_readfile(&saciphers, "etc/tlsserverciphers", 0) == -1)
       { SSL_free(myssl); die_control(); }
     if (saciphers.len) { /* convert all '\0's except the last one to ':' */
       int i;

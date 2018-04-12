@@ -1,4 +1,8 @@
 
+QMAILDIR="QPRFX"
+# get it from qmail-print shouldn't give an error
+TLS=`qmail-print | grep TLS | cut -d\  -f3`
+
 # some escape sequences to format output
 OFF=$'\e[0m'   # all attributes off
 BLD=$'\e[1m'   # bold
@@ -6,28 +10,7 @@ ULN=$'\e[4m'   # underlined
 YLW=$'\e[33m'  # yellow foreground
 RED=$'\e[91m'  # light red foreground
 
-printf "\033[1m\033[4m%s\033[0m\n\n" "Compiled-in values:"
-echo "   eQmail home directory: $HOMEDIR"
-echo "user extension delimiter: '$BREAK'"
-echo "   Paternalism (decimal): $PATRN"
-echo "silent concurrency limit: $SPAWN"
-echo "queue subdirectory split: $SPLIT"
-echo
-echo "user and group id's:"
-echo "      alias user: $UIDA"
-echo "     daemon user: $UIDD"
-echo "        log user: $UIDL"
-echo "       misc user: $UIDO"
-echo "     passwd user: $UIDP"
-echo "      queue user: $UIDQ"
-echo "     remote user: $UIDR"
-echo "       send user: $UIDS"
-echo "  standard group: $GIDQ"
-echo "   process group: $GIDN"
-echo
-echo "supports TLS/SSL: $TLS"
-echo "support for IPv6: $IP6"
-echo
+QPRFX/bin/qmail-print
 
 printContent() {
   printf "\033[1m%s\033[0m" "$f:"
@@ -65,7 +48,7 @@ printContent() {
   FMT=0 ; COMMENT="" ; DEFCMNT=""
 }
 
-CONFDIR=$HOMEDIR/control
+CONFDIR=$QMAILDIR/etc
 if [ ! -d $CONFDIR ] ; then echo "error reading controls directory!" ; exit 1 ; fi
 
 FILES="me defaultdomain locals defaulthost plusdomain rcpthosts morercpthosts \
@@ -77,7 +60,7 @@ FILES="me defaultdomain locals defaulthost plusdomain rcpthosts morercpthosts \
        badmailfrom badmailto percenthack \
        smtpplugins checkpwtools \
 "
-if [ "$TLS" = "Yes" ] ; then 
+if [ "$TLS" = "Yes" ] ; then
    FILES=" $FILES servercert clientcert tlsserverciphers tlsclientciphers \
           dh2048.pem rsa2048.pem"
 fi
@@ -207,7 +190,7 @@ do
       printContent;;
     plusdomain)
       if [ ! -f "$CONFDIR/$f" ] ; then FMT="0" ; else FMT="1" ; fi
-      COMMENT="this domain name will be added to addesses w/o a domain: "
+      COMMENT="this domain name will be added to addresses w/o a domain: "
       DEFAULT="not set"
       printContent;;
     qmqpservers)

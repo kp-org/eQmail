@@ -1,12 +1,17 @@
 
-BINDIR="QMAILDIR/bin"		   # can be used in config file too
+PATH="QPREFIX:$PATH"
+PRG="QPREFIX/bin/PROGRAM"    # failsafe default
+
+DoExec() { exec "$PRG" "$@"; exit; }
 
 # silently ignore if config file doesn't exists
-if [ ! -f QMAILDIR/control/BEFORE ] ; then
-   exec "$BINDIR/PROG" $@ && exit ; fi
+[ -f QPRFX/etc/CFGFILE ] || DoExec "$@"
 
-# include the config file and try to execute the commands in it
-(. QMAILDIR/control/BEFORE 2>/dev/null) || ( \
- ErrMsg="Something went wrong with the config file!" && \
- echo "$ErrMsg" | "$BINDIR/splogger" `basename $0` && \
- exec "$BINDIR/PROG" $@)
+# get plugin from config file and try to execute it
+TMP=`head -1 QPRFX/etc/CFGFILE`
+[ -x "$TMP" ] && PRG="$TMP" || ( \
+  [ ! -z "$TMP" ] && \
+  ErrMsg="warning: ignoring invalid value '$TMP' in config file!" && \
+  echo "$ErrMsg" | splogger `basename $0` )
+
+DoExec "$@"

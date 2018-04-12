@@ -1,1 +1,1 @@
-exec QMAIL/bin/predate QMAIL/bin/sendmail ${1+"$@"}
+exec QPRFX/bin/predate QPRFX/bin/sendmail ${1+"$@"}

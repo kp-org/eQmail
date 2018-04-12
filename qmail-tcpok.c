@@ -1,38 +1,52 @@
-#include "strerr.h"
-#include "substdio.h"
+/*
+ *  Revision 20180123, Kai Peter
+ *  - removed 'auto_qmail', use 'buildins' instead
+ *  - replaced strerr by errmsg
+ *  - switched to buffer, unistd.h
+ *  - changed 'queue/' --> 'var/queue/'
+
+ NOTE: replacing strerr by errmsg and  using  stralloc_* functions to concatenate
+       the error message string seems to be weird on the first view. But I wanted
+       to show the differences against the (hard readable) '#defines' in strerr.h
+       here. It's just readability against shortness of code from my POV.
+*/
+#include <unistd.h>
+#include "buffer.h"
+#include "error.h"
 #include "lock.h"
 #include "open.h"
-#include "readwrite.h"
-#include "auto_qmail.h"
-#include "exit.h"
+#include "buildins.h"
 #include "ipalloc.h"
 #include "tcpto.h"
-#include "chdir.h"   /* temp */
 
-#define FATAL "qmail-tcpok: fatal: "
+#define WHO "qmail-tcpok"
 
 struct tcpto_buf buf[TCPTO_BUFSIZ];
-substdio ss;
+buffer b;
 
 int main()
 {
   int fd;
   int i;
 
-  if (chdir(auto_qmail) == -1)
-    strerr_die4sys(111,FATAL,"unable to chdir to ",auto_qmail,": ");
-  if (chdir("queue/lock") == -1)
-    strerr_die4sys(111,FATAL,"unable to chdir to ",auto_qmail,"/queue/lock: ");
+  if (chdir(qprfxdir) == -1) {
+    errint(errno,B("unable to chdir to ",qprfxdir,": "));
+  }
+  if (chdir("var/queue/lock") == -1) {
+	errint(errno,B("unable to chdir to ",qprfxdir,"/var/queue/lock: "));
+  }
 
   fd = open_write("tcpto");
-  if (fd == -1)
-    strerr_die4sys(111,FATAL,"unable to write ",auto_qmail,"/queue/lock/tcpto: ");
-  if (lock_ex(fd) == -1)
-    strerr_die4sys(111,FATAL,"unable to lock ",auto_qmail,"/queue/lock/tcpto: ");
-
-  substdio_fdbuf(&ss,write,fd,buf,sizeof buf);
-  for (i = 0;i < sizeof buf;++i) substdio_put(&ss,"",1);
-  if (substdio_flush(&ss) == -1)
-    strerr_die4sys(111,FATAL,"unable to clear ",auto_qmail,"/queue/lock/tcpto: ");
+  if (fd == -1) {
+	errint(errno,B("unable to write ",qprfxdir,"/var/queue/lock/tcpto: "));
+  }
+  if (lock_ex(fd) == -1) {
+	errint(errno,B("unable to lock ",qprfxdir,"/var/queue/lock/tcpto: "));
+  }
+  buffer_init(&b,write,fd,(char *)buf,sizeof buf);
+  for (i = 0;i < sizeof buf;++i) buffer_put(&b,"",1);
+  if (buffer_flush(&b) == -1) {
+	errint(errno,B("unable to clear ",qprfxdir,"/var/queue/lock/tcpto: "));
+  }
   _exit(0);
 }

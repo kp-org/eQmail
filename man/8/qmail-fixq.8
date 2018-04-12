@@ -1,0 +1,17 @@
+.TH qmail-fixq 8 "" eQmail
+.SH NAME
+qmail-fixq \- check the queue and fix possible issues of the queue
+.SH SYNOPSIS
+.B qmail-fixq \fI[ -c | -f | [ -h ]\fR
+.SH DESCRIPTION
+.B qmail-fixq
+goes through the directory structure of the queue and reads splitting and access rights.
+\fBqmail-fixq\fR has the following options:
+.TP
+\fI-c\fR check the queue and print results
+.TP
+\fI-f\fR fix issues of the queue
+.TP
+\fI-h\fR print help
+.SH "SEE ALSO"
+qmail-qstat(8)

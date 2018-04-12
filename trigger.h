@@ -4,5 +4,6 @@
 extern void trigger_set();
 extern void trigger_selprep();
 extern int trigger_pulled();
+extern void triggerpull();
 
 #endif

@@ -9,7 +9,8 @@
 #include "substdio.h"
 #include "datetime.h"
 #include "now.h"
-#include "triggerpull.h"
+//#include "triggerpull.h"
+#include "trigger.h"
 #include "auto_qmail.h"
 #include "auto_uids.h"
 #include "date822fmt.h"
@@ -160,7 +161,8 @@ int main()
   sig_blocknone();
   umask(033);
   if (chdir(auto_qmail) == -1) die(61);
-  if (chdir("queue") == -1) die(62);
+//  if (chdir("queue") == -1) die(62);
+  if (chdir("var/queue") == -1) die(62);
 
   mypid = getpid();
   uid = getuid();

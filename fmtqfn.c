@@ -1,3 +1,7 @@
+/*
+ *  Revision 20180123, Kai Peter
+ *  - prevented 'misleading-indentation' warning
+*/
 #include "fmtqfn.h"
 #include "fmt.h"
 #include "auto_split.h"
@@ -20,6 +24,6 @@ unsigned int fmt_qfn(char *s,char *dirslash,unsigned long id,int flagsplit)
    i = fmt_str(s,"/"); len += i; if (s) s += i;
   }
  i = fmt_ulong(s,id); len += i; if (s) s += i;
- if (s) *s++ = 0; ++len;
+ if (s) { *s++ = 0; } ++len;
  return len;
 }

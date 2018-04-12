@@ -1,18 +1,40 @@
-.TH qmail-qstat 8
+.TH qmail-qstat 8 "" eQmail
 .SH NAME
 qmail-qstat \- summarize status of mail queue
 .SH SYNOPSIS
-.B qmail-qstat
+.B qmail-qstat \fI[options]\fR
 .SH DESCRIPTION
-.B qmail-qstat
-gives a human-readable breakdown
-of the number of messages at various spots in the mail queue.
+\fBqmail-qstat\fR gives a human-readable breakdown of the number of messages at
+various spots in the mail queue. \fBqmail-qstat\fR can give more detailed info
+about messages in the queue and chn remove messages from the queue.
 
-.B qmail-qstat
-must be run either as
-.B root
-or with group id
-.BR qmail .
+\fBqmail-qstat\fR must be run either as \fBroot\fR or with group id \fBqmail\fR.
+.SH OPTIONS
+.TP
+-D <id>
+removes message \fIid\fR from queue
+.TP
+-d
+deletes all messages from the queue
+.TP
+-h
+shows help and exists
+.TP
+-i
+lists the \fIid\fR's of all message in the queue
+.TP
+-l
+lists all message in the queue
+.TP
+-L
+lists number of messages in the queue with local recipient
+.TP
+-m <id>
+shows the message with \fIid\fR
+.TP
+-R
+lists number of messages in the queue with remote recipient
+.TP
+Without an option \fBqmail-qstat\fR shows a summary and exists.
 .SH "SEE ALSO"
-qmail-qread(8),
-qmail-send(8)
+qmail-qread(8),qmail-send(8)

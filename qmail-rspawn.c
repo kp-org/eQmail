@@ -1,121 +1,132 @@
-#include "fd.h"
-#include "wait.h"
-#include "substdio.h"
-#include "error.h"
-#include "ipalloc.h"
-#include "tcpto.h"
-
+/*
+ *  Revision 20180123, Kai Peter
+ *  - prevented 'misleading-indentation' warning
+ *  Revision 20170515, Kai Peter
+ *  - switched to stralloc (instead of <string.h>)
+ *  Revision 20160712, Kai Peter
+ *  - switched to 'buffer'
+ *  Revision 20160608, Kai Peter
+ *  - replaced 'vfork' with 'fork'
+*/
 #include <unistd.h>
 #include <sys/stat.h>
-#include <string.h>
-char *np;	/* next program to call */
+#include "fd.h"
+#include "wait.h"
+#include "buffer.h"
+#include "errmsg.h"
+#include "ipalloc.h"
+#include "tcpto.h"
+#include "str.h"
+#include "auto_qmail.h"
 
-void initialize(argc,argv)
-int argc;
-char **argv;
-{
- tcpto_clean();
-}
+#define WHO "qmail-rspawn"
+
+void initialize(int argc,char **argv) { tcpto_clean(); }
 int truncreport = 0;
+char *np = "qmail-bfrmt";   /* next program to call */
 
-void report(ss,wstat,s,len)
-substdio *ss;
-int wstat;
-char *s;
-int len;
+void report(buffer *b,int wstat,char *s,int len)
 {
- int j;
- int k;
- int result;
- int orr;
+  int j;
+  int k;
+  int result;
+  int orr;
 
- if (wait_crashed(wstat))
-  { substdio_puts(ss,"Z");
-    substdio_puts(ss,np);
-    substdio_puts(ss," crashed.\n"); return; }
+  if (wait_crashed(wstat))
+  { buffer_puts(b,"Z");
+    buffer_puts(b,np);
+    buffer_puts(b," crashed.\n"); return; }
 
- switch(wait_exitcode(wstat))
+  switch(wait_exitcode(wstat))   /* see qmail.c */
   {
-   case 0: break;
-   case 111: substdio_puts(ss,"ZUnable to run ");
-             substdio_puts(ss,np);
-             substdio_puts(ss,".\n"); return;
-   default: substdio_puts(ss,"DUnable to run ");
-            substdio_puts(ss,np);
-            substdio_puts(ss,".\n"); return;
-  }
- if (!len)
-  { substdio_puts(ss,"Z");
-    substdio_puts(ss,np);
-    substdio_puts(ss," produced no output.\n"); return; }
+    case 0: break;
+    case 111: buffer_puts(b,"Z111_Unable to run ");
+              buffer_puts(b,np);
+              buffer_puts(b,".\n"); return;
+    case 112: buffer_puts(b,"Z112_Unable to run ");
+              buffer_puts(b,np);
+              buffer_puts(b,".\n"); return;
+// test: suppress bounces
+    case 113: buffer_puts(b,"Z113_Stopped bounces ");
+              //buffer_puts(b,np);
+              buffer_puts(b,".\n"); return;
 
- result = -1;
- j = 0;
- for (k = 0;k < len;++k)
-   if (!s[k])
+   default:   buffer_puts(b,"D000_Unable to run ");
+              buffer_puts(b,np);
+              buffer_puts(b,".\n"); return;
+  }
+  if (!len)
+  { buffer_puts(b,"Z");
+    buffer_puts(b,np);
+    buffer_puts(b," produced no output.\n"); return; }
+
+  result = -1;
+  j = 0;
+  for (k = 0;k < len;++k)
+  {
+    if (!s[k])
     {
-     if (s[j] == 'K') { result = 1; break; }
-     if (s[j] == 'Z') { result = 0; break; }
-     if (s[j] == 'D') break;
-     j = k + 1;
+      if (s[j] == 'K') { result = 1; break; }
+      if (s[j] == 'Z') { result = 0; break; }
+      if (s[j] == 'D') break;
+      j = k + 1;
     }
-
- orr = result;
- switch(s[0])
-  {
-   case 's': orr = 0; break;
-   case 'h': orr = -1;
   }
 
- switch(orr)
-  {
-   case 1: substdio_put(ss,"K",1); break;
-   case 0: substdio_put(ss,"Z",1); break;
-   case -1: substdio_put(ss,"D",1); break;
+  orr = result;
+  switch(s[0]) {
+    case 's': orr = 0; break;
+    case 'h': orr = -1;
   }
 
- for (k = 1;k < len;)
-   if (!s[k++])
+  switch(orr) {
+    case  1: buffer_put(b,"K",1); break;
+    case  0: buffer_put(b,"Z",1); break;
+    case -1: buffer_put(b,"D",1); break;
+  }
+
+  for (k = 1;k < len;)
+    if (!s[k++])
     {
-     substdio_puts(ss,s + 1);
-     if (result <= orr)
-       if (k < len)
-	 switch(s[k])
-	  {
-	   case 'Z': case 'D': case 'K':
-             substdio_puts(ss,s + k + 1);
-	  }
-     break;
+      buffer_puts(b,s + 1);
+      if (result <= orr)
+        if (k < len)
+          switch(s[k])
+          {
+            case 'Z': case 'D': case 'K':
+              buffer_puts(b,s + k + 1);
+          }
+      break;
     }
 }
 
-int spawn(fdmess,fdout,s,r,at)
-int fdmess; int fdout;
-char *s; char *r; int at;
+int spawn(int fdmess,int fdout,char *s,char *r,int at)
 {
- struct stat st;
- np = "qmail-bfrmt";
- /* act. dir is (/var/qmail/)queue/mess */
- char x[22] = "../../bin/";	/* relative path */
- strcat(x,np);	            /* combine path and np */
- if (stat(x,&st) != 0) { np = "qmail-remote"; }
+  struct stat st;
+  stralloc sa = {0};
 
- int f;
- char *(args[5]);
- args[0] = np;
- args[1] = r + at + 1;
- args[2] = s;
- args[3] = r;
- args[4] = 0;
+  if(!stralloc_copys(&sa,auto_qmail)) errsys(errno);
+  if(!stralloc_catb(&sa,"/bin/qmail-bfrmt",16)) errsys(errno); /* len: 16 + \0 */
+  if(!stralloc_0(&sa)) errsys(errno);
+  char *x = sa.s;
+  if (stat(x,&st) != 0) { np = "qmail-remote"; }
 
- if (!(f = fork()))
+  int f;
+  char *(args[5]);
+  args[0] = np;
+  args[1] = r + at + 1;
+  args[2] = s;
+  args[3] = r;
+  args[4] = 0;
+
+  if (!(f = fork()))
   {
-   if (fd_move(0,fdmess) == -1) _exit(111);
-   if (fd_move(1,fdout) == -1) _exit(111);
-   if (fd_copy(2,1) == -1) _exit(111);
-   execvp(*args,args);
-   if (error_temp(errno)) _exit(111);
-   _exit(100);
+    if (fd_move(0,fdmess) == -1) errsys(errno);
+    if (fd_move(1,fdout) == -1) errsys(errno);
+    if (fd_copy(2,1) == -1) errsys(errno);
+    execvp(*args,args);
+    if (errno) errsys(errno);
+    _exit(100);  /* TODO: check exit code */
   }
- return f;
+  return f;
 }
