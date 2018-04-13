@@ -1,14 +1,14 @@
 #ifndef QMAIL_H
 #define QMAIL_H
 
-#include "substdio.h"
+#include "buffer.h"
 
 struct qmail {
   int flagerr;
   unsigned long pid;
   int fdm;
   int fde;
-  substdio ss;
+  buffer b;
   char buf[1024];
 } ;
 

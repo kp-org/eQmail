@@ -274,15 +274,10 @@ qmail-qmqpc.o: \
 compile qmail-qmqpc.c
 	./compile qmail-qmqpc.c
 
-qmail-qmqpd: \
-load qmail-qmqpd.o received.o now.o date822fmt.o qmail.o auto_qmail.o \
-env.a substdio.a sig.a error.a wait.a fd.a str.a datetime.a fs.a
-	./load qmail-qmqpd received.o now.o date822fmt.o qmail.o \
-	auto_qmail.o env.a substdio.a sig.a error.a wait.a fd.a \
-	str.a datetime.a fs.a alloc.a
-
-qmail-qmqpd.o: compile qmail-qmqpd.c
-	./compile qmail-qmqpd.c
+qmail-qmqpd: received.o now.o date822fmt.o qmail.o auto_qmail.o
+	$(COMPILE) qmail-qmqpd.c
+	./load qmail-qmqpd received.o now.o date822fmt.o datetime.a qmail.o \
+	auto_qmail.o $(QLIBS) substdio.a
 
 qmail-qmtpd: \
 load qmail-qmtpd.o rcpthosts.o control.o constmap.o received.o \
