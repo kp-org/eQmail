@@ -276,8 +276,8 @@ compile qmail-qmqpc.c
 
 qmail-qmqpd: received.o now.o date822fmt.o qmail.o auto_qmail.o
 	$(COMPILE) qmail-qmqpd.c
-	./load qmail-qmqpd received.o now.o date822fmt.o datetime.a qmail.o \
-	auto_qmail.o $(QLIBS) substdio.a
+	$(LOADBIN) qmail-qmqpd received.o now.o date822fmt.o datetime.a qmail.o \
+	auto_qmail.o $(QLIBS)
 
 qmail-qmtpd: \
 load qmail-qmtpd.o rcpthosts.o control.o constmap.o received.o \

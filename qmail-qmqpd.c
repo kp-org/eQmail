@@ -1,26 +1,31 @@
+/*
+ *  Revision 20160713, Kai Peter
+ *  - switched to 'buffer'
+ *  Revision 20160509, Kai Peter
+ *  - changed return type of main to int
+ *  - added '<unistd.h>', 'byte.h', 'str.h'
+ */
 #include <unistd.h>
 #include "auto_qmail.h"
 #include "qmail.h"
 #include "received.h"
 #include "sig.h"
-#include "substdio.h"
-#include "exit.h"
+#include "buffer.h"
 #include "now.h"
 #include "fmt.h"
 #include "env.h"
-#include "byte.h"
 #include "str.h"
 
 void resources() { _exit(111); }
 
-int safewrite(fd,buf,len) int fd; char *buf; int len;
+ssize_t safewrite(int fd,char *buf,int len)
 {
   int r;
   r = write(fd,buf,len);
   if (r <= 0) _exit(0);
   return r;
 }
-int saferead(fd,buf,len) int fd; char *buf; int len;
+ssize_t saferead(int fd,char *buf,int len)
 {
   int r;
   r = read(fd,buf,len);
@@ -28,18 +33,17 @@ int saferead(fd,buf,len) int fd; char *buf; int len;
   return r;
 }
 
-char ssinbuf[512];
-substdio ssin = SUBSTDIO_FDBUF(saferead,0,ssinbuf,sizeof ssinbuf);
-char ssoutbuf[256];
-substdio ssout = SUBSTDIO_FDBUF(safewrite,1,ssoutbuf,sizeof ssoutbuf);
+char binbuf[512];
+buffer bin = BUFFER_INIT(saferead,0,binbuf,sizeof binbuf);
+char boutbuf[256];
+buffer bout = BUFFER_INIT(safewrite,1,boutbuf,sizeof boutbuf);
 
 unsigned long bytesleft = 100;
 
-void getbyte(ch)
-char *ch;
+void getbyte(char *ch)
 {
   if (!bytesleft--) _exit(100);
-  substdio_get(&ssin,ch,1);
+  buffer_get(&bin,ch,1);
 }
 
 unsigned long getlen()
@@ -79,7 +83,7 @@ void identify()
   local = env_get("TCPLOCALHOST");
   if (!local) local = env_get("TCPLOCALIP");
   if (!local) local = "unknown";
- 
+
   received(&qq,"QMQP",local,remoteip,remotehost,remoteinfo,(char *) 0);
 }
 
@@ -167,10 +171,10 @@ int main()
   if (!flagok)
     result = "Dsorry, I can't accept addresses like that (#5.1.3)";
 
-  substdio_put(&ssout,strnum,fmt_ulong(strnum,(unsigned long) str_len(result)));
-  substdio_puts(&ssout,":");
-  substdio_puts(&ssout,result);
-  substdio_puts(&ssout,",");
-  substdio_flush(&ssout);
+  buffer_put(&bout,strnum,fmt_ulong(strnum,(unsigned long) str_len(result)));
+  buffer_puts(&bout,":");
+  buffer_puts(&bout,result);
+  buffer_putsflush(&bout,",");
+
   _exit(0);
 }
