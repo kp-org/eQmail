@@ -15,7 +15,7 @@ QLIBS = $(LDFLAGS) -lqlibs
 DNSLIB = `head -1 resolv.lib`
 SSLLIB = `echo \`cat ssl.lib\` \`cat crypto.lib\` \`cat dl.lib\``
 
-default: conf libs obj it man-pages
+default: conf obj it man-pages
 
 bla:
 	@echo $(SSLLIB)
@@ -39,9 +39,10 @@ man-pages:
 	@cd man/ ; make
 
 libs:
+	@echo '--------------------------------------------------------------------'
 	cd qlibs ; make ; make install
 
-obj:
+obj: libs
 	$(COMPILE) commands.c
 	$(COMPILE) constmap.c
 	$(COMPILE) control.c
@@ -261,18 +262,9 @@ qmail-pw2u:
 	case.a getopt.a stralloc.a alloc.a buffer.a error.a str.a \
 	fs.a auto_usera.o auto_break.o auto_qmail.o substdio.a
 
-qmail-qmqpc: \
-load qmail-qmqpc.o slurpclose.o timeoutread.o timeoutwrite.o \
-timeoutconn.o ip.a control.o auto_qmail.o sig.a ndelay.a open.a \
-getln.a substdio.a stralloc.a alloc.a error.a str.a fs.a
-	./load qmail-qmqpc slurpclose.o timeoutread.o \
-	timeoutwrite.o timeoutconn.o ip.a control.o auto_qmail.o \
-	sig.a ndelay.a open.a getln.a substdio.a stralloc.a alloc.a \
-	error.a str.a fs.a buffer.a qlibs/qlibs.a
-
-qmail-qmqpc.o: \
-compile qmail-qmqpc.c
-	./compile qmail-qmqpc.c
+qmail-qmqpc: obj auto_qmail.o
+	$(COMPILE) qmail-qmqpc.c
+	$(LOADBIN) qmail-qmqpc control.o auto_qmail.o $(QLIBS)
 
 qmail-qmqpd: received.o now.o date822fmt.o qmail.o auto_qmail.o
 	$(COMPILE) qmail-qmqpd.c
