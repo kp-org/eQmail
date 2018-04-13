@@ -335,8 +335,8 @@ error.a str.a fs.a auto_qmail.o base64.o tls.o ssl_timeoutio.o
 #	tls.o ssl_timeoutio.o -L/usr/local/ssl/lib -lssl -lcrypto
 
 qmail-rspawn: spawn.o tcpto_clean.o now.o
-	./compile qmail-rspawn.c
-	./load qmail-rspawn spawn.o tcpto_clean.o now.o $(QLIBS) substdio.a \
+	$(COMPILE) qmail-rspawn.c
+	$(LOADBIN) qmail-rspawn spawn.o tcpto_clean.o now.o $(QLIBS) \
 	auto_qmail.o auto_uids.o auto_spawn.o
 
 qmail-send: obj auto_split.o date822fmt.o newfield.o prioq.o qsutil.o readsubdir.o trigger.o

@@ -1,4 +1,6 @@
 /*
+ *  Revision 20180413, Kai Peter
+ *  - switched to buffer
  *  Revision 20160509, Kai Peter
  *  - added '#include unistd.h'
  *  - changed return type of main to int
@@ -8,16 +10,15 @@
 #include <unistd.h>
 #include "sig.h"
 #include "wait.h"
-#include "substdio.h"
-#include "byte.h"
+#include "buffer.h"
+//#include "byte.h"
 #include "str.h"
 #include "alloc.h"
-#include "stralloc.h"
+//#include "stralloc.h"
 #include "select.h"
-#include "exit.h"
 #include "fd.h"
 #include "open.h"
-#include "error.h"
+#include "errmsg.h"
 #include "auto_qmail.h"
 #include "auto_uids.h"
 #include "auto_spawn.h"
@@ -29,8 +30,8 @@ extern void initialize();
 
 struct delivery {
   int used;
-  int fdin; /* pipe input */
-  int pid; /* zero if child is dead */
+  int fdin;  /* pipe input */
+  int pid;   /* zero if child is dead */
   int wstat; /* if !pid: status of child */
   int fdout; /* pipe output, -1 if !pid; delays eof until after death */
   stralloc output;
@@ -38,8 +39,7 @@ struct delivery {
 
 struct delivery *d;
 
-void sigchld()
-{
+void sigchld() {
   int wstat;
   int pid;
   int i;
@@ -54,86 +54,84 @@ void sigchld()
 
 int flagwriting = 1;
 
-int okwrite(fd,buf,n) int fd; char *buf; int n;
-{
- int w;
- if (!flagwriting) return n;
- w = write(fd,buf,n);
- if (w != -1) return w;
-// if (errno == error_intr) return -1;
- if (errno == EINTR) return -1;
- flagwriting = 0; close(fd);
- return n;
+ssize_t okwrite(int fd,char *buf,int n) {
+  int w;
+  if (!flagwriting) return n;
+  w = write(fd,buf,n);
+  if (w != -1) return w;
+  if (errno == EINTR) return -1;
+  flagwriting = 0; close(fd);
+  return n;
 }
 
 int flagreading = 1;
-char outbuf[1024]; substdio ssout;
+char outbuf[1024];
+buffer bout;
 
-int stage = 0; /* reading 0:delnum 1:messid 2:sender 3:recip */
+int stage = 0;    /* reading 0:delnum 1:messid 2:sender 3:recip */
 int flagabort = 0; /* if 1, everything except delnum is garbage */
 int delnum;
 stralloc messid = {0};
 stralloc sender = {0};
 stralloc recip = {0};
 
-void err(s) char *s;
-{
-  char ch; ch = delnum; substdio_put(&ssout,&ch,1);
-  substdio_puts(&ssout,s); substdio_putflush(&ssout,"",1);
+void err(char *s) {
+  char ch; ch = delnum; buffer_put(&bout,&ch,1);
+  buffer_puts(&bout,s); buffer_putflush(&bout,"",1);
 }
 
 void docmd()
 {
- int f;
- int i;
- int j;
- int fdmess;
- int pi[2];
- struct stat st;
+  int f;
+  int i;
+  int j;
+  int fdmess;
+  int pi[2];
+  struct stat st;
 
- if (flagabort) { err("Zqmail-spawn out of memory. (#4.3.0)\n"); return; }
- if (delnum < 0) { err("ZInternal error: delnum negative. (#4.3.5)\n"); return; }
- if (delnum >= auto_spawn) { err("ZInternal error: delnum too big. (#4.3.5)\n"); return; }
- if (d[delnum].used) { err("ZInternal error: delnum in use. (#4.3.5)\n"); return; }
- for (i = 0;i < messid.len;++i)
-   if (messid.s[i])
-     if (!i || (messid.s[i] != '/'))
-       if ((unsigned char) (messid.s[i] - '0') > 9)
-        { err("DInternal error: messid has nonnumerics. (#5.3.5)\n"); return; }
- if (messid.len > 100) { err("DInternal error: messid too long. (#5.3.5)\n"); return; }
- if (!messid.s[0]) { err("DInternal error: messid too short. (#5.3.5)\n"); return; }
+  if (flagabort) { err("Zqmail-spawn out of memory. (#4.3.0)\n"); return; }
+  if (delnum < 0) { err("ZInternal error: delnum negative. (#4.3.5)\n"); return; }
+  if (delnum >= auto_spawn) { err("ZInternal error: delnum too big. (#4.3.5)\n"); return; }
+  if (d[delnum].used) { err("ZInternal error: delnum in use. (#4.3.5)\n"); return; }
+  for (i = 0;i < messid.len;++i)
+    if (messid.s[i])
+      if (!i || (messid.s[i] != '/'))
+        if ((unsigned char) (messid.s[i] - '0') > 9)
+          { err("DInternal error: messid has nonnumerics. (#5.3.5)\n"); return; }
+  if (messid.len > 100) { err("DInternal error: messid too long. (#5.3.5)\n"); return; }
+  if (!messid.s[0]) { err("DInternal error: messid too short. (#5.3.5)\n"); return; }
 
- if (!stralloc_copys(&d[delnum].output,""))
-  { err("Zqmail-spawn out of memory. (#4.3.0)\n"); return; }
+  if (!stralloc_copys(&d[delnum].output,""))
+    { err("Zqmail-spawn out of memory. (#4.3.0)\n"); return; }
 
- j = byte_rchr(recip.s,recip.len,'@');
- if (j >= recip.len) { err("DSorry, address must include host name. (#5.1.3)\n"); return; }
+  j = byte_rchr(recip.s,recip.len,'@');
+  if (j >= recip.len) { err("DSorry, address must include host name. (#5.1.3)\n"); return; }
 
- fdmess = open_read(messid.s);
- if (fdmess == -1) { err("Zqmail-spawn unable to open message. (#4.3.0)\n"); return; }
+  fdmess = open_read(messid.s);
+  if (fdmess == -1) { err("Zqmail-spawn unable to open message. (#4.3.0)\n"); return; }
 
- if (fstat(fdmess,&st) == -1)
-  { close(fdmess); err("Zqmail-spawn unable to fstat message. (#4.3.0)\n"); return; }
- if ((st.st_mode & S_IFMT) != S_IFREG)
-  { close(fdmess); err("ZSorry, message has wrong type. (#4.3.5)\n"); return; }
- if (st.st_uid != auto_uidq) /* aaack! qmailq has to be trusted! */
-  /* your security is already toast at this point. damage control... */
-  { close(fdmess); err("ZSorry, message has wrong owner. (#4.3.5)\n"); return; }
+  if (fstat(fdmess,&st) == -1)
+    { close(fdmess); err("Zqmail-spawn unable to fstat message. (#4.3.0)\n"); return; }
+  if ((st.st_mode & S_IFMT) != S_IFREG)
+    { close(fdmess); err("ZSorry, message has wrong type. (#4.3.5)\n"); return; }
+  if (st.st_uid != auto_uidq) /* aaack! qmailq has to be trusted! */
+    /* your security is already toast at this point. damage control... */
+    { close(fdmess); err("ZSorry, message has wrong owner. (#4.3.5)\n"); return; }
 
- if (pipe(pi) == -1)
-  { close(fdmess); err("Zqmail-spawn unable to create pipe. (#4.3.0)\n"); return; }
+  if (pipe(pi) == -1)
+    { close(fdmess); err("Zqmail-spawn unable to create pipe. (#4.3.0)\n"); return; }
 
- fd_coe(pi[0]);
+  fd_coe(pi[0]);
 
- f = spawn(fdmess,pi[1],sender.s,recip.s,j);
- close(fdmess);
- if (f == -1)
-  { close(pi[0]); close(pi[1]); err("Zqmail-spawn unable to fork. (#4.3.0)\n"); return; }
+  f = spawn(fdmess,pi[1],sender.s,recip.s,j);
+  close(fdmess);
+  if (f == -1)
+    { close(pi[0]); close(pi[1]); err("Zqmail-spawn unable to fork. (#4.3.0)\n"); return; }
 
- d[delnum].fdin = pi[0];
- d[delnum].fdout = pi[1]; fd_coe(pi[1]);
- d[delnum].pid = f;
- d[delnum].used = 1;
+  d[delnum].fdin = pi[0];
+  d[delnum].fdout = pi[1]; fd_coe(pi[1]);
+  d[delnum].pid = f;
+  d[delnum].used = 1;
 }
 
 char cmdbuf[1024];
@@ -149,7 +147,6 @@ void getcmd()
   { flagreading = 0; return; }
   if (r == -1)
   {
-//    if (errno != error_intr)
     if (errno != EINTR)
       flagreading = 0;
     return;
@@ -191,7 +188,6 @@ int main(int argc,char **argv)
   int nfds;
 
   if (chdir(auto_qmail) == -1) _exit(111);
-//  if (chdir("queue/mess") == -1) _exit(111);
   if (chdir("var/queue/mess") == -1) _exit(111);
   if (!stralloc_copys(&messid,"")) _exit(111);
   if (!stralloc_copys(&sender,"")) _exit(111);
@@ -200,14 +196,14 @@ int main(int argc,char **argv)
   d = (struct delivery *) alloc((auto_spawn + 10) * sizeof(struct delivery));
   if (!d) _exit(111);
 
-  substdio_fdbuf(&ssout,okwrite,1,outbuf,sizeof(outbuf));
+  buffer_init(&bout,okwrite,1,outbuf,sizeof(outbuf));
 
   sig_pipeignore();
   sig_childcatch(sigchld);
 
   initialize(argc,argv);
 
-  ch = auto_spawn; substdio_putflush(&ssout,&ch,1);
+  ch = auto_spawn; buffer_putflush(&bout,&ch,1);
 
   for (i = 0;i < auto_spawn;++i) { d[i].used = 0; d[i].output.s = 0; }
 
@@ -242,10 +238,10 @@ int main(int argc,char **argv)
             continue; /* read error on a readable pipe? be serious */
           if (r == 0)
           {
-            ch = i; substdio_put(&ssout,&ch,1);
-            report(&ssout,d[i].wstat,d[i].output.s,d[i].output.len);
-            substdio_put(&ssout,"",1);
-            substdio_flush(&ssout);
+            ch = i; buffer_put(&bout,&ch,1);
+            report(&bout,d[i].wstat,d[i].output.s,d[i].output.len);
+            buffer_put(&bout,"",1);
+            buffer_flush(&bout);
             close(d[i].fdin); d[i].used = 0;
             continue;
           }
