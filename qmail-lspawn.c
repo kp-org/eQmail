@@ -1,4 +1,6 @@
 /*
+ *  Revision 20180413, Kai Peter
+ *  - switched to buffer
  *  Revision 20171023, Kai Peter
  *  - moved folder 'users' to 'var/users'
  *  Revision 20170316, Kai Peter
@@ -8,13 +10,13 @@
 #include "fd.h"
 #include "wait.h"
 #include "prot.h"
-#include "substdio.h"
+#include "buffer.h"
 #include "stralloc.h"
 #include "scan.h"
-#include "error.h"
+#include "errmsg.h"
 #include "cdbread.h"
 #include "case.h"
-#include "slurpclose.h"
+#include "readclose.h"
 #include "auto_qmail.h"
 #include "auto_uids.h"
 #include "qlx.h"
@@ -32,44 +34,44 @@ void initialize(int argc,char **argv) {
 
 int truncreport = 3000;
 
-void report(substdio *ss,int wstat,char *s,int len)
+void report(buffer *b,int wstat,char *s,int len)
 {
   int i;
   if (wait_crashed(wstat))
-  { substdio_puts(ss,"Zqmail-local crashed.\n"); return; }
+  { buffer_puts(b,"Zqmail-local crashed.\n"); return; }
   switch(wait_exitcode(wstat))
   {
    case QLX_CDB:
-     substdio_puts(ss,"ZTrouble reading var/users/cdb in qmail-lspawn.\n"); return;
+     buffer_puts(b,"ZTrouble reading var/users/cdb in qmail-lspawn.\n"); return;
    case QLX_NOMEM:
-     substdio_puts(ss,"ZOut of memory in qmail-lspawn.\n"); return;
+     buffer_puts(b,"ZOut of memory in qmail-lspawn.\n"); return;
    case QLX_SYS:
-     substdio_puts(ss,"ZTemporary failure in qmail-lspawn.\n"); return;
+     buffer_puts(b,"ZTemporary failure in qmail-lspawn.\n"); return;
    case QLX_NOALIAS:
-     substdio_puts(ss,"ZUnable to find alias user!\n"); return;
+     buffer_puts(b,"ZUnable to find alias user!\n"); return;
    case QLX_ROOT:
-     substdio_puts(ss,"ZNot allowed to perform deliveries as root.\n"); return;
+     buffer_puts(b,"ZNot allowed to perform deliveries as root.\n"); return;
    case QLX_USAGE:
-     substdio_puts(ss,"ZInternal qmail-lspawn bug.\n"); return;
+     buffer_puts(b,"ZInternal qmail-lspawn bug.\n"); return;
    case QLX_NFS:
-     substdio_puts(ss,"ZNFS failure in qmail-local.\n"); return;
+     buffer_puts(b,"ZNFS failure in qmail-local.\n"); return;
    case QLX_EXECHARD:
-     substdio_puts(ss,"DUnable to run qmail-local.\n"); return;
+     buffer_puts(b,"DUnable to run qmail-local.\n"); return;
    case QLX_EXECSOFT:
-     substdio_puts(ss,"ZUnable to run qmail-local.\n"); return;
+     buffer_puts(b,"ZUnable to run qmail-local.\n"); return;
    case QLX_EXECPW:
-     substdio_puts(ss,"ZUnable to run qmail-getpw.\n"); return;
+     buffer_puts(b,"ZUnable to run qmail-getpw.\n"); return;
    case 111: case 71: case 74: case 75:
-     substdio_put(ss,"Z",1); break;
+     buffer_put(b,"Z",1); break;
    case 0:
-     substdio_put(ss,"K",1); break;
+     buffer_put(b,"K",1); break;
    case 100:
    default:
-     substdio_put(ss,"D",1); break;
+     buffer_put(b,"D",1); break;
   }
 
   for (i = 0;i < len;++i) if (!s[i]) break;
-  substdio_put(ss,s,i);
+  buffer_put(b,s,i);
 }
 
 stralloc lower = {0};
@@ -95,7 +97,7 @@ void nughde_get(char *local)
 
   fd = open_read("var/users/cdb");
   if (fd == -1)
-    if (errno != error_noent)
+    if (errno != ENOENT)
       _exit(QLX_CDB);
 
   if (fd != -1)
@@ -157,7 +159,7 @@ void nughde_get(char *local)
   }
   close(pi[1]);
 
-  if (slurpclose(pi[0],&nughde,128) == -1) _exit(QLX_SYS);
+  if (readclose(pi[0],&nughde,128) == -1) _exit(QLX_SYS);
 
   if (wait_pid(&gpwstat,gpwpid) != -1)
   {
@@ -226,7 +228,7 @@ int spawn(int fdmess,int fdout,char *s,char *r,int at)
     if (!getuid()) _exit(QLX_ROOT);
 
     execv(*args,args);
-    if (error_temp(errno)) _exit(QLX_EXECSOFT);
+    if (errno) _exit(QLX_EXECSOFT);
     _exit(QLX_EXECHARD);
   }
   return f;

@@ -235,13 +235,10 @@ myctime.o slurpclose.o  datetime.a auto_qmail.o auto_patrn.o
 	error.a str.a fs.a datetime.a auto_qmail.o auto_patrn.o \
 	substdio.a $(QLIBS)
 
-qmail-lspawn: compile load qmail-lspawn.c spawn.o prot.o slurpclose.o \
-sig.a wait.a case.a cdb.a fd.a open.a stralloc.a alloc.a \
-substdio.a error.a str.a fs.a auto_qmail.o auto_uids.o auto_spawn.o
-	./compile qmail-lspawn.c
-	./load qmail-lspawn spawn.o prot.o slurpclose.o sig.a wait.a \
-	case.a cdb.a fd.a open.a stralloc.a alloc.a substdio.a error.a \
-	str.a fs.a auto_qmail.o auto_uids.o auto_spawn.o $(QLIBS)
+qmail-lspawn: spawn.o auto_qmail.o auto_uids.o auto_spawn.o
+	$(COMPILE) qmail-lspawn.c
+	$(LOADBIN) qmail-lspawn spawn.o prot.o $(QLIBS) \
+	auto_qmail.o auto_uids.o auto_spawn.o
 
 qmail-newmrh:
 	$(COMPILE) qmail-newmrh.c
