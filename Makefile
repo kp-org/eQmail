@@ -271,26 +271,21 @@ qmail-qmqpd: received.o now.o date822fmt.o qmail.o auto_qmail.o
 	$(LOADBIN) qmail-qmqpd received.o now.o date822fmt.o datetime.a qmail.o \
 	auto_qmail.o $(QLIBS)
 
-qmail-qmtpd: \
-load qmail-qmtpd.o rcpthosts.o control.o constmap.o received.o \
+qmail-qmtpd: rcpthosts.o control.o constmap.o received.o \
 date822fmt.o now.o qmail.o cdb.a fd.a wait.a datetime.a open.a \
 getln.a sig.a case.a env.a stralloc.a alloc.a substdio.a error.a \
 str.a fs.a auto_qmail.o
+	$(COMPILE) qmail-qmtpd.c
 	./load qmail-qmtpd rcpthosts.o control.o constmap.o \
 	received.o date822fmt.o now.o qmail.o cdb.a fd.a wait.a \
 	datetime.a open.a getln.a sig.a case.a env.a stralloc.a \
-	alloc.a error.a str.a fs.a auto_qmail.o buffer.a substdio.a
+	alloc.a error.a str.a fs.a auto_qmail.o buffer.a
 
-qmail-qmtpd.o: compile qmail-qmtpd.c
-	./compile qmail-qmtpd.c
-
-qmail-qread: compile load qmail-qread.c fmtqfn.o readsubdir.o date822fmt.o \
-datetime.a open.a getln.a stralloc.a alloc.a substdio.a error.a str.a fs.a \
+qmail-qread: fmtqfn.o readsubdir.o date822fmt.o datetime.a \
 auto_qmail.o auto_split.o
-	./compile qmail-qread.c
-	./load qmail-qread fmtqfn.o readsubdir.o date822fmt.o \
-	datetime.a open.a getln.a stralloc.a alloc.a substdio.a \
-	error.a str.a fs.a auto_qmail.o auto_split.o buffer.a
+	$(COMPILE) qmail-qread.c
+	$(LOADBIN) qmail-qread fmtqfn.o readsubdir.o date822fmt.o \
+	datetime.a $(QLIBS) auto_qmail.o auto_split.o
 
 qmail-qstat: warn-auto.sh qmail-qstat.sh
 	cat warn-auto.sh qmail-qstat.sh | sed s}QPRFX}"$(QPRFX)"}g > qmail-qstat
