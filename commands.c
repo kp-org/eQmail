@@ -1,5 +1,4 @@
 #include "commands.h"
-//#include "substdio.h"
 #include "buffer.h"
 #include "stralloc.h"
 #include "str.h"
@@ -8,8 +7,6 @@
 static stralloc cmd = {0};
 
 int commands(buffer *b,struct commands *c)
-//substdio *ss;
-//struct commands *c;
 {
   int i;
   char *arg;
@@ -20,7 +17,6 @@ int commands(buffer *b,struct commands *c)
     for (;;) {
       if (!stralloc_readyplus(&cmd,1)) return -1;
       i = buffer_get(b,cmd.s + cmd.len,1);
-//      i = substdio_get(ss,cmd.s + cmd.len,1);
       if (i != 1) return i;
       if (cmd.s[cmd.len] == '\n') break;
       ++cmd.len;

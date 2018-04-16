@@ -294,9 +294,8 @@ qmail-qstat: warn-auto.sh qmail-qstat.sh
 qmail-queue: qmail-queue.c trigger.o fmtqfn.o now.o \
 date822fmt.o datetime.a
 	$(COMPILE) qmail-queue.c
-	./load qmail-queue trigger.o fmtqfn.o now.o date822fmt.o \
-	datetime.a seek.a ndelay.a open.a sig.a alloc.a substdio.a \
-	error.a str.a fs.a auto_qmail.o auto_split.o auto_uids.o 
+	$(LOADBIN) qmail-queue trigger.o fmtqfn.o now.o date822fmt.o \
+	datetime.a $(QLIBS) auto_qmail.o auto_split.o auto_uids.o
 
 qmail-remote: compile load qmail-remote.c control.o constmap.o timeoutread.o \
 timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ip.a ipalloc.o ipme.o quote.o \
@@ -311,7 +310,6 @@ error.a str.a fs.a auto_qmail.o base64.o tls.o ssl_timeoutio.o
 	str.a fs.a auto_qmail.o  base64.o $(DNSLIB) \
 	buffer.a \
 	qlibs/uint16p.o
-#	tls.o ssl_timeoutio.o -L/usr/local/ssl/lib -lssl -lcrypto
 
 qmail-rspawn: spawn.o tcpto_clean.o now.o
 	$(COMPILE) qmail-rspawn.c
