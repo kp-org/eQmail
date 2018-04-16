@@ -9,9 +9,9 @@ struct tcpto_buf {
 	unsigned long when;
 	union {
 		struct ip_address ip;
-#ifdef INET6
+//#ifdef INET6
 		struct ip6_address ip6;
-#endif
+//#endif
 		unsigned char dummy[16];
 	} addr;
 };

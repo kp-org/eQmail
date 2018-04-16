@@ -356,15 +356,12 @@ qmail-tcpok:
 	$(COMPILE) qmail-tcpok.c
 	$(LOADBIN) qmail-tcpok buildins.o $(QLIBS)
 
-qmail-tcpto: compile load qmail-tcpto.c ip.a now.o open.a lock.a \
-substdio.a error.a str.a fs.a auto_qmail.o
-	./compile qmail-tcpto.c
-	./load qmail-tcpto ip.a now.o open.a lock.a substdio.a \
-	error.a str.a fs.a auto_qmail.o \
-	qlibs/uint16p.o
+qmail-tcpto: now.o auto_qmail.o
+	$(COMPILE) qmail-tcpto.c
+	$(LOADBIN) qmail-tcpto now.o $(QLIBS) auto_qmail.o
 
-qmail.o: compile qmail.c
-	./compile qmail.c
+qmail.o:
+	$(COMPILE) qmail.c
 
 qreceipt: headerbody.o hfield.o quote.o token822.o qmail.o auto_qmail.o
 	$(COMPILE) qreceipt.c
