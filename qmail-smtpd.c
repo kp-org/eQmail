@@ -1,17 +1,37 @@
 /*
+ *  Revision 20180418, Kai Peter
+ *  - renamed old timeout{read,write} functions (conflicts w/ qlibs)
  *  Revision 20171130, Kai Peter
  *  - changed folder name 'control' to 'etc'
-*/
+ *  Revision 20160708, Kai Peter
+ *  - changed return type of 'saferead'/'safewrite' to 'ssize_t'
+ *  - replaced readwrite.h and other (temp.) header files by unistd.h
+ *  - switched to 'buffer'
+ *  Revision 20160705, Kai Peter
+ *  - switched to 'buffer' for 'smtpcommands' (see 'commands.c' too)
+ *  Revision 20160509, Kai Peter
+ *  - added string (argument) to call 'err_unimpl()'
+ *  - removed arguments from call 'err_authfail()'
+ *  Revision 20160509, Kai Peter
+ *  - added 'close.h', base64,h, 'fd.h', 'getpid.h', 'chdir.h', 'sleep.h'
+ *  - added declaration of 'spp_rcpt_accepted()'
+ *  - changed callings 'die_nomem;' to 'die_nomem();'
+ *  Revision 20160504, Kai Peter
+ *  - changed return type of main to in
+ *  - added parentheses to multiple conditions
+ *  - casting some pointers (char *)
+ *  - added includes 'exec.h', 'pipe.h'
+ */
+
+#include <unistd.h>
 #include "sig.h"
-#include "readwrite.h"		/* the original definitions */
-#include "stralloc.h"
-#include "substdio.h"
+#include "buffer.h"
 #include "alloc.h"
 #include "auto_qmail.h"
 #include "control.h"
 #include "received.h"
 #include "constmap.h"
-#include "error.h"
+#include "errmsg.h"
 #include "ipme.h"
 #include "ip.h"
 #include "qmail.h"
@@ -22,30 +42,23 @@
 #include "case.h"
 #include "env.h"
 #include "now.h"
-#include "exit.h"
 #include "rcpthosts.h"
 #include "timeoutread.h"
 #include "timeoutwrite.h"
 #include "commands.h"
 #include "wait.h"
 #include "qmail-spp.h"
+#include "base64.h"
 #include "fd.h"
 
-/* temp:  */
-extern int chdir(const char *_path);
-extern int execvp(const char *, char * const *);
-extern int fork();
-extern int getpid(void);
-extern int pipe();
-extern unsigned int sleep(unsigned int _seconds);
-#include "close.h"
-#include "base64.h"
-/* end temp */
+#define WHO "qmail-smtpd"
 
-extern void spp_rcpt_accepted();
 int spp_val;
+extern void spp_rcpt_accepted();
 
-#define CRAM_MD5
+#ifndef CRAM_MD5
+#define CRAM_MD5 1
+#endif
 #define AUTHSLEEP 5
 #define SUBMISSION "587"
 
@@ -64,7 +77,7 @@ void tls_nogateway();
 int ssl_rfd = -1, ssl_wfd = -1; /* SSL_get_Xfd() are broken */
 #endif
 
-int safewrite(fd,buf,len) int fd; char *buf; int len;
+ssize_t safewrite(int fd,char *buf,int len)
 {
   int r;
 #ifdef TLS
@@ -72,20 +85,24 @@ int safewrite(fd,buf,len) int fd; char *buf; int len;
     r = ssl_timeoutwrite(timeout, ssl_rfd, ssl_wfd, ssl, buf, len);
   else
 #endif
-  r = timeoutwrite(timeout,fd,buf,len);
+  r = timeoutwrite_old(timeout,fd,buf,len);
   if (r <= 0) _exit(1);
   return r;
 }
 
-char ssoutbuf[512];
-substdio ssout = SUBSTDIO_FDBUF(safewrite,1,ssoutbuf,sizeof ssoutbuf);
-char sserrbuf[512];
-substdio sserr = SUBSTDIO_FDBUF(write,2,sserrbuf,sizeof sserrbuf);
+char boutbuf[512];
+buffer bout = BUFFER_INIT(safewrite,1,boutbuf,sizeof boutbuf);
+char berrbuf[512];
+buffer berr = BUFFER_INIT(write,2,berrbuf,sizeof berrbuf);
+
+char **childargs;   /* the childargs are a checkpassword tool! */
+char bauthbuf[512];
+buffer bauth = BUFFER_INIT(safewrite,3,bauthbuf,sizeof(bauthbuf));
 
 void logit(const char* message);
 void logit2(const char* message, const char* reason);
-void flush() { substdio_flush(&ssout); }
-void out(s) char *s; { substdio_puts(&ssout,s); }
+void flush() { buffer_flush(&bout); }
+void out(char *s) { buffer_puts(&bout,s); }
 
 void die_read() { logit("read failed"); _exit(1); }
 void die_alarm() { logit("timeout"); out("451 timeout (#4.4.2)\r\n"); flush(); _exit(1); }
@@ -124,24 +141,38 @@ void err_authmail() { out("503 no auth during mail transaction (#5.5.0)\r\n"); }
 int err_noauth() { out("504 auth type unimplemented (#5.5.1)\r\n"); return -1; }
 int err_authabrt() { out("501 auth exchange canceled (#5.0.0)\r\n"); return -1; }
 int err_input() { out("501 malformed auth input (#5.5.4)\r\n"); return -1; }
-void err_authfail(char *a, char *b) { out("535 authentication failed (#5.7.1)\r\n"); }
+void err_authfail() { out("535 authentication failed (#5.7.1)\r\n"); }
 void err_submission() { out("530 Authorization required (#5.7.1) \r\n"); }
+
+ssize_t saferead(int fd,char *buf,int len)
+{
+  int r;
+  flush();
+#ifdef TLS
+  if (ssl && fd == ssl_rfd)
+    r = ssl_timeoutread(timeout, ssl_rfd, ssl_wfd, ssl, buf, len);
+  else
+#endif
+  r = timeoutread_old(timeout,fd,buf,len);
+  if (r == -1) if (errno == error_timeout) die_alarm();
+  if (r <= 0) die_read();
+  return r;
+}
+
+char inbuf[1024];
+buffer bin = BUFFER_INIT(saferead,0,inbuf,sizeof inbuf);
+//----
 
 stralloc greeting = {0};
 
-void smtp_greet(code) char *code;
-{
-  substdio_puts(&ssout,code);
-  substdio_put(&ssout,greeting.s,greeting.len);
+void smtp_greet(char *code) {
+  buffer_puts(&bout,code);
+  buffer_put(&bout,greeting.s,greeting.len);
 }
-void smtp_help(arg) char *arg;
-{
-  out("214 eQmail home page: http://openqmail.org\r\n");
-}
-void smtp_quit(arg) char *arg;
-{
-  smtp_greet("221 "); out("\r\n"); flush(); _exit(0);
-}
+void smtp_help(char *arg) {
+  out("214 eQmail home page: http://openqmail.org\r\n"); }
+void smtp_quit(char *arg) {
+  smtp_greet("221 "); out("\r\n"); flush(); _exit(0); }
 
 char *protocol;
 char *remoteip;
@@ -187,7 +218,7 @@ void setup()
   if (bmfok)
     if (!constmap_init(&mapbmf,bmf.s,bmf.len,0)) die_nomem();
 
-  if (control_readint(&databytes,"etc/databytes") == -1) die_control();
+  if (control_readint((int *)&databytes,"etc/databytes") == -1) die_control();
   x = env_get("DATABYTES");
   if (x) { scan_ulong(x,&u); databytes = u; }
   if (!(databytes + 1)) --databytes;
@@ -213,7 +244,6 @@ void setup()
 #endif
   dohelo(remotehost);
 }
-
 
 stralloc addr = {0}; /* will be 0-terminated, if addrparse returns 1 */
 
@@ -261,20 +291,21 @@ char *arg;
   /* could check for termination failure here, but why bother? */
   if (!stralloc_append(&addr,"")) die_nomem();
 
-  /* if address is in "localiphost" */
+  /* if address is in "etc/localiphost" */
   if (liphostok) {
     i = byte_rchr(addr.s,addr.len,'@');
     if (i < addr.len) /* if not, partner should go read rfc 821 */
       if (addr.s[i + 1] == '[')
-//        if (byte_rchr(addr.s + 1 + 2,addr.len - 1 - 2,":")) {  /* @Kai ??? (obsolete?) @[IPv6::] */
-          if (!addr.s[i + 1 + ip_scanbracket(addr.s + i + 1,(char *)&ip)])
-            if ( (ipme_is4(&ip)) || (ipme_is6(&ip)) ) {
-              addr.len = i + 1;
-              if (!stralloc_cat(&addr,&liphost)) die_nomem();
-              if (!stralloc_0(&addr)) die_nomem();
-            }
-//        }  // end '@[IPv6::]'
-  } // end 'if (liphostok)'
+//        if (!addr.s[i + 1 + ip_scanbracket(addr.s + i + 1,&ip)])
+        if (!addr.s[i + 1 + ip46_scanbracket(addr.s + i + 1,(char *)&ip)])  // new function in ip.c
+/* Kai: todo: check for IPv6 too (works with IPv4 now only!) */
+/* --> but: a ip6_scanbracket function is overhead */
+          if ( (ipme_is(&ip)) || (ipme_is6(&ip)) ) {
+            addr.len = i + 1;
+            if (!stralloc_cat(&addr,&liphost)) die_nomem();
+            if (!stralloc_0(&addr)) die_nomem();
+          }
+  }
 
   if (addr.len > 900) return 0;
   return 1;
@@ -290,7 +321,7 @@ int bmfcheck()
     if (constmap(&mapbmf,addr.s + j,addr.len - j - 1)) return 1;
     for (j++; j < addr.len; j++)
       if (addr.s[j] == '.') {
-    if(constmap(&mapbmf,addr.s + j,addr.len - j - 1)) return 1;
+	if(constmap(&mapbmf,addr.s + j,addr.len - j - 1)) return 1;
       }
   }
   return 0;
@@ -340,7 +371,8 @@ void logit(message) const char* message;
   } else
       if (!stralloc_catb(&log_buf, "(null)", 6)) die_nomem();
   if (!stralloc_catb(&log_buf, "\n", 1)) die_nomem();
-  substdio_putflush(&sserr, log_buf);
+//  substdio_putflush(&sserr, log_buf);
+    buffer_putflush(&berr,log_buf.s,log_buf.len);
 }
 
 void logit2(message, reason)
@@ -369,12 +401,12 @@ const char* reason;
   } else
      if (!stralloc_catb(&log_buf, "(null)", 6)) die_nomem();
   if (!stralloc_catb(&log_buf, "\n", 1)) die_nomem();
-  substdio_putflush(&sserr, log_buf);
+//  substdio_putflush(&sserr, log_buf);
+    buffer_putflush(&berr,log_buf.s,log_buf.len);
 }
 
 
-int mailfrom_size(arg) char *arg;
-{
+int mailfrom_size(char *arg) {
   unsigned long r;
   unsigned long sizebytes = 0;
 
@@ -384,10 +416,7 @@ int mailfrom_size(arg) char *arg;
   return 0;
 }
 
-void mailfrom_auth(arg,len) 
-char *arg; 
-int len;
-{
+void mailfrom_auth(char *arg,int len) {
   if (!stralloc_copys(&fuser,"")) die_nomem();
   if (case_starts(arg,"<>")) { if (!stralloc_cats(&fuser,"unknown")) die_nomem(); }
   else 
@@ -404,7 +433,7 @@ int len;
   if (!remoteinfo) {
     remoteinfo = fuser.s;
     if (!env_unset("TCPREMOTEINFO")) die_read();
-    if (!env_put2("TCPREMOTEINFO",remoteinfo)) die_nomem();
+    if (!env_put("TCPREMOTEINFO",remoteinfo)) die_nomem();
   }
 }
 
@@ -452,11 +481,14 @@ void smtp_ehlo(arg) char *arg;
   size[fmt_ulong(size,(unsigned int) databytes)] = 0;
   out("\r\n250-PIPELINING\r\n250-8BITMIME\r\n");
   out("250-SIZE "); out(size); out("\r\n");
+  /* offer auth only if a checkpasswordtool is given */
+  if (*childargs) {
 #ifdef CRAM_MD5
-  out("250 AUTH LOGIN PLAIN CRAM-MD5\r\n");
+    out("250 AUTH LOGIN PLAIN CRAM-MD5\r\n");
 #else
-  out("250 AUTH LOGIN PLAIN\r\n");
+    out("250 AUTH LOGIN PLAIN\r\n");
 #endif
+  }
   seenmail = 0; dohelo(arg);
 }
 void smtp_rset(arg) char *arg;
@@ -504,26 +536,8 @@ void smtp_rcpt(arg) char *arg; {
   out("250 ok\r\n");
 }
 
-
-int saferead(fd,buf,len) int fd; char *buf; int len;
-{
-  int r;
-  flush();
 #ifdef TLS
-  if (ssl && fd == ssl_rfd)
-    r = ssl_timeoutread(timeout, ssl_rfd, ssl_wfd, ssl, buf, len);
-  else
-#endif
-  r = timeoutread(timeout,fd,buf,len);
-  if (r == -1) if (errno == error_timeout) die_alarm();
-  if (r <= 0) die_read();
-  return r;
-}
-
-char ssinbuf[1024];
-substdio ssin = SUBSTDIO_FDBUF(saferead,0,ssinbuf,sizeof ssinbuf);
-#ifdef TLS
-void flush_io() { ssin.p = 0; flush(); }
+void flush_io() { bin.p = 0; flush(); }
 #endif
 
 struct qmail qqt;
@@ -554,7 +568,7 @@ int *hops;
   flaginheader = 1;
   pos = 0; flagmaybex = flagmaybey = flagmaybez = 1;
   for (;;) {
-    substdio_get(&ssin,&ch,1);
+    buffer_get(&bin,&ch,1);
     if (flaginheader) {
       if (pos < 9) {
         if (ch != "delivered"[pos]) if (ch != "DELIVERED"[pos]) flagmaybez = 0;
@@ -564,7 +578,7 @@ int *hops;
         if (flagmaybex) if (pos == 7) ++*hops;
         if (pos < 2) if (ch != "\r\n"[pos]) flagmaybey = 0;
         if (flagmaybey) if (pos == 1) flaginheader = 0;
-    ++pos;
+	++pos;
       }
       if (ch == '\n') { pos = 0; flagmaybex = flagmaybey = flagmaybez = 1; }
     }
@@ -613,7 +627,7 @@ void acceptmessage(qp) unsigned long qp;
   out("\r\n");
 }
 
-void smtp_data(arg) char *arg; {
+void smtp_data(char *arg) {
   int hops;
   unsigned long qp;
   char *qqx;
@@ -661,8 +675,6 @@ void smtp_data(arg) char *arg; {
   out("\r\n");
 }
 
-/* this file is too long ----------------------------------------- SMTP AUTH */
-
 char unique[FMT_ULONG + FMT_ULONG + 3];
 static stralloc authin = {0};   /* input from SMTP client */
 static stralloc user = {0};     /* authorization user-id */
@@ -673,17 +685,14 @@ static stralloc chal = {0};     /* plain challenge */
 static stralloc slop = {0};     /* b64 challenge */
 #endif
 
-char **childargs;
-char ssauthbuf[512];
-substdio ssauth = SUBSTDIO_FDBUF(safewrite,3,ssauthbuf,sizeof(ssauthbuf));
-
 int authgetl(void) {
   int i;
 
   if (!stralloc_copys(&authin,"")) die_nomem();
   for (;;) {
     if (!stralloc_readyplus(&authin,1)) die_nomem(); /* XXX */
-    i = substdio_get(&ssin,authin.s + authin.len,1);
+//    i = substdio_get(&ssin,authin.s + authin.len,1);
+    i = buffer_get(&bin,authin.s + authin.len,1);
     if (i != 1) die_read();
     if (authin.s[authin.len] == '\n') break;
     ++authin.len;
@@ -721,38 +730,38 @@ int authenticate(void)
   }
   close(pi[0]);
 
-  substdio_fdbuf(&ssauth,write,pi[1],ssauthbuf,sizeof ssauthbuf);
-  if (substdio_put(&ssauth,user.s,user.len) == -1) return err_write();
-  if (substdio_put(&ssauth,pass.s,pass.len) == -1) return err_write();
+  buffer_init(&bauth,write,pi[1],bauthbuf,sizeof bauthbuf);
+  if (buffer_put(&bauth,user.s,user.len) == -1) return err_write();
+  if (buffer_put(&bauth,pass.s,pass.len) == -1) return err_write();
 #ifdef CRAM_MD5
-  if (substdio_put(&ssauth,chal.s,chal.len) == -1) return err_write();
+  if (buffer_put(&bauth,chal.s,chal.len) == -1) return err_write();
 #endif
-  if (substdio_flush(&ssauth) == -1) return err_write();
+  if (buffer_flush(&bauth) == -1) return err_write();
 
   close(pi[1]);
 #ifdef CRAM_MD5
   if (!stralloc_copys(&chal,"")) die_nomem();
   if (!stralloc_copys(&slop,"")) die_nomem();
 #endif
-  byte_zero(ssauthbuf,sizeof ssauthbuf);
+  byte_zero(bauthbuf,sizeof bauthbuf);
   if (wait_pid(&wstat,child) == -1) return err_child();
   if (wait_crashed(wstat)) return err_child();
   if (wait_exitcode(wstat)) { sleep(AUTHSLEEP); return 1; } /* no */
   return 0; /* yes */
 }
 
-int auth_login(arg) char *arg;
+int auth_login(char *arg)
 {
   int r;
 
   if (*arg) {
-    if ((r = b64decode(arg,str_len(arg),&user)) == 1) return err_input();
+    if ((r = b64decode(arg,str_len(arg),&user) == 1)) return err_input();
   }
   else {
 //  out("334 VXNlcm5hbWU6\r\n"); flush();       /* Username: */
     out("334 Username:\r\n"); flush();       	/* Username: */
     if (authgetl() < 0) return -1;
-    if ((r = b64decode(authin.s,authin.len,&user)) == 1) return err_input();
+    if ((r = b64decode(authin.s,authin.len,&user) == 1)) return err_input();
   }
   if (r == -1) die_nomem();
 //  out("334 UGFzc3dvcmQ6\r\n"); flush();         /* Password: */
@@ -766,17 +775,17 @@ int auth_login(arg) char *arg;
   return authenticate();
 }
 
-int auth_plain(arg) char *arg;
+int auth_plain(char *arg)
 {
   int r, id = 0;
 
   if (*arg) {
-    if ((r = b64decode(arg,str_len(arg),&resp)) == 1) return err_input();
+    if ((r = b64decode(arg,str_len(arg),&resp) == 1)) return err_input();
   }
   else {
     out("334 \r\n"); flush();
     if (authgetl() < 0) return -1;
-    if ((r = b64decode(authin.s,authin.len,&resp)) == 1) return err_input();
+    if ((r = b64decode(authin.s,authin.len,&resp) == 1)) return err_input();
   }
   if (r == -1 || !stralloc_0(&resp)) die_nomem();
   while (resp.s[id]) id++;                       /* "authorize-id\0userid\0passwd\0" */
@@ -815,7 +824,7 @@ int auth_cram()
   flush();
 
   if (authgetl() < 0) return -1;                        /* got response */
-  if ((r = b64decode(authin.s,authin.len,&resp)) == 1) return err_input();
+  if ((r = b64decode(authin.s,authin.len,&resp) == 1)) return err_input();
   if (r == -1 || !stralloc_0(&resp)) die_nomem();
 
   i = str_chr(resp.s,' ');
@@ -842,8 +851,7 @@ struct authcmd {
 , { 0,err_noauth }
 };
 
-void smtp_auth(arg)
-char *arg;
+void smtp_auth(char *arg)
 {
   int i;
   char *cmd = arg;
@@ -851,16 +859,15 @@ char *arg;
 /* tls required patch */
 #ifdef TLS
   if (strcmp(arg,"cram-md5") != 0) {
-    char *tlsrequired = env_get("TLSREQUIRED");
-    if (tlsrequired && (strcmp(tlsrequired, "1")) == 0) {
-      if (!ssl) { 
-        out("538 AUTH PLAIN/LOGIN not available without TLS (#5.3.3)\r\n");
-        flush(); /*die_read();*/ return;   /* don't die */
+	char *tlsrequired = env_get("TLSREQUIRED");
+	if (tlsrequired && (strcmp(tlsrequired, "1")) == 0) {
+  	  if (!ssl) { 
+  		out("538 AUTH PLAIN/LOGIN not available without TLS (#5.3.3)\r\n");
+    	flush(); /*die_read();*/ return;	/* don't die */
       }
-    }
+	}
   }
-#endif   /* END tls required patch */
-
+#endif		/* END tls required patch */
   if (!*childargs) { out("503 auth not available (#5.3.3)\r\n"); return; }
   if (flagauth) { err_authd(); return; }
   if (seenmail) { err_authmail(); return; }
@@ -888,19 +895,17 @@ char *arg;
       relayclient = "";
       remoteinfo = user.s;
       if (!env_unset("TCPREMOTEINFO")) die_read();
-      if (!env_put2("TCPREMOTEINFO",remoteinfo)) die_nomem();
-      if (!env_put2("RELAYCLIENT",relayclient)) die_nomem();
+      if (!env_put("TCPREMOTEINFO",remoteinfo)) die_nomem();
+      if (!env_put("RELAYCLIENT",relayclient)) die_nomem();
       out("235 ok, ");
       out(remoteinfo);
       out(", go ahead (#2.0.0)\r\n");
       break;
     case 1:
-      err_authfail(user.s,authcmds[i].text);
+//      err_authfail(user.s,authcmds[i].text);
+      err_authfail();
   }
 }
-
-
-/* this file is too long --------------------------------------------- GO ON */
 
 #ifdef TLS
 stralloc proto = {0};
@@ -909,7 +914,7 @@ const char *ssl_verify_err = 0;
 
 void smtp_tls(char *arg)
 {
-  if (ssl) err_unimpl("");
+  if (ssl) err_unimpl("unimplemented");
   else if (*arg) out("501 Syntax error (no parameters allowed) (#5.5.4)\r\n");
   else tls_init();
 }
@@ -940,7 +945,7 @@ DH *tmp_dh_cb(SSL *ssl, int export, int keylen)
     }
   }
   return DH_generate_parameters(keylen, DH_GENERATOR_2, NULL, NULL);
-}
+} 
 
 /* don't want to fail handshake if cert isn't verifiable */
 int verify_cb(int preverify_ok, X509_STORE_CTX *ctx) { return 1; }
@@ -960,9 +965,9 @@ void tls_out(const char *s1, const char *s2)
 }
 void tls_err(const char *s) { tls_out(s, ssl_error()); if (smtps) die_read(); }
 
-#define CLIENTCA "etc/clientca.pem"
-#define CLIENTCRL "etc/clientcrl.pem"
-#define SERVERCERT "etc/servercert.pem"
+# define CLIENTCA "etc/clientca.pem"
+# define CLIENTCRL "etc/clientcrl.pem"
+# define SERVERCERT "etc/servercert.pem"
 
 int tls_verify()
 {
@@ -1079,7 +1084,7 @@ void tls_init()
   /* support ECDH */
   SSL_CTX_set_ecdh_auto(ctx,1);
 #endif
- 
+
   /* set the callback here; SSL_set_verify didn't work before 0.9.6c */
   SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, verify_cb);
 
@@ -1109,8 +1114,14 @@ void tls_init()
 
   SSL_set_tmp_rsa_callback(myssl, tmp_rsa_cb);
   SSL_set_tmp_dh_callback(myssl, tmp_dh_cb);
-  SSL_set_rfd(myssl, ssl_rfd = substdio_fileno(&ssin));
-  SSL_set_wfd(myssl, ssl_wfd = substdio_fileno(&ssout));
+//  SSL_set_rfd(myssl, ssl_rfd = substdio_fileno(&ssin));
+//  SSL_set_wfd(myssl, ssl_wfd = substdio_fileno(&ssout));
+
+// Kai: 'define' is from substdio.h: (not in buffer.h)
+// #define substdio_fileno(s) ((s)->fd)
+#define buffer_fileno(s) ((s)->fd)
+  SSL_set_rfd(myssl, ssl_rfd = buffer_fileno(&bin));
+  SSL_set_wfd(myssl, ssl_wfd = buffer_fileno(&bout));
 
   if (!smtps) { out("220 ready for tls\r\n"); flush(); }
 
@@ -1166,7 +1177,7 @@ int main(int argc,char **argv)
     smtp_greet("220 ");
     out(" ESMTP\r\n");
   }
-  if (commands(&ssin,&smtpcommands) == 0) die_read();
+  if (commands(&bin,smtpcommands) == 0) die_read();
   die_nomem();
   return(0);  /* never reached */
 }
