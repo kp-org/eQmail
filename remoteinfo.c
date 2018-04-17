@@ -17,11 +17,11 @@ static int t;
 
 static int mywrite(fd,buf,len) int fd; char *buf; int len;
 {
-  return timeoutwrite(t,fd,buf,len);
+  return timeoutwrite_old(t,fd,buf,len);
 }
 static int myread(fd,buf,len) int fd; char *buf; int len;
 {
-  return timeoutread(t,fd,buf,len);
+  return timeoutread_old(t,fd,buf,len);
 }
 
 union sockunion {

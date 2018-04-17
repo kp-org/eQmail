@@ -3,7 +3,7 @@
 #include "select.h"
 #include "error.h"
 
-int timeoutread(t,fd,buf,len) int t; int fd; char *buf; int len;
+int timeoutread_old(t,fd,buf,len) int t; int fd; char *buf; int len;
 {
   fd_set rfds;
   struct timeval tv;

@@ -3,7 +3,7 @@
 #include "select.h"
 #include "error.h"
 
-int timeoutwrite(t,fd,buf,len) int t; int fd; char *buf; int len;
+int timeoutwrite_old(t,fd,buf,len) int t; int fd; char *buf; int len;
 {
   fd_set wfds;
   struct timeval tv;
