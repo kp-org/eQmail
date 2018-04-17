@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "byte.h"
 #include "sig.h"
 #include "open.h"
 #include "seek.h"
@@ -15,7 +16,8 @@
 #include "datetime.h"
 #include "now.h"
 #include "trigger.h"
-#include "auto_qmail.h"
+//#include "auto_qmail.h"
+#include "buildins.h"
 #include "auto_uids.h"
 #include "date822fmt.h"
 #include "fmtqfn.h"
@@ -162,7 +164,8 @@ int main()
 
   sig_blocknone();
   umask(033);
-  if (chdir(auto_qmail) == -1) die(61);
+//  if (chdir(auto_qmail) == -1) die(61);
+  if (chdir(qprfxdir) == -1) die(61);
   if (chdir("var/queue") == -1) die(62);
 
   mypid = getpid();

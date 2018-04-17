@@ -2,7 +2,8 @@
 #include "fmt.h"
 #include "scan.h"
 #include "str.h"
-#include "auto_split.h"
+//#include "auto_split.h"
+#include "buildins.h"
 
 void readsubdir_init(rs,name,pause)
 readsubdir *rs;
@@ -26,7 +27,8 @@ unsigned long *id;
 
  if (!rs->dir)
   {
-   if (rs->pos >= auto_split) return 0;
+//   if (rs->pos >= auto_split) return 0;
+   if (rs->pos >= queue_split) return 0;
    if (str_len(rs->name) > READSUBDIR_NAMELEN) { rs->pos++; return -1; }
    len = 0;
    len += fmt_str(namepos + len,rs->name);

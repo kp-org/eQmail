@@ -35,7 +35,7 @@ echo "char *queuedir = \"$QUEUEDIR\";"       >> $oFN
 echo "char auto_break[] = \"$BREAK\";" > auto_break.c
 echo "int auto_patrn = $p;"            > auto_patrn.c
 echo "int auto_spawn = $fd_spn;"       > auto_spawn.c
-echo "int auto_split = "$SPLIT";"      > auto_split.c
+#echo "int auto_split = "$SPLIT";"      > auto_split.c
 
 # compat temp
 echo "char auto_qmail[] = \"$QMAILDIR\";"  > auto_qmail.c

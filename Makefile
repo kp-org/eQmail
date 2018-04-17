@@ -43,6 +43,7 @@ libs:
 	cd qlibs ; make ; make install
 
 obj: libs
+	$(COMPILE) buildins.c
 	$(COMPILE) commands.c
 	$(COMPILE) constmap.c
 	$(COMPILE) control.c
@@ -61,8 +62,8 @@ auto_qmail.o:
 auto_spawn.o:
 	$(COMPILE) auto_spawn.c
 
-auto_split.o:
-	$(COMPILE) auto_split.c
+#auto_split.o:
+#	$(COMPILE) auto_split.c
 
 auto_uids.o:
 	$(COMPILE) auto_uids.c
@@ -74,8 +75,7 @@ bouncesaying:
 	$(COMPILE) bouncesaying.c
 	$(LOAD) bouncesaying $(QLIBS)
 
-buildins.o:
-	$(COMPILE) buildins.c
+buildins.o: obj
 
 condredirect:
 	$(COMPILE) condredirect.c
@@ -166,7 +166,7 @@ maildirmake:
 	./load maildirmake strerr.a buffer.a error.a str.a
 
 mailsubj: warn-auto.sh mailsubj.sh
-	cat warn-auto.sh mailsubj.sh | sed s}QMAIL}"$(QPRFX)"}g > mailsubj
+	cat warn-auto.sh mailsubj.sh | sed s}QPRFX}"$(QPRFX)"}g > mailsubj
 	chmod 755 mailsubj
 
 myctime.o: compile myctime.c
@@ -202,10 +202,10 @@ qmail-before: qmail-before.sh
 	chmod 754 qmail-bfque qmail-bfrmt
 	chgrp qmail qmail-bfque qmail-bfrmt
 
-qmail-clean: auto_split.o fmtqfn.o
+qmail-clean: fmtqfn.o buildins.o
 	$(COMPILE) qmail-clean.c
 	$(LOAD) qmail-clean fmtqfn.o now.o getln.a sig.a stralloc.a \
-	alloc.a buffer.a error.a str.a fs.a auto_qmail.o auto_split.o
+	alloc.a buffer.a error.a str.a fs.a buildins.o auto_qmail.o
 
 qmail-fixq: qmail-fixq.sh
 	sh ./qmail-fixq.sh
@@ -266,8 +266,8 @@ qmail-qmqpc: obj auto_qmail.o
 
 qmail-qmqpd: received.o now.o date822fmt.o qmail.o auto_qmail.o
 	$(COMPILE) qmail-qmqpd.c
-	$(LOADBIN) qmail-qmqpd received.o now.o date822fmt.o datetime.a qmail.o \
-	auto_qmail.o $(QLIBS)
+	$(LOADBIN) qmail-qmqpd received.o now.o date822fmt.o datetime.a \
+	qmail.o auto_qmail.o $(QLIBS)
 
 qmail-qmtpd: rcpthosts.o control.o constmap.o received.o \
 date822fmt.o now.o qmail.o cdb.a fd.a wait.a datetime.a open.a \
@@ -279,21 +279,19 @@ str.a fs.a auto_qmail.o
 	datetime.a open.a getln.a sig.a case.a env.a stralloc.a \
 	alloc.a error.a str.a fs.a auto_qmail.o buffer.a
 
-qmail-qread: fmtqfn.o readsubdir.o date822fmt.o datetime.a \
-auto_qmail.o auto_split.o
+qmail-qread: fmtqfn.o readsubdir.o date822fmt.o datetime.a auto_qmail.o
 	$(COMPILE) qmail-qread.c
 	$(LOADBIN) qmail-qread fmtqfn.o readsubdir.o date822fmt.o \
-	datetime.a $(QLIBS) auto_qmail.o auto_split.o
+	datetime.a $(QLIBS) auto_qmail.o buildins.o
 
 qmail-qstat: warn-auto.sh qmail-qstat.sh
 	cat warn-auto.sh qmail-qstat.sh | sed s}QPRFX}"$(QPRFX)"}g > qmail-qstat
 	chmod 755 qmail-qstat
 
-qmail-queue: qmail-queue.c trigger.o fmtqfn.o now.o \
-date822fmt.o datetime.a
+qmail-queue: trigger.o buildins.o fmtqfn.o now.o date822fmt.o datetime.a
 	$(COMPILE) qmail-queue.c
 	$(LOADBIN) qmail-queue trigger.o fmtqfn.o now.o date822fmt.o \
-	datetime.a $(QLIBS) auto_qmail.o auto_split.o auto_uids.o
+	datetime.a $(QLIBS) buildins.o auto_uids.o
 
 qmail-remote: control.o constmap.o \
 timeoutread.o timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ipalloc.o ipme.o quote.o \
@@ -309,11 +307,11 @@ qmail-rspawn: spawn.o tcpto_clean.o now.o
 	$(LOADBIN) qmail-rspawn spawn.o tcpto_clean.o now.o $(QLIBS) \
 	auto_qmail.o auto_uids.o auto_spawn.o
 
-qmail-send: obj auto_split.o date822fmt.o newfield.o prioq.o qsutil.o readsubdir.o trigger.o
+qmail-send: obj date822fmt.o newfield.o prioq.o qsutil.o readsubdir.o trigger.o
 	$(COMPILE) qmail-send.c
 	./load qmail-send qsutil.o control.o constmap.o newfield.o \
 	prioq.o trigger.o fmtqfn.o quote.o now.o readsubdir.o \
-	qmail.o date822fmt.o datetime.a auto_qmail.o auto_split.o $(QLIBS)
+	qmail.o date822fmt.o datetime.a auto_qmail.o $(QLIBS) buildins.o
 
 qmail-shcfg: qmail-shcfg.sh warn-auto.sh
 	@echo Creating $@
