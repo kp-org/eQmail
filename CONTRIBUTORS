@@ -1,0 +1,14 @@
+eQmail includes some 'foreign' code, provided more or indirect by
+some people through patches for (net)qmail and separate software
+packages. I wish to thank all for their work, especially
+
+- Dan J. Berstein for qmail itself
+- the mötley crue of netqmail (see netqmail's docs)
+- Pawel Foremsky for his qmail-spp patch
+- Frederick Vermeulen for his great TLS patch
+- Erwin Hoffmann (feh) for the 'auth' patch and his contribution to
+  qlibs socket code
+- Felix von Leitner for libowfat
+
+I wish to thank all the others not explicitly mentiond here which
+contributed code, patches and documentation.

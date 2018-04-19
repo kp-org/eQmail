@@ -2,13 +2,12 @@ systype
 load
 compile
 makelib
-#auto_qmail.c
 auto_patrn.c
 auto_spawn.c
 auto_uids.c
 qmail-lspawn
 auto_break.c
-auto_split.c
+#auto_split.c
 auto_usera.c
 buildins.c
 qmail-getpw
@@ -20,14 +19,12 @@ qmail-rspawn
 qmail-clean
 qmail-send
 qmail-start
-#syslog.lib
 splogger
 qmail-queue
 qmail-inject
 predate
 datemail
 mailsubj
-qmail-showctl
 qmail-newu
 qmail-print
 qmail-pw2u
@@ -67,3 +64,4 @@ hostname
 
 autocf-break
 autocf-spawn
+autocf-qprfx

@@ -1,8 +1,92 @@
 ************************ H E A D E R *************************
 CHANGELOG created from git - do not change these hesder lines!
-Last commit: 2a8b947c08c10f1a597bb96b1427bdc4246bc050
+Last commit: 9d3d58a87b6980ad8ecdc288a17704ce7ec20c2d
 ********************* E N D  H E A D E R *********************
 
+20180417:
+    qmail-smtpd: replaced 'substdio' by 'buffer'
+    removed 'auto_split'
+    qmail-remote: switched to 'buffer'
+    renamed 'old' timeout{read,write} functions to prevent conflicts with newer ones from qlibs
+20180416:
+    qmail-queue: switched to 'buffer'
+    qmail-tcpto: switched to qlibs, removed 'INET6'
+    qmail-qread: switched to 'buffer', 'errmsg'
+20180413:
+    headerbody: switched to buffer, clean-up
+    qmail-qmqpc: switched to qlibs (socket, buffer)
+    qmail-qmqpd: replaced substdio by buffer
+    qmail.c: replaced substdio by buffer
+    qmail-lspawn: replaced substdio by buffer
+    replaced substdio by buffer
+20180412:
+    added missing file conf-build
+    qmail-tcpsrv: revision 20180412
+    changed buffer variable 'ss' -> 'b', clean-up
+20180410:
+    removed compiler warnings (clang)
+20180409:
+    qmail-send: changed static logging to dynamic
+    qmail-local: Revision 20180409
+    updated build system
+    qmail-qstat: changed queue location
+    adjusted configuration of TLS enabled/disabled
+    removed obsolete code
+    switched to 'errmsg'
+    changed queue location
+20180406:
+    changed 'queue' -> 'var/queue'
+20180405:
+    qmail-smtpd.c: avoided clang warnings
+    changed functions to latest errmsg version
+    removed 'bash-styles'
+    changed functions to latest errmsg version
+    excluded 'bounces' and 'todo' into seperate files
+20180320:
+    new file: hostname.c
+20180319:
+    included triggerpull into trigger
+    improved configure system
+20180314:
+    removed obsoleted library man pages
+    ipmeprint uses now 'buffer', new configure procedures
+    changed splogger to use actual qlibs
+    changed some files to errmsg()
+    moved man pages for getline into qlibs
+20180123:
+    removed compiler warnings
+    qmail-remote: re-incorperated Revision 20160509
+    prevented some 'misleading-indentation' warnings (gcc-6)
+    tcpto.c: changed 'queue' dir, a bit clean-up
+    ´prevented compiler warnings
+    reworked buildsystem, changed some variables
+    qmail-tcpok: Revision 20180123, removed depraceted deps
+20180117:
+    qreceipt: prevented 'misleading-indentation' warning
+    mkconfig: changed 'QMAIL' --> 'QPRFX'
+    preline: switched to errmsg()
+    maildir2mbox: Revision 20180115
+    reworked configure system and variables, some cleanup
+20180109:
+    mkconfig: replaced 'control' by 'etc'
+    changed var 'OMAILDIR' to 'PKGDIR'
+20171130:
+    moved folder 'users' to 'var/users'
+    some fixes of build/install system
+    qmail-qmtpd: switched to 'buffer', changed config folder name
+    changed folder name 'control' to 'etc'
+20171005:
+    qmail-tcpsrv: moved from 'noipv6' to 'ipv4socket'
+    improved build system (clean up)
+20170728:
+    qmail-print: added hostname
+    improved remote plugin code
+    qmail-remote: solved conflict with 'DEBUG' constant
+20170727:
+    upped man qmail-qstat.8
+    bouncesaying: switched to errmsg()
+    updated build/install/cofig system
+    typo in qmail-shcfg
 20170525
     commands.c: switched to buffer
 20170521
