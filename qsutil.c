@@ -24,10 +24,10 @@ void qslog(char *m) { buffer_putsflush(&sserr,m); }
 
 void logsa(sa) stralloc *sa; { buffer_putflush(&sserr,sa->s,sa->len); }
 /* we can't use 'errmem' here, cause we want 'sleep' instead to 'exit' */
-void nomem() { qslog("alert: out of memory, sleeping...\n"); sleep(10); }
+void nomem() { qslog("qmail-send: alert: out of memory, sleeping...\n"); sleep(10); }
 
 void pausedir(dir) char *dir;
-{ qslog(B("alert: unable to opendir ",dir,", sleeping...\n")); sleep(10); }
+{ qslog(B("qmail-send: alert: unable to opendir ",dir,", sleeping...\n")); sleep(10); }
 
 static int issafe(ch) char ch;
 {
@@ -44,7 +44,8 @@ void logsafe(s) char *s;
  while (!stralloc_copys(&foo,s)) nomem();
  for (i = 0;i < foo.len;++i)
    if (foo.s[i] == '\n')
-     foo.s[i] = '/';
+//     foo.s[i] = '/';  // ./Remote host said: ..
+     foo.s[i] = ' ';  // ./Remote host said: ..
    else
      if (!issafe(foo.s[i]))
        foo.s[i] = ' ';
