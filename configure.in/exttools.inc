@@ -23,12 +23,12 @@ optionalTools() {
   do
 	echo -n "Checking for $f ... "
 	which $f 2>/dev/null
-	if [ $? -ne 0 ] ; then echo "not found! Ignoring!"
+	if [ $? -ne 0 ] ; then echo "not found! (ignored)"
 	else echo `which "$f"` > _has.$f.tmp ; fi
   done
 }
 # check for system tools (required) !!!
-RT="sh env sh [ test make perl awk"
+RT="sh env [ test make perl awk"
 requiredTools "$RT"
 
 OT="svc start-stop-daemon tcpserver xinetd php"

@@ -12,7 +12,7 @@ L="resolv crypt ssl crypto dl"
 for SL in ${L}
 do
   echo -n "checking for lib$SL ..."
-  ((./load trylib -l"$SL") && echo -n "-l$SL" || exit 0) > "$SL".lib
+  ((./load trylib -l"$SL") 2>/dev/null && echo -n "-l$SL" || exit 0) > "$SL".lib
   [ -s "$SL.lib" ] || echo -n " not"
   echo " found!"
 done

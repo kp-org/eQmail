@@ -1,33 +1,52 @@
 #!/bin/sh
 #********************************************************************************
-# Configure script of eQmail-1.10
-#
-# Beware of the order of checks!
+# Configure script of eQmail-1.10                                               *
+#                                                                               *
+# Beware of the order of checks!                                                *
 #********************************************************************************
 cd `dirname $0`
-echo Act. Dir: `pwd`
 
-CRITICAL=""
+make_clean() {
+  # don't run 'make clean' if not required from Makefile receipt ...
+  # a) if 'systype' exists and has the correct values then exit script
+  [ -f systype ] && [ "$QCONF" ] && \
+  cat systype | grep `uname -s | tr '[A-Z]' '[a-z]'` >/dev/null && \
+  cat systype | grep `uname -m` >/dev/null && exit
+  # b) if 'systype' doesn't exists then 'make clean' isn't required
+  [ -f systype ] || return
+  # ... but always if 'configure' was invoked directily
+#  uname -s | grep [Ll]inux >/dev/null && MAKEOPTS="--no-print-directory"
+#  [ "$MAKEOPTS" ] || MAKEOPTS="-s"   # alternative for non GNU make
+  printf '***** \033[1mcleaning up sources\033[0m ****************************\n'
+#  make "${MAKEOPTS}" clean
+  make clean
+}
+# check if './configure' was invoked by 'make'
+QCONF=`ps | grep 'make' | grep -v 'grep'`
+make_clean
+
+#********************************************************************************
+printf '***** executing \033[1mconfigure\033[0m in: '
+echo `pwd`
 
 echo -n "Checking system ... "
-OS=`uname -s | tr '/:[A-Z]' '..[a-z]'` ; echo -n $OS > systype
-echo "building on "${OS}"!"
+OS=`uname -s | tr '/:[A-Z]' '..[a-z]'`
+echo "building on ${OS}!"
+echo -n $OS > systype
 echo -n "Checking architecture ... "
-ARCH=`uname -m` ; echo -n ":$ARCH" >> systype
+ARCH=`uname -m`
 echo "build on "${ARCH}"!"
+echo -n ":$ARCH:" >> systype
+
+CRITICAL=""
 
 #********************************************************************************
 # check for external system tools
 . configure.in/exttools.inc
 
 #********************************************************************************
-# Checking conf-* files
-#. cfg/conf-files.inc
-
-#********************************************************************************
 # Check (open)ssl headers
 . configure.in/sslheaders.inc
-#exit
 
 #********************************************************************************
 # Create compile, load, makelib

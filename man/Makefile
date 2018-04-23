@@ -13,8 +13,9 @@ clean:
 	@echo -n Cleaning up man pages ...
 	@rm -f 5/dot-qmail.5 8/qmail-bfrmt.8 5/qmail-control.5 8/qmail-getpw.8 \
 	7/qmail-limits.7 8/qmail-newmrh.8 8/qmail-pw2u.8 8/qmail-send.8 \
-	8/qmail-start.8 5/qmail-users.5 5/smtpplugins.5
-	@echo  done!
+	8/qmail-start.8 5/qmail-users.5 5/smtpplugins.5 \
+	makeopts
+	@echo " done!"
 
 dot-qmail.5: dot-qmail.man
 	cat dot-qmail.man | sed s}BREAK}"$(BREAK)"}g > 5/dot-qmail.5

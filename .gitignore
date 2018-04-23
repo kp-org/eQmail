@@ -20,9 +20,7 @@ _*
 tmp
 trylib
 rts
-newlibs
 dev
-tcpserver
 boot
 test-it
 qlibs
@@ -31,11 +29,11 @@ ipme2*
 ipalloc2*
 ipmeprint2*
 hassalen.h
-qmail-send-*
+configure.in/find-qmaildir
+configure.in/find-dir
 
 autocf-*
 buildins.c
-CONTRIBUTORS
 c-tests
 ssl.bin
 
