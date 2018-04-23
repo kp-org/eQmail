@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #include "buffer.h"
-#include "error.h"
+#include "errmsg.h"
 #include "byte.h"
 #include "str.h"
 #include "case.h"
@@ -16,6 +16,8 @@
 #include "auto_usera.h"
 #include "auto_break.h"
 #include "qlx.h"
+
+#define WHO "qmail-getpw"
 
 #define GETPW_USERLEN 32
 
@@ -38,7 +40,8 @@ int userext()
     case_lowers(username);
     errno = 0;
     pw = getpwnam(username);
-    if (errno == error_txtbsy) _exit(QLX_SYS);
+//    if (errno == error_txtbsy) _exit(QLX_SYS);
+    if (errno == ETXTBSY) _exit(QLX_SYS);
     if (pw)
       if (pw->pw_uid)
         {
@@ -51,7 +54,8 @@ int userext()
           }
         }
         else
-          if (error_temp(errno)) _exit(QLX_NFS);
+//          if (error_temp(errno)) _exit(QLX_NFS);
+          if (errno) errsys(errno); //_exit(QLX_NFS);
         }
     }
     if (extension == local) return 0;

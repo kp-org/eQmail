@@ -26,14 +26,14 @@
 #include "getoptb.h"
 #include "alloc.h"
 #include "errmsg.h"
-#include "stralloc.h"
+//#include "stralloc.h"
 #include "fmt.h"
 #include "str.h"
 #include "now.h"
 #include "case.h"
 #include "quote.h"
 #include "qmail.h"
-#include "slurpclose.h"
+#include "readclose.h"
 #include "myctime.h"
 #include "gfrom.h"
 #include "auto_patrn.h"
@@ -99,7 +99,8 @@ char *dir;
  buffer bout; // = BUFFER_INIT(write,1,outbuf,sizeof outbuf);
 
  sig_alarmcatch(sigalrm);
- if (chdir(dir) == -1) { if (error_temp(errno)) _exit(1); _exit(2); }
+// if (chdir(dir) == -1) { if (error_temp(errno)) _exit(1); _exit(2); }
+ if (chdir(dir) == -1) errsys(errno); //{ if (error_temp(errno)) _exit(1); _exit(2); }
  pid = getpid();
  host[0] = 0;
  gethostname(host,sizeof(host));
@@ -111,7 +112,7 @@ char *dir;
    s += fmt_ulong(s,time); *s++ = '.';
    s += fmt_ulong(s,pid); *s++ = '.';
    s += fmt_strn(s,host,sizeof(host)); *s++ = 0;
-   if (stat(fntmptph,&st) == -1) if (errno == error_noent) break;
+   if (stat(fntmptph,&st) == -1) if (errno == ENOENT) break;
    /* really should never get to this point */
    if (loop == 2) _exit(1);
    sleep(2);
@@ -337,7 +338,8 @@ char *dashowner;
  if (!stralloc_0(&qme)) errmem;
  if (stat(qme.s,&st) == -1)
   {
-   if (error_temp(errno)) temp_qmail(qme.s);
+//   if (error_temp(errno)) temp_qmail(qme.s);
+   if (errno) temp_qmail(qme.s);
    return -1;
   }
  return 0;
@@ -353,9 +355,10 @@ int *cutable;
 
   *fd = open_read(qme.s);
   if (*fd == -1) {
-    if (error_temp(errno)) temp_qmail(qme.s);
-    if (errno == error_perm) temp_qmail(qme.s);
-    if (errno == error_acces) temp_qmail(qme.s);
+//    if (error_temp(errno)) temp_qmail(qme.s);
+//    if (errno == error_perm) temp_qmail(qme.s);
+//    if (errno == error_acces) temp_qmail(qme.s);
+    if (errno) temp_qmail(qme.s);
     return 0;
   }
 
@@ -609,7 +612,8 @@ int main(int argc,char **argv)
  if (!stralloc_ready(&cmds,0)) errmem;
  cmds.len = 0;
  if (fd != -1)
-   if (slurpclose(fd,&cmds,256) == -1) errmem;
+//   if (slurpclose(fd,&cmds,256) == -1) errmem;
+   if (readclose(fd,&cmds,256) == -1) errmem;
 
  if (!cmds.len)
   {

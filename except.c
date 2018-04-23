@@ -25,7 +25,7 @@ int main(int argc,char **argv)
     strerr_die2sys(111,FATL,"unable to fork: ");
   if (pid == 0) {
     execvp(argv[1],argv + 1);
-    if (error_temp(errno)) _exit(111);
+    if (errno) _exit(111);
     _exit(100);
   }
 

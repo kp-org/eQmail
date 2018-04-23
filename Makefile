@@ -1,6 +1,7 @@
 # Don't edit Makefile! Use conf-* for configuration.
 
 SHELL=/bin/sh
+GNUMAKEFLAGS += --no-print-directory
 
 CCFLAGS=-Iqlibs/include -DTLS=20160918 -DINET6
 LDFLAGS=-Lqlibs
@@ -13,36 +14,42 @@ QPRFX = `head -1 autocf-qprfx`
 QLIBS = $(LDFLAGS) -lqlibs
 
 DNSLIB = `head -1 resolv.lib`
-SSLLIB = `echo \`cat ssl.lib\` \`cat crypto.lib\` \`cat dl.lib\``
+SSLLIB += `head -1 ssl.lib`
+SSLLIB += `head -1 crypto.lib`
+SSLLIB += `head -1 dl.lib`
 
-default: conf obj it man-pages
+all: qconf obj eqmail man-pages
 
-bla:
-	@echo $(SSLLIB)
+default:
+	make all
+
+begin:
+	@printf "***** \033[1mbuilding eQmail\033[0m **********************************************************\n"
 
 clean: TARGETS
-	rm -f *.o *.a *.tmp *.lib `cat TARGETS`
-	@cd qlibs ; make clean
-	@cd man ; make clean
+	@echo -n Cleaning up sources ...
+	@rm -f *.o *.a *.tmp *.lib `cat TARGETS`
+	@echo " done!"
+	@cd qlibs ; $(MAKE) clean
+	@cd man ; $(MAKE) clean
 
-conf: configure
-	./configure
+qconf: configure
+	@./configure
 
-# 'make install' will not work here usually ...
-install: setup
-# ... so we route 'install' to target 'setup'
-setup:
+install: setup   # 'make install' will not work here usually ...
+
+setup:           # ... so we route 'install' to target 'setup'
 	@./install
 
 man-pages:
 	@echo Creating man pages ...
-	@cd man/ ; make
+	@cd man/ ; $(MAKE)
 
 libs:
-	@echo '--------------------------------------------------------------------'
-	cd qlibs ; make ; make install
+	@printf  "***** \033[1mbuilding qlibs\033[0m ***********************************************************\n"
+	@cd qlibs ; $(MAKE) ; $(MAKE) install
 
-obj: libs
+obj: libs begin
 	$(COMPILE) buildins.c
 	$(COMPILE) commands.c
 	$(COMPILE) constmap.c
@@ -111,8 +118,9 @@ fmtqfn.o: compile fmtqfn.c
 
 forward:
 	$(COMPILE) forward.c
-	$(LOAD) forward qmail.o errmsg.a fd.a wait.a sig.a \
-	env.a buffer.a error.a str.a fs.a auto_qmail.o
+	$(LOADBIN) forward qmail.o auto_qmail.o $(QLIBS)
+# error.a errmsg.a fd.a wait.a sig.a \
+#	env.a buffer.a str.a fs.a
 
 gfrom.o: compile gfrom.c
 	./compile gfrom.c
@@ -140,9 +148,9 @@ ipmeprint: ipme.o ipalloc.o
 	$(COMPILE) ipmeprint.c
 	$(LOADBIN) ipmeprint ipme.o ipalloc.o $(QLIBS)
 
-it: all
+#it: all
 
-all: \
+eqmail: \
 qmail-local qmail-lspawn qmail-getpw qmail-remote qmail-rspawn \
 qmail-clean qmail-send qmail-start splogger qmail-queue qmail-inject \
 predate datemail mailsubj qmail-newu qmail-print \
@@ -212,8 +220,7 @@ qmail-fixq: qmail-fixq.sh
 
 qmail-getpw: auto_break.o auto_usera.o
 	$(COMPILE) qmail-getpw.c
-	$(LOAD) qmail-getpw case.a buffer.a error.a str.a fs.a \
-	auto_break.o auto_usera.o
+	$(LOADBIN) qmail-getpw	auto_break.o auto_usera.o $(QLIBS)
 
 qmail-inject: compile load qmail-inject.c headerbody.o hfield.o token822.o
 #newfield.o quote.o now.o control.o date822fmt.o constmap.o qmail.o \
@@ -225,14 +232,11 @@ qmail-inject: compile load qmail-inject.c headerbody.o hfield.o token822.o
 	getln.a sig.a getopt.a datetime.a token822.o env.a stralloc.a \
 	alloc.a buffer.a error.a str.a fs.a auto_qmail.o strerr.a
 
-qmail-local: compile load qmail-local.c qmail.o quote.o now.o gfrom.o \
-myctime.o slurpclose.o  datetime.a auto_qmail.o auto_patrn.o
+qmail-local: qmail.o quote.o now.o gfrom.o \
+myctime.o datetime.a auto_qmail.o auto_patrn.o
 	$(COMPILE) $(CCFLAGS) qmail-local.c
 	./load qmail-local qmail.o quote.o now.o gfrom.o myctime.o \
-	slurpclose.o case.a getln.a getopt.a sig.a open.a seek.a lock.a \
-	buffer.a \
-	fd.a wait.a env.a stralloc.a alloc.a strerr.a \
-	error.a str.a fs.a datetime.a auto_qmail.o auto_patrn.o $(QLIBS)
+	datetime.a auto_qmail.o auto_patrn.o $(QLIBS) strerr.a
 
 qmail-lspawn: spawn.o auto_qmail.o auto_uids.o auto_spawn.o
 	$(COMPILE) qmail-lspawn.c
@@ -418,22 +422,21 @@ token822.o: compile token822.c
 trigger.o:
 	$(COMPILE) trigger.c
 
-mkrsadhkeys: \
-conf-users conf-groups mkrsadhkeys.sh warn-auto.sh
-	@cat warn-auto.sh mkrsadhkeys.sh\
+mkrsadhkeys: qmail-print
+	@cat warn-auto.sh mkrsadhkeys.sh \
 	| sed s}QPRFX}"$(QPRFX)"}g \
-	| sed s}UID}"`head -2 conf-users | tail -1`"}g \
-	| sed s}GID}"`head -1 conf-groups`"}g \
+	| sed s}UID}"`head -1 pemid.tmp`"}g \
+	| sed s}GID}"`head -2 pemid.tmp | tail -1`"}g \
 	> $@
 	@echo creating $@
 	@chmod 755 $@
 
-mksrvrcerts: mksrvrcerts.sh conf-users conf-groups warn-auto.sh
+mksrvrcerts: qmail-print
 	@cat warn-auto.sh mksrvrcerts.sh \
 	| sed s}OPENSSLBIN}"`head -1 ssl.bin`"}g \
 	| sed s}QPRFX}"$(QPRFX)"}g \
-	| sed s}UID}"`head -2 conf-users | tail -1`"}g \
-	| sed s}GID}"`head -1 conf-groups`"}g \
+	| sed s}UID}"`head -1 pemid.tmp`"}g \
+	| sed s}GID}"`head -2 pemid.tmp | tail -1`"}g \
 	> $@
 	@echo creating $@
 	@chmod 755 $@
