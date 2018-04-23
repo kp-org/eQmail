@@ -111,7 +111,7 @@ dns.o: compile dns.c
 
 except:
 	$(COMPILE) except.c
-	$(LOAD) except strerr.a error.a buffer.a str.a wait.a
+	$(LOADBIN) except $(QLIBS)
 
 fmtqfn.o: compile fmtqfn.c
 	./compile fmtqfn.c
@@ -119,8 +119,6 @@ fmtqfn.o: compile fmtqfn.c
 forward:
 	$(COMPILE) forward.c
 	$(LOADBIN) forward qmail.o auto_qmail.o $(QLIBS)
-# error.a errmsg.a fd.a wait.a sig.a \
-#	env.a buffer.a str.a fs.a
 
 gfrom.o: compile gfrom.c
 	./compile gfrom.c
@@ -147,8 +145,6 @@ ipme.o: compile ipme.c
 ipmeprint: ipme.o ipalloc.o
 	$(COMPILE) ipmeprint.c
 	$(LOADBIN) ipmeprint ipme.o ipalloc.o $(QLIBS)
-
-#it: all
 
 eqmail: \
 qmail-local qmail-lspawn qmail-getpw qmail-remote qmail-rspawn \
@@ -220,7 +216,7 @@ qmail-fixq: qmail-fixq.sh
 
 qmail-getpw: auto_break.o auto_usera.o
 	$(COMPILE) qmail-getpw.c
-	$(LOADBIN) qmail-getpw	auto_break.o auto_usera.o $(QLIBS)
+	$(LOADBIN) qmail-getpw auto_break.o auto_usera.o $(QLIBS)
 
 qmail-inject: compile load qmail-inject.c headerbody.o hfield.o token822.o
 #newfield.o quote.o now.o control.o date822fmt.o constmap.o qmail.o \
