@@ -31,6 +31,7 @@ ipmeprint2*
 hassalen.h
 configure.in/find-qmaildir
 configure.in/find-dir
+mkusers
 
 autocf-*
 buildins.c
