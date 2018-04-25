@@ -1,8 +1,21 @@
 ************************ H E A D E R *************************
 CHANGELOG created from git - do not change these hesder lines!
-Last commit: 9d3d58a87b6980ad8ecdc288a17704ce7ec20c2d
+Last commit: 41ac5ad2b512c7c77ca96e29648ee38d7fae1dae
 ********************* E N D  H E A D E R *********************
 
+20180425:
+    qmail-shcfg: output format fixes
+20180424:
+    removed mkusers (did depend at 'conf-{users,groups}'
+20180423:
+    fixes and updated to the build system
+    except: switched to errmsg
+    removed 'error_temp', replaced 'slurpclose'
+20180420:
+    removed conf-{users,groups}
+20180419:
+    updated package documentation files
+    qmail-send: reworked log messages
 20180417:
     qmail-smtpd: replaced 'substdio' by 'buffer'
     removed 'auto_split'
