@@ -22,7 +22,7 @@ printContent() {
     # read the first line only
     "1") printf "\t\033[33m%s\033[0m\n" "`head -1 $CONFDIR/$f`" ;;
     # read multiple lines w/o having spaces, exclude comments ('#')
-    "2") printf "\t\033[33m%s\n" $(cat $CONFDIR/$f | grep -v ^'\#')
+    "2") printf "\t\033[33m%s\n" $(cat $CONFDIR/$f | grep -v ^'\#' | cut -d\  -f1)
          printf "\033[0m";;
     # 
     "3") VALUE=$(openssl x509 -enddate -noout -in $CONFDIR/$f.pem | cut -d= -f2)
@@ -212,12 +212,10 @@ do
       COMMENT="our SMTP greeting is:"
       DEFAULT="'220 `head -1 $CONFDIR/me` ESMTP'"  ; DEFCMNT="(default: me)"
       printContent;;
-    smtproutes) # this is a bit more special
+    smtproutes)
       if [ ! -f "$CONFDIR/$f" ] ; then FMT="0" ; else FMT="2" ; fi
       COMMENT="(potential auth credentials are not shown)"
       DEFAULT="(doesn't exists - no effect)"
-      if [ "$FMT" = "2" ] ; then   # this is a bit more special here
-         DEFAULT="$(cat $CONFDIR/$f | grep -v ^'\#' | cut -d\  -f1)" ; FMT="0" ; fi
       printContent;;
     timeoutconnect)
       if [ ! -f "$CONFDIR/$f" ] ; then FMT="0" ; else FMT="1" ; fi
