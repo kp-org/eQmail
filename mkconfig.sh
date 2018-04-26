@@ -58,7 +58,7 @@ printf "
 # pathes are relativ to QPRFX\n#\n" > QPRFX/etc/smtpplugins
 printf "[connection]\n\n[helo]\n\n[mail]\n\n[rcpt]\n\n[data]\n\n#[auth]\n" \
        >> QPRFX/etc/smtpplugins
-chown root:qmail QPRFX/etc/smtpplugins
+chown root:"$GIDQ" QPRFX/etc/smtpplugins
 chmod 644 QPRFX/etc/smtpplugins	)
 
 # create config file for qmail-bfque
@@ -78,23 +78,24 @@ printf "QPRFX/bin/qmail-remote
 See qmail-bfrmt(8), beforemote(5) and qmail picture for details.
 "       >> QPRFX/etc/beforemote )
 
-chown root:qmail QPRFX/etc/beforemote QPRFX/etc/beforequeue
+chown root:"$GIDQ" QPRFX/etc/beforemote QPRFX/etc/beforequeue
 chmod 644 QPRFX/etc/beforemote QPRFX/etc/beforequeue
 
 #********************************************************************************
 if [ "$TLS" = "Yes" ] ; then
 #   echo "TLS is enabled ..."
-   # create servercert.cnf and TLS/SSL keys and certificates
-   [ -f QPRFX/etc/servercert.cnf ] || (
-     cat servercert.cnf | sed s{localhost{"$FQDN"{g \
-     > QPRFX/etc/servercert.cnf
-     chmod 640 QPRFX/etc/servercert.cnf
-     chown root:qmail QPRFX/etc/servercert.cnf
-     )
-   mkdir -p QPRFX/etc/tlshosts
-   [ -f QPRFX/etc/servercert.pem ] || ( \
-     echo -e "\nCreating temporary keys and self-signed certificate ..."
-     ./mkrsadhkeys
-     ./mksrvrcerts
-     )
+  # create servercert.cnf and TLS/SSL keys and certificates
+  [ -f QPRFX/etc/servercert.cnf ] || (
+	cat servercert.cnf | sed s{localhost{"$FQDN"{g \
+    > QPRFX/etc/servercert.cnf
+  )
+  chmod 640 QPRFX/etc/servercert.cnf
+  chown root:"$GIDQ" QPRFX/etc/servercert.cnf
+  mkdir -p QPRFX/etc/tlshosts
+  [ -f QPRFX/etc/servercert.pem ] || ( \
+	echo -e "\nCreating temporary keys and self-signed certificate ..."
+    ./mkrsadhkeys
+    ./mksrvrcerts
+  )
+  chown "$UIDD":"$GIDQ" QPRFX/etc/servercert.pem
 fi
