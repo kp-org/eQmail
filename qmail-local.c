@@ -1,4 +1,6 @@
 /*
+ *  Revision 20180428, Kai Peter
+ *  - fixed temp. error handling in function qmeox()
  *  Revision 20180409, Kai Peter
  *  - changed buffer variable names, code refactoring (partial)
  *  - replaced 'temp_nomem()' by 'errmem'
@@ -26,7 +28,6 @@
 #include "getoptb.h"
 #include "alloc.h"
 #include "errmsg.h"
-//#include "stralloc.h"
 #include "fmt.h"
 #include "str.h"
 #include "now.h"
@@ -38,7 +39,7 @@
 #include "gfrom.h"
 #include "auto_patrn.h"
 
-#define WHO "qmail-send"
+#define WHO "qmail-local"
 
 void usage() { strerr_die1x(100,"qmail-local: usage: qmail-local [ -nN ] user homedir local dash ext domain sender aliasempty"); }
 
@@ -187,7 +188,8 @@ void mailfile(char *fn)
 
   fd = open_append(fn);
   if (fd == -1)
-    strerr_die5x(111,"Unable to open ",fn,": ",error_str(errno),". (#4.2.1)");
+//    strerr_die5x(111,"Unable to open ",fn,": ",error_str(errno),". (#4.2.1)");
+	errint(errno,B("Unable to open ",fn,": ",error_str(errno),". (#4.2.1)"));
 
   sig_alarmcatch(temp_slowlock);
   alarm(30);
@@ -326,23 +328,22 @@ void checkhome()
   }
 }
 
-int qmeox(dashowner)
-char *dashowner;
-{
- struct stat st;
+int qmeox(char *dashowner) {
+  struct stat st;
 
- if (!stralloc_copys(&qme,".qmail")) errmem;
- if (!stralloc_cats(&qme,dash)) errmem;
- if (!stralloc_cat(&qme,&safeext)) errmem;
- if (!stralloc_cats(&qme,dashowner)) errmem;
- if (!stralloc_0(&qme)) errmem;
- if (stat(qme.s,&st) == -1)
+  if (!stralloc_copys(&qme,".qmail")) errmem;
+  if (!stralloc_cats(&qme,dash)) errmem;
+  if (!stralloc_cat(&qme,&safeext)) errmem;
+  if (!stralloc_cats(&qme,dashowner)) errmem;
+  if (!stralloc_0(&qme)) errmem;
+  if (stat(qme.s,&st) == -1)
   {
-//   if (error_temp(errno)) temp_qmail(qme.s);
-   if (errno) temp_qmail(qme.s);
-   return -1;
+//   if (error_temp(errno)) temp_qmail(qme.s);  // djb orig
+// Kai: usually error is ENOENT, which was not in error_temp
+    if (errno != ENOENT) temp_qmail(qme.s);
+    return -1;
   }
- return 0;
+  return 0;
 }
 
 int qmeexists(fd,cutable)
@@ -356,9 +357,9 @@ int *cutable;
   *fd = open_read(qme.s);
   if (*fd == -1) {
 //    if (error_temp(errno)) temp_qmail(qme.s);
-//    if (errno == error_perm) temp_qmail(qme.s);
-//    if (errno == error_acces) temp_qmail(qme.s);
-    if (errno) temp_qmail(qme.s);
+    if (errno == EPERM) temp_qmail(qme.s);
+    if (errno == EACCES) temp_qmail(qme.s);
+    if (errno) temp_qmail(qme.s);   // replacement for error_temp !?
     return 0;
   }
 
