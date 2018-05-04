@@ -1,7 +1,17 @@
 ************************ H E A D E R *************************
 CHANGELOG created from git - do not change these hesder lines!
-Last commit: 41ac5ad2b512c7c77ca96e29648ee38d7fae1dae
+Last commit: a447c8d8ac65a41c58f4a6a97a96b4746ce17226
 ********************* E N D  H E A D E R *********************
+
+20180504:
+    qmail-shcfg: internal optimizations
+    replaced 'error_temp'
+
+20180426:
+    fixed owner of servercert.pem
+
+20180425:
+    updated package documentation files
 
 20180425:
     qmail-shcfg: output format fixes

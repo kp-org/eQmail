@@ -8,7 +8,7 @@ packages. I wish to thank all for their work, especially
 - Frederick Vermeulen for his great TLS patch
 - Erwin Hoffmann (feh) for the 'auth' patch and his contribution to
   qlibs socket code
-- Felix von Leitner for libowfat
+- Felix von Leitner (fefe) for libowfat
 
 I wish to thank all the others not explicitly mentiond here which
 contributed code, patches and documentation.

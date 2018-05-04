@@ -4,9 +4,9 @@
 #include "ip.h"
 #include "stralloc.h"
 
-#ifdef TLS
-# define IX_FQDN 1
-#endif
+//#ifdef TLS
+//# define IX_FQDN 1
+//#endif
 
 struct ip_mx {
   unsigned short af;
@@ -17,7 +17,8 @@ struct ip_mx {
 #endif
   } addr;
   int pref;
-#ifdef IX_FQDN
+#ifdef TLS
+//IX_FQDN
   char *fqdn;
 #endif
 };

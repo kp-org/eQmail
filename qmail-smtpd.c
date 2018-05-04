@@ -175,7 +175,7 @@ void smtp_quit(char *arg) {
   smtp_greet("221 "); out("\r\n"); flush(); _exit(0); }
 
 char *protocol;
-char *remoteip;
+char *remoteip = "";
 char *remotehost;
 char *remoteinfo;
 char *local;
@@ -192,7 +192,7 @@ void dohelo(arg) char *arg; {
   fakehelo = case_diffs(remotehost,helohost.s) ? helohost.s : 0;
 }
 
-int liphostok = 0;
+int liphostok = 0;      /* local ip host */
 stralloc liphost = {0};
 int bmfok = 0;
 stralloc bmf = {0};

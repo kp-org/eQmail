@@ -1,4 +1,5 @@
 /*
+ *  - switched to OS error constants
  *  Revision 20160509, Kai Peter
  *  - changed return type of main to int
  *  - added parentheses to outer if
@@ -40,7 +41,6 @@ int userext()
     case_lowers(username);
     errno = 0;
     pw = getpwnam(username);
-//    if (errno == error_txtbsy) _exit(QLX_SYS);
     if (errno == ETXTBSY) _exit(QLX_SYS);
     if (pw)
       if (pw->pw_uid)
@@ -55,7 +55,7 @@ int userext()
         }
         else
 //          if (error_temp(errno)) _exit(QLX_NFS);
-          if (errno) errsys(errno); //_exit(QLX_NFS);
+          if (errno != ENOENT) errsys(errno); //_exit(QLX_NFS);
         }
     }
     if (extension == local) return 0;
@@ -93,5 +93,4 @@ int main(int argc,char **argv)
   buffer_flush(buffer_1);
 
   _exit(0);
-  return(0);  /* never reached */
 }

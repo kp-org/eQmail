@@ -28,7 +28,7 @@ optionalTools() {
   done
 }
 # check for system tools (required) !!!
-RT="sh env [ test make perl awk"
+RT="sh env [ test make perl awk less"
 requiredTools "$RT"
 
 OT="svc start-stop-daemon tcpserver xinetd php"
