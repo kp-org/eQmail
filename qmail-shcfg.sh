@@ -1,4 +1,7 @@
 
+# use less to show output page by page
+[ "$1" = "-l" ] && qmail-shcfg | less && exit 0
+
 QMAILDIR="QPRFX"
 # get it from qmail-print shouldn't give an error
 TLS=`qmail-print | grep TLS | cut -d\  -f3`
@@ -10,6 +13,27 @@ ULN=$'\e[4m'   # underlined
 YLW=$'\e[33m'  # yellow foreground
 RED=$'\e[91m'  # light red foreground
 
+CONFDIR=$QMAILDIR/etc
+if [ ! -d $CONFDIR ] ; then echo "error reading controls directory!" ; exit 1 ; fi
+
+#
+FILES="me defaultdomain locals defaulthost plusdomain rcpthosts morercpthosts \
+       virtualdomains helohost localiphost envnoathost idhost \
+       smtpgreeting concurrencylocal concurrencyremote queuelifetime \
+       timeoutconnect timeoutremote timeoutsmtpd databytes \
+       bouncefrom bouncehost doublebouncehost doublebounceto \
+       defaultdelivery smtproutes qmqpservers \
+       badmailfrom badmailto percenthack \
+       smtpplugins checkpwtools \
+"
+# These config files will be shown only if TLS is enabled
+if [ "$TLS" = "Yes" ] ; then
+   FILES=" $FILES servercert clientcert tlsserverciphers tlsclientciphers \
+          dh2048.pem rsa2048.pem"
+fi
+
+#********************************************************************************
+# print output
 QPRFX/bin/qmail-print
 
 printContent() {
@@ -48,25 +72,8 @@ printContent() {
   FMT=0 ; COMMENT="" ; DEFCMNT=""
 }
 
-CONFDIR=$QMAILDIR/etc
-if [ ! -d $CONFDIR ] ; then echo "error reading controls directory!" ; exit 1 ; fi
-
-FILES="me defaultdomain locals defaulthost plusdomain rcpthosts morercpthosts \
-       virtualdomains helohost localiphost envnoathost idhost \
-       smtpgreeting concurrencylocal concurrencyremote queuelifetime \
-       timeoutconnect timeoutremote timeoutsmtpd databytes \
-       bouncefrom bouncehost doublebouncehost doublebounceto \
-       defaultdelivery smtproutes qmqpservers \
-       badmailfrom badmailto percenthack \
-       smtpplugins checkpwtools \
-"
-if [ "$TLS" = "Yes" ] ; then
-   FILES=" $FILES servercert clientcert tlsserverciphers tlsclientciphers \
-          dh2048.pem rsa2048.pem"
-fi
-
 #********************************************************************************
-# 
+# each config file requires a short definition for parsing:
 printf "\033[1m\033[4m""Configuration files:""\033[0m\n\n"
 for f in $FILES
 do
